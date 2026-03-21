@@ -9,6 +9,8 @@
 <meta name="theme-color" content="#07090f">
 <title>CCM Accident Assistant</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init('qs3shRg48o-6yNtXb');</script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <style>
 /* =========================================================
@@ -430,16 +432,21 @@ input[type="datetime-local"].fi{color-scheme:dark}
 .ftp-strip span{color:var(--t1)}
 .ftp-strip strong{color:var(--teal)}
 
-.scard{background:var(--bg2);border:1px solid var(--bd0);border-radius:var(--r12);overflow:hidden;margin-bottom:12px}
+.scard{background:var(--bg2);border:1px solid var(--bd0);border-radius:var(--r12);overflow:hidden;margin-bottom:16px}
 .scard-hd{
   font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--blue);padding:10px 15px;border-bottom:1px solid var(--bd0);
-  background:rgba(45,140,240,.04);
+  color:var(--blue);padding:10px 16px;border-bottom:1px solid var(--bd0);
+  background:rgba(45,140,240,.06);
 }
-.srow{display:flex;padding:10px 15px;border-bottom:1px solid var(--bd0);font-size:13px;gap:10px}
+.srow{
+  display:grid;grid-template-columns:160px 1fr;
+  padding:10px 16px;border-bottom:1px solid var(--bd0);font-size:13px;gap:12px;
+  align-items:start;
+}
 .srow:last-child{border-bottom:none}
-.slbl{color:var(--t1);min-width:120px;flex-shrink:0;line-height:1.4;font-size:12px}
-.sval{color:var(--t0);font-weight:500;flex:1;line-height:1.4;word-break:break-word}
+.srow:nth-child(even){background:rgba(255,255,255,.02)}
+.slbl{color:var(--t1);line-height:1.5;font-size:12px;font-weight:600;padding-top:1px}
+.sval{color:var(--t0);font-weight:500;line-height:1.5;word-break:break-word}
 
 /* =========================================================
    SUCCESS
@@ -1576,7 +1583,9 @@ function buildSummary(){
         const q=Qs.find(x=>x.id===id);
         const a=S.ans[id];
         if(!q||!a||a==='Skipped')return '';
-        return `<div class="srow"><span class="slbl">${q.text}</span><span class="sval">${a}</span></div>`;
+        // Shorten question text to a clean label
+        const lbl=q.text.replace(/Please provide |Please describe |Provide |Describe /gi,'').replace(/\?$/,'');
+        return `<div class="srow"><span class="slbl">${lbl}</span><span class="sval">${a}</span></div>`;
       }).filter(Boolean).join('');
       if(rows)html+=`<div class="scard"><div class="scard-hd">${sec.t}</div>${rows}</div>`;
     });
@@ -1693,40 +1702,48 @@ function dlCSV(){
   a.click();
 }
 
-function submitReport(){
-  // Build plain text report
-  let body='ACCIDENT REPORT — Corporate Claims Management\n';
-  body+='Generated: '+new Date().toLocaleString()+'\n'+'='.repeat(58)+'\n\n';
+async function submitReport(){
+  // Show sending state
+  const btn=document.querySelector('.sum-actions .btn-primary');
+  if(btn){btn.disabled=true;btn.textContent='Sending…';}
+
+  // Build report text
+  const name=(S.ans[16]||'').split('Name: ')[1]?.split(' |')[0]||'Driver';
+  const date=S.ans[9]||new Date().toLocaleString();
+  let report='ACCIDENT REPORT — Corporate Claims Management\n';
+  report+='Generated: '+new Date().toLocaleString()+'\n';
+  report+='='.repeat(58)+'\n\n';
   SECS.forEach(sec=>{
     const rows=sec.ids.map(id=>{
       const q=Qs.find(x=>x.id===id);
       const a=S.ans[id];
       if(!q||!a||a==='Skipped')return '';
-      return `  • ${q.text}\n    → ${a}`;
+      return q.text+':\n    '+a;
     }).filter(Boolean);
-    if(rows.length)body+=`[${sec.t.toUpperCase()}]\n${rows.join('\n\n')}\n\n`;
+    if(rows.length) report+='[ '+sec.t.toUpperCase()+' ]\n'+rows.join('\n\n')+'\n\n';
   });
   if(S.photos.length)
-    body+=`[ATTACHMENTS]\n  ${S.photos.length} file(s) attached by driver.\n  Files: ${S.photos.map(p=>p.name).join(', ')}\n\n`;
-  body+='='.repeat(58);
+    report+='[ ATTACHMENTS ]\n'+S.photos.length+' file(s) attached by driver.\nFiles: '+S.photos.map(p=>p.name).join(', ')+'\n\n';
+  report+='='.repeat(58);
 
-  // Try email — works on mobile native mail apps
-  const name=(S.ans[16]||'').split('Name: ')[1]?.split(' |')[0]||'Driver';
-  const date=S.ans[9]||new Date().toLocaleDateString();
-  const subj=encodeURIComponent('Accident Report — '+name+' — '+date);
-  const mailLink = 'mailto:'+CLAIMS_EMAIL+'?subject='+subj+'&body='+encodeURIComponent(body);
-
-  // Open email client — works on iPhone native Mail, Outlook mobile, etc.
-  window.location.href = mailLink;
-
-  // FTP / API hook for future use
-  if(FTP_ENDPOINT){
-    fetch(FTP_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(buildJSON())})
-      .then(r=>{if(!r.ok)throw new Error('API returned '+r.status);console.log('Report POSTed ✓');})
-      .catch(e=>console.warn('API post failed:',e));
+  try{
+    await emailjs.send('service_lefri76','template_g91f9a7',{
+      driver_name: name,
+      date:        date,
+      report:      report,
+      to_email:    CLAIMS_EMAIL,
+    });
+    // FTP hook for future use
+    if(FTP_ENDPOINT){
+      fetch(FTP_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(buildJSON())})
+        .catch(e=>console.warn('API post failed:',e));
+    }
+    show('scrOK');
+  }catch(err){
+    console.error('EmailJS failed:',err);
+    if(btn){btn.disabled=false;btn.textContent='✅  Submit Report to Claims';}
+    alert('Failed to send report. Please check your connection and try again.\n\nError: '+JSON.stringify(err));
   }
-
-  show('scrOK');
 }
 
 /* ─────────────────────────────────
