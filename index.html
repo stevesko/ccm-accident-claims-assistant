@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-03-23 17:34 UTA -->
+<!-- CCM Accident Assistant — Built: 2026-03-23 17:34 UTC -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1048,7 +1048,7 @@ function initVoice(){
   if(SR){S.rec=new SR();S.rec.continuous=false;S.rec.interimResults=false;S.rec.lang='en-US';S.hasMic=true;}
 }
 /* ── AUDIO ENGINE ─────────────────────────────────────────
-   Voice:   Google Cloud TTS  Chirp 3 HD — Leda
+   Voice:   Google Cloud TTS  Neural2-F (warm professional female, consistent pace)
             Natural, warm professional female. Never robotic.
    KEY:     Replace PASTE_YOUR_KEY_HERE with your AIza... key
    Cache:   Each question fetched once per session only.
@@ -1057,7 +1057,7 @@ function initVoice(){
             NO robot voice. Ever.
 ─────────────────────────────────────────────────────────── */
 
-const GOOGLE_TTS_KEY = 'AIzaSyDky41VgsKz2F4AFNSSKpBAjoMyibOk5k0';
+const GOOGLE_TTS_KEY = 'AIzaSyDky41VgsKz2F4AFNSSKpBAjoMyibOk5k';
 
 S.audioCache  = {};
 S.audioCtx    = null;
@@ -1080,7 +1080,7 @@ function stopSpeak(){
 async function _fetchAudio(text){
   if(S.audioCache[text]) return S.audioCache[text];
   const r=await fetch(
-    'https://texttospeech.googleapis.com/v1beta1/text:synthesize?key='+GOOGLE_TTS_KEY,
+    'https://texttospeech.googleapis.com/v1/text:synthesize?key='+GOOGLE_TTS_KEY,
     {
       method:'POST',
       headers:{'Content-Type':'application/json'},
@@ -1088,7 +1088,7 @@ async function _fetchAudio(text){
         input:{text:text.slice(0,5000)},
         voice:{
           languageCode:'en-US',
-          name:'en-US-chirp3-hd-leda'
+          name:'en-US-Neural2-F'
         },
         audioConfig:{
           audioEncoding:'MP3',
