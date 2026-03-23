@@ -186,6 +186,17 @@ body{
 .btn-warn{background:var(--amber-g);border:1px solid rgba(245,166,35,.25);color:var(--amber);font-size:14px}
 .btn-warn:hover{background:rgba(245,166,35,.2)}
 .btn-danger{background:var(--red-g);border:1px solid rgba(255,79,109,.25);color:var(--red);font-size:14px}
+.btn-warn{background:var(--amber-g);border:1.5px solid rgba(245,166,35,.4);color:var(--amber);font-size:15px;font-weight:700}
+.btn-warn:hover{background:rgba(245,166,35,.25)}
+.opt-btn{
+  display:flex;align-items:center;gap:14px;
+  background:var(--bg2);border:1.5px solid var(--bd1);
+  border-radius:var(--r12);padding:14px 16px;width:100%;
+  cursor:pointer;color:var(--t0);transition:border-color .15s,background .15s;
+  text-align:left;
+}
+.opt-btn:hover,.opt-btn.selected{background:var(--sur0);border-color:var(--blue);}
+.opt-btn.selected{border-color:var(--blue);background:var(--blue-g);}
 .btn-danger:hover{background:rgba(255,79,109,.2)}
 .btn[disabled]{opacity:.35;pointer-events:none}
 .btn-sm{padding:10px 16px;font-size:13px;border-radius:var(--r12)}
@@ -563,11 +574,104 @@ input[type="datetime-local"].fi{color-scheme:dark}
         <div class="feat"><div class="feat-ic">💾</div><div class="feat-title">Auto-Save Draft</div><div class="feat-desc">Progress saved locally if you lose signal</div></div>
         <div class="feat"><div class="feat-ic">📋</div><div class="feat-title">Auto Report</div><div class="feat-desc">Full claim submitted to CCM on completion</div></div>
       </div>
-      <button class="btn btn-primary" onclick="startInterview()">
+
+
+      <button class="btn btn-primary" onclick="beginApp()">
         <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
         Begin Accident Report
       </button>
       <p class="sm tc mt8">Microphone access requested — tap answers if unavailable</p>
+    </div>
+  </section>
+
+  <!-- IDENTIFICATION SCREEN 1: Company + Driver Type -->
+  <section class="scr" id="scrID1">
+    <div class="qcard">
+      <div class="qstep">Step 1 of 2 — Identification</div>
+      <div class="qtext">What is the name of your company working with Corporate Claims Management?</div>
+    </div>
+    <div style="padding:0 4px">
+      <input class="fi" id="id1Company" placeholder="Company name…" type="text" style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:10px;text-transform:uppercase;letter-spacing:.08em;font-size:11px">Are you an employee of this company or a family member / authorized driver?</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+        <button class="opt-btn" id="btnEmployee" onclick="selectDriverType('employee')">
+          <span style="font-size:20px">👤</span>
+          <div style="text-align:left">
+            <div style="font-weight:700;font-size:15px">Employee</div>
+            <div style="font-size:12px;color:var(--t1)">I am an employee of this company</div>
+          </div>
+        </button>
+        <button class="opt-btn" id="btnFamily" onclick="selectDriverType('family')">
+          <span style="font-size:20px">👨‍👩‍👧</span>
+          <div style="text-align:left">
+            <div style="font-weight:700;font-size:15px">Family Member / Authorized Driver</div>
+            <div style="font-size:12px;color:var(--t1)">I am a family member or authorized driver</div>
+          </div>
+        </button>
+      </div>
+      <p class="field-err" id="id1Err" style="display:none;margin-bottom:10px"></p>
+      <button class="btn btn-primary" onclick="submitID1()">Continue →</button>
+    </div>
+  </section>
+
+  <!-- IDENTIFICATION SCREEN 2: Driver Details Form -->
+  <section class="scr" id="scrID2">
+    <div class="qcard">
+      <div class="qstep">Step 2 of 2 — Identification</div>
+      <div class="qtext" id="id2Title">Please provide your details</div>
+    </div>
+    <div style="padding:0 4px">
+      <!-- Employee fields -->
+      <div id="id2EmployeeFields">
+        <label class="fl">Driver ID</label>
+        <input class="fi" id="id2DriverID" placeholder="e.g. D1234, EMP-567…" type="text" style="margin-bottom:12px">
+      </div>
+      <!-- Shared fields -->
+      <label class="fl">Full Name</label>
+      <input class="fi" id="id2Name" placeholder="First and last name…" type="text" style="margin-bottom:12px">
+      <label class="fl">Mobile Phone Number</label>
+      <input class="fi" id="id2Phone" placeholder="e.g. 555-123-4567" type="tel" style="margin-bottom:12px">
+      <label class="fl">Email Address</label>
+      <input class="fi" id="id2Email" placeholder="your@email.com" type="email" style="margin-bottom:12px">
+      <!-- Family member additional fields -->
+      <div id="id2FamilyFields" style="display:none">
+        <label class="fl">Relationship to Assigned Employee</label>
+        <select class="fi" id="id2Relationship" style="margin-bottom:12px">
+          <option value="">Select relationship…</option>
+          <option>Spouse</option>
+          <option>Child</option>
+          <option>Other Authorized Driver</option>
+        </select>
+        <label class="fl">Was this driver authorized to use the vehicle?</label>
+        <div style="display:flex;gap:10px;margin-bottom:12px">
+          <button class="opt-btn" id="btnAuthYes" onclick="selectAuth('Yes')" style="flex:1;padding:12px">Yes</button>
+          <button class="opt-btn" id="btnAuthNo"  onclick="selectAuth('No')"  style="flex:1;padding:12px">No</button>
+        </div>
+        <label class="fl">Assigned Employee Full Name</label>
+        <input class="fi" id="id2EmployeeName" placeholder="Employee full name…" type="text" style="margin-bottom:12px">
+        <label class="fl">Assigned Employee Driver ID</label>
+        <input class="fi" id="id2EmployeeID" placeholder="e.g. D1234…" type="text" style="margin-bottom:12px">
+      </div>
+      <p class="field-err" id="id2Err" style="display:none;margin-bottom:10px"></p>
+      <button class="btn btn-primary" onclick="submitID2()">Continue →</button>
+      <button class="btn btn-ghost btn-sm" onclick="show('scrID1')" style="margin-top:10px">← Back</button>
+    </div>
+  </section>
+
+  <!-- PENDING CLAIM CHECK SCREEN -->
+  <section class="scr" id="scrPending">
+    <div class="succ">
+      <div class="succ-ring">📋</div>
+      <h2 class="succ-h">Pending Report Found</h2>
+      <p class="succ-p">We found an accident report that was started for your Driver ID.</p>
+      <div id="pendingRefBlock" style="background:var(--blue-g);border:1px solid rgba(45,140,240,.25);border-radius:var(--r12);padding:14px;margin-bottom:20px;text-align:center">
+        <div style="font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--blue);text-transform:uppercase;margin-bottom:4px">Reference Number</div>
+        <div id="pendingRefNum" style="font-size:22px;font-weight:800;color:var(--t0)"></div>
+      </div>
+      <div class="btns-col">
+        <button class="btn btn-primary" onclick="continuePendingReport()">▶  Complete Phase 2</button>
+        <button class="btn btn-ghost" onclick="startNewClaim()">＋  Start a New Claim</button>
+      </div>
     </div>
   </section>
 
@@ -589,9 +693,10 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr" id="scrSum">
     <div class="sum-banner">
       <div class="sum-ic">📋</div>
-      <div>
+      <div style="flex:1">
         <div class="sum-title">Accident Report</div>
         <div class="sum-dt" id="sumDt"></div>
+        <div id="sumMeta" style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px"></div>
       </div>
     </div>
 
@@ -600,17 +705,56 @@ input[type="datetime-local"].fi{color-scheme:dark}
     <div id="sumBody"></div>
 
     <div class="btns-col sum-actions" style="margin-top:16px">
-      <button class="btn btn-primary" onclick="submitReport()">✅  Submit Report to Claims</button>
+      <button class="btn btn-primary" id="submitBtn" onclick="submitReport()">✅  Submit Phase 1 to Claims</button>
       <button class="btn btn-ghost btn-sm" onclick="backEdit()">← Edit Answers</button>
     </div>
   </section>
 
-  <!-- SUCCESS -->
+  <!-- PHASE 1 SUCCESS -->
   <section class="scr" id="scrOK">
     <div class="succ">
       <div class="succ-ring">✅</div>
-      <h2 class="succ-h">Report Submitted</h2>
-      <p class="succ-p">Thank you. Your accident report has been submitted to Corporate Claims Management. A claims representative will be in touch with you shortly.</p>
+      <h2 class="succ-h">Phase 1 Submitted</h2>
+      <p class="succ-p">Your initial accident report has been sent to Corporate Claims Management.</p>
+      <div id="refBlock" style="background:var(--blue-g);border:1px solid rgba(45,140,240,.25);border-radius:var(--r12);padding:16px;margin-bottom:20px;text-align:center">
+        <div style="font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--blue);text-transform:uppercase;margin-bottom:4px">Reference Number</div>
+        <div id="refNum" style="font-size:28px;font-weight:800;color:var(--t0);letter-spacing:.08em"></div>
+        <div style="font-size:11px;color:var(--t1);margin-top:4px">Save this number to complete Phase 2 later</div>
+      </div>
+      <div style="background:var(--amber-g);border:1px solid rgba(245,166,35,.25);border-radius:var(--r12);padding:14px;margin-bottom:20px;font-size:13px;color:var(--amber);line-height:1.55">
+        <strong>Phase 2 is optional but recommended.</strong> It includes vehicle details, insurance information, damage description, police report, and accident narrative. The more detail you provide, the faster your claim can be processed.
+      </div>
+      <div class="btns-col">
+        <button class="btn btn-primary" onclick="startPhase2()">Continue to Phase 2 Now</button>
+        <button class="btn btn-ghost" onclick="showPhase2Later()">Complete Phase 2 Later</button>
+        <button class="btn btn-danger btn-sm" onclick="resetApp()">Start New Report</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHASE 2 LATER INSTRUCTIONS -->
+  <section class="scr" id="scrLater">
+    <div class="succ">
+      <div class="succ-ring">📋</div>
+      <h2 class="succ-h">Complete Phase 2 Later</h2>
+      <p class="succ-p">When you're ready, return to this app and click "Complete Phase 2" on the home screen. You'll need your reference number.</p>
+      <div id="refBlock2" style="background:var(--blue-g);border:1px solid rgba(45,140,240,.25);border-radius:var(--r12);padding:16px;margin-bottom:20px;text-align:center">
+        <div style="font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--blue);text-transform:uppercase;margin-bottom:4px">Your Reference Number</div>
+        <div id="refNum2" style="font-size:28px;font-weight:800;color:var(--t0);letter-spacing:.08em"></div>
+      </div>
+      <div class="btns-col">
+        <button class="btn btn-primary" onclick="startPhase2()">Actually — Continue Now</button>
+        <button class="btn btn-danger btn-sm" onclick="resetApp()">Done for Now</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHASE 2 SUCCESS -->
+  <section class="scr" id="scrOK2">
+    <div class="succ">
+      <div class="succ-ring">✅</div>
+      <h2 class="succ-h">Phase 2 Submitted</h2>
+      <p class="succ-p">Thank you. Your complete accident report has been submitted to Corporate Claims Management. A claims representative will be in touch with you shortly.</p>
       <div class="btns-col">
         <button class="btn btn-danger btn-sm" onclick="resetApp()">Start New Report</button>
       </div>
@@ -720,7 +864,7 @@ const YRS  = Array.from({length:new Date().getFullYear()-1979},(_,i)=>String(new
    QUESTIONS
 ───────────────────────────────── */
 const Qs=[
-  {id:1,  text:"Were you involved in a vehicular accident?",                      type:'yn'},
+  // Identification collected on scrID1/scrID2 screens before interview begins
   {id:2,  text:"How many vehicles were involved in the accident?",                type:'vehicles'},
   {id:3,  text:"Were there any passengers in the vehicles?",                      type:'yn'},
   {id:4,  text:"Was anyone injured?",                                             type:'yn'},
@@ -729,15 +873,55 @@ const Qs=[
   {id:7,  text:"Were any injuries life-threatening or requiring hospitalization?", type:'yn',      skip:a=>a[4]==='No'},
   {id:8,  text:"Where did the accident occur?",                                   type:'loc'},
   {id:9,  text:"What was the date and time of the accident?",                     type:'dt'},
-  {id:10, text:"What were the weather conditions?",                               type:'dd',opts:WX,ph:'Select weather…'},
-  {id:11, text:"What were the road conditions?",                                  type:'dd',opts:RD,ph:'Select road conditions…'},
-  {id:12, text:"Describe traffic conditions.",                                    type:'og3',opts:['Light','Moderate','Heavy']},
   {id:13, text:"What type of accident was this?",                                 type:'dd',opts:AT,ph:'Select accident type…'},
-  {id:14, text:"Was your vehicle moving, parked, or stopped at impact?",          type:'og3',opts:['Moving','Parked','Stopped']},
-  {id:15, text:"Which direction were you traveling?",                             type:'dir'},
-  {id:16, text:"Provide your name and driver's license information.",             type:'fdriver'},
+  {id:14, text:"Was your vehicle moving, parked, or stopped at impact?",          type:'og3',opts:['Moving','Parked','Stopped'],
+    skip:a=>{
+      const parkedTypes=['Hit While Parked','Parking Lot','Vandalism','Vehicle Theft','Hit & Run — Parked'];
+      return parkedTypes.some(t=>(a[13]||'').includes(t));
+    }
+  },
+  {id:10, text:"What were the weather conditions?",                               type:'dd',opts:WX,ph:'Select weather…',
+    skip:a=>{
+      const noWeatherTypes=['Vandalism','Vehicle Theft','Mechanical Failure','Fire'];
+      return noWeatherTypes.some(t=>(a[13]||'').includes(t));
+    }
+  },
+  {id:11, text:"What were the road conditions?",                                  type:'dd',opts:RD,ph:'Select road conditions…',
+    skip:a=>{
+      const noRoadTypes=[
+        'Parking Lot','Hit Animal','Vandalism','Vehicle Theft',
+        'Glass / Windshield','Act of Nature','Fire','Mechanical Failure'
+      ];
+      return noRoadTypes.some(t=>(a[13]||'').includes(t));
+    }
+  },
+  {id:12, text:"Describe traffic conditions.",                                    type:'og3',opts:['Light','Moderate','Heavy'],
+    skip:a=>{
+      const noTrafficTypes=[
+        'Parking Lot','Hit While Parked','Hit Animal','Debris / Pothole Damage',
+        'Vandalism','Vehicle Theft','Glass / Windshield','Act of Nature','Fire',
+        'Mechanical Failure','Hit & Run — Parked','Rollover'
+      ];
+      return noTrafficTypes.some(t=>(a[13]||'').includes(t));
+    }
+  },
+  {id:15, text:"Which direction were you traveling?",                             type:'dir',
+    skip:a=>{
+      const noDirectionTypes=[
+        'Parking Lot','Hit While Parked','Vandalism','Vehicle Theft',
+        'Glass / Windshield','Act of Nature','Fire','Mechanical Failure',
+        'Hit & Run — Parked','Hit Animal','Debris / Pothole Damage'
+      ];
+      // Also skip if vehicle was parked or stopped
+      const parked = (a[14]||'').toLowerCase().includes('parked');
+      return parked || noDirectionTypes.some(t=>(a[13]||'').includes(t));
+    }
+  },
   {id:17, text:"Is this a company or personal vehicle?",                          type:'og2',opts:['Company Vehicle','Personal Vehicle']},
-  {id:18, text:"What is the name of your company?",                               type:'txt',ph:'Company name…',skip:a=>a[17]==='Personal Vehicle'},
+  {id:16, text:"Please provide your driver's license number and issuing state.",  type:'fdriver'},
+
+
+
   {id:19, text:"Provide your vehicle information.",                               type:'fvehicle'},
   {id:20, text:"Provide your auto insurance information.",                        type:'fins',key:'my'},
   {id:21, text:"Provide the other driver's information.",                         type:'fotherdrv',skip:isSolo},
@@ -773,7 +957,22 @@ const S={
   ans:{}, idx:0, paused:false, hasMic:false,
   rec:null,
   photos:[], contactMethod:'', airbags:[], injSel:{},
+  phase:1,
+  refNum:'',
+  hasPending:false,
+  pendingSaved:null,
+  identity:{        // collected on ID screens before interview
+    company:'',
+    driverType:'',  // 'employee' or 'family'
+    driverID:'',
+    name:'',
+    phone:'',
+    email:'',
+  }
 };
+
+// Phase 1 question IDs — asked at the scene
+const PHASE1_IDS=new Set([1,2,3,4,5,7,8,9,13,14,17,16,19,20]);
 
 /* ─────────────────────────────────
    SCREEN UTIL
@@ -847,7 +1046,7 @@ function initVoice(){
   if(SR){S.rec=new SR();S.rec.continuous=false;S.rec.interimResults=false;S.rec.lang='en-US';S.hasMic=true;}
 }
 /* ── AUDIO ENGINE ─────────────────────────────────────────
-   Voice:   Google Cloud TTS  en-US-Neural2-F
+   Voice:   Google Cloud TTS  Chirp 3 HD — Leda
             Natural, warm professional female. Never robotic.
    KEY:     Replace PASTE_YOUR_KEY_HERE with your AIza... key
    Cache:   Each question fetched once per session only.
@@ -879,18 +1078,20 @@ function stopSpeak(){
 async function _fetchAudio(text){
   if(S.audioCache[text]) return S.audioCache[text];
   const r=await fetch(
-    'https://texttospeech.googleapis.com/v1/text:synthesize?key='+GOOGLE_TTS_KEY,
+    'https://texttospeech.googleapis.com/v1beta1/text:synthesize?key='+GOOGLE_TTS_KEY,
     {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         input:{text:text.slice(0,5000)},
-        voice:{languageCode:'en-US',name:'en-US-Neural2-F'},
+        voice:{
+          languageCode:'en-US',
+          name:'en-US-chirp3-hd-leda'
+        },
         audioConfig:{
           audioEncoding:'MP3',
           speakingRate:0.95,
           volumeGainDb:1.0,
-          effectsProfileId:['handset-class-device']
         }
       })
     }
@@ -964,10 +1165,135 @@ function stopListen(){
 /* ─────────────────────────────────
    INTERVIEW FLOW
 ───────────────────────────────── */
-function getVis(){return Qs.filter(q=>!q.skip||!q.skip(S.ans));}
+function getVis(){
+  return Qs.filter(q=>{
+    if(S.phase===1 && !PHASE1_IDS.has(q.id)) return false;
+    if(S.phase===2 &&  PHASE1_IDS.has(q.id)) return false;
+    return !q.skip||!q.skip(S.ans);
+  });
+}
+
+// ── IDENTIFICATION SCREEN FUNCTIONS ──────────────────────────
+
+function beginApp(){
+  // Reset state
+  S.ans={};S.idx=0;S.paused=false;S.photos=[];S.airbags=[];S.injSel={};
+  S.contactMethod='';S.phase=1;S.refNum='';S.hasPending=false;S.pendingSaved=null;
+  S.identity={company:'',driverType:'',driverID:'',name:'',phone:'',email:''};
+  // Clear selections
+  document.getElementById('id1Company').value='';
+  document.getElementById('id1Err').style.display='none';
+  document.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('selected'));
+  show('scrID1');
+  speak('Welcome to the Corporate Claims Management Accident Assistant. Please tell us your company name and who was driving the vehicle.');
+}
+
+function selectDriverType(type){
+  S.identity.driverType=type;
+  document.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById(type==='employee'?'btnEmployee':'btnFamily').classList.add('selected');
+}
+
+function submitID1(){
+  const err=document.getElementById('id1Err');
+  const company=document.getElementById('id1Company').value.trim();
+  if(!company){ err.textContent='Please enter your company name.'; err.style.display='block'; return; }
+  if(!S.identity.driverType){ err.textContent='Please select who was driving.'; err.style.display='block'; return; }
+  err.style.display='none';
+  S.identity.company=company;
+
+  // Set up Screen 2 based on driver type
+  const isEmployee=S.identity.driverType==='employee';
+  document.getElementById('id2Title').textContent=isEmployee
+    ?'Please provide your details as the assigned employee.'
+    :'Please provide the driver details.';
+  document.getElementById('id2EmployeeFields').style.display=isEmployee?'block':'none';
+  document.getElementById('id2FamilyFields').style.display=isEmployee?'none':'block';
+  document.getElementById('id2DriverID').value='';
+  document.getElementById('id2Name').value='';
+  document.getElementById('id2Phone').value='';
+  document.getElementById('id2Email').value='';
+  document.getElementById('id2Err').style.display='none';
+  show('scrID2');
+
+  const prompt2=isEmployee
+    ?'Please enter your Driver ID, full name, phone number and email address.'
+    :'Please enter your full name, phone number and email address.';
+  speak(prompt2);
+}
+
+function submitID2(){
+  const err=document.getElementById('id2Err');
+  const isEmployee=S.identity.driverType==='employee';
+  const driverID=document.getElementById('id2DriverID').value.trim();
+  const name=document.getElementById('id2Name').value.trim();
+  const phone=document.getElementById('id2Phone').value.trim();
+  const email=document.getElementById('id2Email').value.trim();
+
+  if(isEmployee&&!driverID){ err.textContent='Please enter your Driver ID.'; err.style.display='block'; return; }
+  if(!name){ err.textContent='Please enter your full name.'; err.style.display='block'; return; }
+  if(!phone){ err.textContent='Please enter your phone number.'; err.style.display='block'; return; }
+  if(!email||!email.includes('@')){ err.textContent='Please enter a valid email address.'; err.style.display='block'; return; }
+  err.style.display='none';
+
+  // Save to identity
+  S.identity.driverID=driverID;
+  S.identity.name=name;
+  S.identity.phone=phone;
+  S.identity.email=email;
+  if(!isEmployee){
+    S.identity.relationship=document.getElementById('id2Relationship').value;
+    S.identity.authorized=S._authVal||'';
+    S.identity.employeeName=document.getElementById('id2EmployeeName').value.trim();
+    S.identity.employeeID=document.getElementById('id2EmployeeID').value.trim();
+  }
+
+  // Check for pending report
+  try{
+    const saved=JSON.parse(localStorage.getItem('ccm_p1_ans')||'null');
+    if(saved&&saved.drvId&&isEmployee){
+      const last4=String(phone).replace(/\D/g,'').slice(-4);
+      if(saved.drvId.toLowerCase()===driverID.toLowerCase()&&saved.last4===last4){
+        // Match found — show pending screen
+        S.hasPending=true;
+        S.pendingSaved=saved;
+        document.getElementById('pendingRefNum').textContent=saved.ref||'Unknown';
+        show('scrPending');
+        speak('We found a pending accident report for you. Would you like to complete Phase 2, or start a new claim?');
+        return;
+      }
+    }
+  }catch(e){}
+
+  // No pending — start fresh Phase 1
+  startInterview();
+}
+
+function continuePendingReport(){
+  const saved=S.pendingSaved||{};
+  S.ans={...saved.ans||{}};
+  S.refNum=saved.ref||'';
+  if(saved.identity) S.identity={...saved.identity,...S.identity}; // keep current session identity
+  S.phase=2;
+  S.idx=0;
+  document.getElementById('progBar').classList.add('show');
+  document.getElementById('cbar').classList.add('show');
+  document.getElementById('pauseBtn').classList.remove('hidden');
+  initVoice();
+  speak('Welcome back. Let us complete the remaining details of your accident report.', ()=>{ goToQ(0); });
+}
+
+function startNewClaim(){
+  // Clear pending and start fresh
+  try{localStorage.removeItem('ccm_p1_ans');}catch(e){}
+  S.hasPending=false;
+  S.pendingSaved=null;
+  startInterview();
+}
 
 function startInterview(){
   S.ans={};S.idx=0;S.paused=false;S.photos=[];S.airbags=[];S.injSel={};S.contactMethod='';
+  // Note: S.identity preserved from identification screens
   clearDraft();
   refreshPhotoUI();
   document.getElementById('progBar').classList.add('show');
@@ -976,10 +1302,9 @@ function startInterview(){
   if(!/localhost|127\.0\.0\.1/.test(location.href))
     document.getElementById('shareBtn').classList.remove('hidden');
   initVoice();
-  // Speak welcome greeting then go to first question
   show('scrPrep');
   document.getElementById('prepMsg').textContent='Connecting…';
-  const greeting = 'Welcome to the Corporate Claims Management Accident Assistant. I will ask you a series of questions to complete your accident claim. Please answer each question as accurately as possible. Let us begin.';
+  const greeting = 'Thank you. I will now guide you through the accident details. Please answer each question as accurately as possible.';
   speak(greeting, ()=>{ goToQ(0); });
 }
 
@@ -988,6 +1313,19 @@ function goToQ(idx){
   const vis=getVis();
   if(idx>=vis.length){buildSummary();return;}
   S.idx=idx;
+  const q=vis[idx];
+
+  // Pending report check handled on ID screens before interview starts
+
+  // Accident questions begin directly after greeting in startInterview
+  _askQuestion(idx);
+}
+
+
+
+function _askQuestion(idx){
+  if(S.paused)return;
+  const vis=getVis();
   const q=vis[idx];
   const total=vis.length;
   const pct=Math.round((idx+1)/total*100);
@@ -1033,6 +1371,7 @@ function ans(q,val){
   stopSpeak();stopListen();
   S.ans[q.id]=val;
   saveDraft();
+
   const vis=getVis();
   goToQ(S.idx+1);
 }
@@ -1205,15 +1544,21 @@ function rNarr(a,q){
 
 /* ── FORMS ── */
 function rFDriver(a,q){
+  // Use name already collected upfront — employee name (id:-2) or family driver name (id:-4)
+  const knownName = S.identity.name||'';
   a.innerHTML=`<div class="fcard">
-    ${fg('Full Name',inp('dN','John Smith'))}
+    ${knownName
+      ? `<div class="fg"><label class="fl">Driver Name</label>
+         <div style="background:var(--bg3);border:1px solid var(--bd0);border-radius:var(--r8);padding:12px 13px;font-size:15px;font-weight:600;color:var(--t0)">${knownName}</div>
+         <p class="hint">Name collected at start of interview</p></div>`
+      : fg('Full Name',inp('dN','Full name'))
+    }
     <div class="r2">
       ${fg('Driver License #',inp('dL','License number'))}
       ${fg('State',sel(ST,'dS','State'))}
     </div>
     <button class="btn btn-primary" onclick="
-      const n=document.getElementById('dN').value.trim();
-      if(!n){alert('Please enter your name.');return;}
+      const n='${knownName}'||document.getElementById('dN')?.value.trim()||'N/A';
       const l=document.getElementById('dL').value.trim();
       const s=document.getElementById('dS').value;
       ans(gQ(${q.id}),'Name: '+n+' | License: '+(l||'N/A')+' ('+(s||'N/A')+')');
@@ -1221,7 +1566,7 @@ function rFDriver(a,q){
   </div>`;
 }
 function rFVehicle(a,q){
-  const isCo=S.ans[17]==='Company Vehicle';
+  const isCo=S.identity.driverType==='employee'||S.identity.driverType==='family';
   a.innerHTML=`<div class="fcard">
     <div class="r2">
       ${fg('Year',sel(YRS,'vY','Year'))}
@@ -1553,18 +1898,25 @@ function closeM(id){document.getElementById(id).classList.remove('on');}
 /* ─────────────────────────────────
    SUMMARY & EXPORT
 ───────────────────────────────── */
-const SECS=[
-  {t:'Incident Overview',     ids:[1,2,3,4,7,8,9,10,11,12,13,14,15]},
-  {t:'Injuries',              ids:[5,6]},
-  {t:'Your Information',      ids:[16,17,18,19,20]},
-  {t:'Other Party',           ids:[21,22,23]},
-  {t:'Vehicle Damage',        ids:[24,25,26,27,28]},
-  {t:'Tow / Recovery',        ids:[29,30]},
-  {t:'Law Enforcement',       ids:[31,32,33,34]},
-  {t:'Witnesses',             ids:[35,36]},
-  {t:'Accident Narrative',    ids:[37]},
-  {t:'Follow-Up Preferences', ids:[38,39]},
+const SECS_P1=[
+  {t:'Claimant Information',       ids:[]},
+  {t:'Incident Overview',          ids:[2,3,4,8,9,13,14]},
+  {t:'Injuries',                   ids:[5,7]},
+  {t:'Vehicle',                    ids:[17,-4,-5,-6,-7,-8]},
 ];
+const SECS_P2=[
+  {t:'Injury Details',             ids:[6]},
+  {t:'Conditions',                 ids:[10,11,12,15]},
+  {t:'Your Information',           ids:[16,19,20]},
+  {t:'Other Party',                ids:[21,22,23]},
+  {t:'Vehicle Damage',             ids:[24,25,26,27,28]},
+  {t:'Tow / Recovery',             ids:[29,30]},
+  {t:'Law Enforcement',            ids:[31,32,33,34]},
+  {t:'Witnesses',                  ids:[35,36]},
+  {t:'Accident Narrative',         ids:[37]},
+  {t:'Follow-Up Preferences',      ids:[38,39]},
+];
+const SECS=[...SECS_P1,...SECS_P2]; // full set for complete summary
 
 function buildSummary(){
   stopSpeak();stopListen();
@@ -1575,16 +1927,36 @@ function buildSummary(){
   show('scrPrep');
   document.getElementById('prepMsg').textContent='Generating your report…';
   document.getElementById('sumDt').textContent=new Date().toLocaleString('en-US',{dateStyle:'full',timeStyle:'short'});
+  document.querySelector('.sum-title').textContent=S.phase===1?'Phase 1 — Scene Report':'Phase 2 — Detailed Report';
+  const sb=document.getElementById('submitBtn');
+  if(sb) sb.textContent=S.phase===1?'✅  Submit Phase 1 to Claims':'✅  Submit Phase 2 to Claims';
+  // Show identity info in summary banner
+  const _co  = S.identity.company||S.ans[0]||'Not provided';
+  const _drv = S.identity.name||'Not provided';
+  const _id  = S.identity.driverID||'N/A';
+  document.getElementById('sumMeta').innerHTML =
+    `<div style="background:var(--blue-g);border:1px solid rgba(45,140,240,.2);border-radius:8px;padding:8px 10px;grid-column:1/-1">
+       <div style="font-size:9px;font-weight:800;letter-spacing:.12em;color:var(--blue);text-transform:uppercase;margin-bottom:2px">Company</div>
+       <div style="font-size:13px;font-weight:700;color:var(--t0)">${_co}</div>
+     </div>
+     <div style="background:var(--blue-g);border:1px solid rgba(45,140,240,.2);border-radius:8px;padding:8px 10px">
+       <div style="font-size:9px;font-weight:800;letter-spacing:.12em;color:var(--blue);text-transform:uppercase;margin-bottom:2px">Driver Name</div>
+       <div style="font-size:13px;font-weight:700;color:var(--t0)">${_drv}</div>
+     </div>
+     <div style="background:var(--blue-g);border:1px solid rgba(45,140,240,.2);border-radius:8px;padding:8px 10px">
+       <div style="font-size:9px;font-weight:800;letter-spacing:.12em;color:var(--blue);text-transform:uppercase;margin-bottom:2px">Driver ID</div>
+       <div style="font-size:13px;font-weight:700;color:var(--t0)">${_id}</div>
+     </div>`;
 
   setTimeout(()=>{
+    const activeSecs = S.phase===1 ? SECS_P1 : SECS_P2;
     let html='';
-    SECS.forEach(sec=>{
+    activeSecs.forEach(sec=>{
       const rows=sec.ids.map(id=>{
         const q=Qs.find(x=>x.id===id);
         const a=S.ans[id];
         if(!q||!a||a==='Skipped')return '';
-        // Shorten question text to a clean label
-        const lbl=q.text.replace(/Please provide |Please describe |Provide |Describe /gi,'').replace(/\?$/,'');
+        const lbl=q.text.replace(/Please provide |Please describe |Provide |Describe /gi,'').replace(/[?]$/,'');
         return `<div class="srow"><span class="slbl">${lbl}</span><span class="sval">${a}</span></div>`;
       }).filter(Boolean).join('');
       if(rows)html+=`<div class="scard"><div class="scard-hd">${sec.t}</div>${rows}</div>`;
@@ -1703,17 +2075,34 @@ function dlCSV(){
 }
 
 async function submitReport(){
-  // Show sending state
-  const btn=document.querySelector('.sum-actions .btn-primary');
+  const btn=document.getElementById('submitBtn');
   if(btn){btn.disabled=true;btn.textContent='Sending…';}
 
   // Build report text
-  const name=(S.ans[16]||'').split('Name: ')[1]?.split(' |')[0]||'Driver';
+  const isFamilyDrv = S.identity.driverType==='family';
+  const name = S.identity.name||'Driver';
   const date=S.ans[9]||new Date().toLocaleString();
-  let report='ACCIDENT REPORT — Corporate Claims Management\n';
+  const company=S.identity.company||'Unknown Company';
+  const driverID=S.identity.driverID||'N/A';
+  const phaseLabel = S.phase===1 ? 'PHASE 1 — SCENE REPORT' : 'PHASE 2 — DETAILED REPORT';
+  let report='ACCIDENT REPORT ('+phaseLabel+') — Corporate Claims Management\n';
+  if(S.refNum) report+='Reference: '+S.refNum+'\n';
+  report+='='.repeat(58)+'\n';
+  report+='Company:   '+company+'\n';
+  report+='Driver:    '+name+'\n';
+  if(isFamilyDrv){
+    report+='Driver Type: Family Member / Authorized Driver\n';
+    report+='Relationship: '+(S.identity.relationship||'N/A')+'\n';
+    report+='Authorized:  '+(S.identity.authorized||'N/A')+'\n';
+    report+='Employee:    '+(S.identity.employeeName||'N/A')+'\n';
+    report+='Employee ID: '+(S.identity.employeeID||'N/A')+'\n';
+  } else {
+    report+='Driver ID: '+(S.identity.driverID||'N/A')+'\n';
+  }
   report+='Generated: '+new Date().toLocaleString()+'\n';
   report+='='.repeat(58)+'\n\n';
-  SECS.forEach(sec=>{
+  const activeSecs2 = S.phase===1 ? SECS_P1 : SECS_P2;
+  activeSecs2.forEach(sec=>{
     const rows=sec.ids.map(id=>{
       const q=Qs.find(x=>x.id===id);
       const a=S.ans[id];
@@ -1729,6 +2118,8 @@ async function submitReport(){
   try{
     await emailjs.send('service_lefri76','template_g91f9a7',{
       driver_name: name,
+      driver_id:   driverID,
+      company:     company,
       date:        date,
       report:      report,
       to_email:    CLAIMS_EMAIL,
@@ -1738,10 +2129,43 @@ async function submitReport(){
       fetch(FTP_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(buildJSON())})
         .catch(e=>console.warn('API post failed:',e));
     }
-    show('scrOK');
+    if(S.phase===1){
+      S.refNum='CCM-'+new Date().getFullYear()+'-'+String(Date.now()).slice(-6);
+      document.getElementById('refNum').textContent=S.refNum;
+      document.getElementById('refNum2').textContent=S.refNum;
+      try{
+        const phone=String(S.identity.phone||'').replace(/\D/g,'');
+        const last4=phone.slice(-4);
+        const drvId=S.identity.driverID.toLowerCase();
+        localStorage.setItem('ccm_p1_ans',JSON.stringify({ans:S.ans,ref:S.refNum,last4,drvId,identity:S.identity}));
+      }catch(e){}
+      // Send confirmation email to driver with reference number
+      const driverEmail=S.identity.email||'';
+      if(driverEmail && driverEmail.includes('@')){
+        const appUrl=window.location.origin+window.location.pathname;
+        emailjs.send('service_lefri76','template_g91f9a7',{
+          driver_name: name,
+          driver_id:   driverID,
+          company:     company,
+          date:        new Date().toLocaleString(),
+          to_email:    driverEmail,
+          report:      'Your Phase 1 accident report has been received by Corporate Claims Management.\n\n'
+                      +'Reference Number: '+S.refNum+'\n\n'
+                      +'Please save this reference number. You will need it to complete Phase 2 of your report.\n\n'
+                      +'To complete Phase 2, return to:\n'+appUrl+'\n\n'
+                      +'Enter your Driver ID ('+( S.identity.driverID||'your ID')+') and last 4 digits of your phone number to resume.\n\n'
+                      +'— Corporate Claims Management'
+        }).catch(e=>console.warn('Driver confirmation email failed:',e));
+      }
+      show('scrOK');
+    } else {
+      clearDraft();
+      try{localStorage.removeItem('ccm_p1_ans');}catch(e){}
+      show('scrOK2');
+    }
   }catch(err){
     console.error('EmailJS failed:',err);
-    if(btn){btn.disabled=false;btn.textContent='✅  Submit Report to Claims';}
+    if(btn){btn.disabled=false;btn.textContent=S.phase===1?'✅  Submit Phase 1 to Claims':'✅  Submit Phase 2 to Claims';}
     alert('Failed to send report. Please check your connection and try again.\n\nError: '+JSON.stringify(err));
   }
 }
@@ -1750,6 +2174,40 @@ async function submitReport(){
    RESET
 ───────────────────────────────── */
 function confirmReset(){if(confirm('Restart and lose all progress?'))resetApp();}
+
+function startPhase2(){
+  // Called immediately after Phase 1 — no verification needed, same session
+  S.phase=2;
+  S.idx=0;
+  S.paused=false;
+  document.getElementById('progBar').classList.add('show');
+  document.getElementById('cbar').classList.add('show');
+  document.getElementById('pauseBtn').classList.remove('hidden');
+  const sb=document.getElementById('submitBtn');
+  if(sb){ sb.textContent='✅  Submit Phase 2 to Claims'; sb.disabled=false; }
+  speak('Thank you. Now let us complete the remaining details of your accident report. Take your time with each question.', ()=>{ goToQ(0); });
+}
+
+function showPhase2Later(){
+  show('scrLater');
+}
+
+function resumePhase2Direct(){ /* legacy */ }
+
+function selectAuth(val){
+  S._authVal=val;
+  document.getElementById('btnAuthYes').classList.toggle('selected', val==='Yes');
+  document.getElementById('btnAuthNo').classList.toggle('selected',  val==='No');
+}
+
+function dismissResume(){
+  try{localStorage.removeItem('ccm_p1_ans');}catch(e){}
+  S.hasPending=false; S.pendingSaved=null;
+}
+
+function showResumePhase2(){
+  resumePhase2Direct();
+}
 function resetApp(){
   stopSpeak();stopListen();clearDraft();
   S.ans={};S.idx=0;S.paused=false;S.photos=[];S.airbags=[];S.injSel={};S.contactMethod='';
@@ -1763,6 +2221,8 @@ function resetApp(){
   refreshPhotoUI();
   checkDraftPill();
   show('scrStart');
+  // Clear identification
+  S.identity={company:'',driverType:'',driverID:'',name:'',phone:'',email:''};
 }
 
 /* ─────────────────────────────────
@@ -1818,6 +2278,7 @@ window.addEventListener('load',()=>{
   if(!/localhost|127\.0\.0\.1/.test(location.href))
     document.getElementById('shareBtn').classList.remove('hidden');
   checkDraftPill();
+  // Pending report check happens during identification flow — no banner needed on load
 });
 </script>
 </body>
