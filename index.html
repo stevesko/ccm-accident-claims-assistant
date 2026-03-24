@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-03-24 10:41 AM ET -->
+<!-- CCM Accident Assistant — Built: 2026-03-24 10:58 AM ET -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-03-24 10:39 AM ET</title>
+<title>CCM Accident Assistant — 2026-03-24 10:58 AM ET</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -567,7 +567,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-24 10:39 AM ET</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-24 10:58 AM ET</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -586,35 +586,55 @@ input[type="datetime-local"].fi{color-scheme:dark}
     </div>
   </section>
 
-  <!-- IDENTIFICATION SCREEN 1: Company + Driver Type -->
+  <!-- IDENTIFICATION SCREEN 1: Company + Purpose + Driver Type -->
   <section class="scr" id="scrID1">
     <div class="qcard">
       <div class="qstep">Step 1 of 2 — Identification</div>
       <div class="qtext">What is the name of your company working with Corporate Claims Management?</div>
     </div>
     <div style="padding:0 4px">
-      <input class="fi" id="id1Company" placeholder="Company name…" type="text" style="margin-bottom:24px">
+      <input class="fi" id="id1Company" placeholder="Company name…" type="text" style="margin-bottom:20px">
 
-      <div style="background:var(--bg2);border:1px solid var(--bd1);border-radius:var(--r16);padding:18px;margin-bottom:20px">
-        <div style="font-size:13px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px;text-align:center">
-          Select One
-        </div>
-        <div style="font-size:15px;font-weight:700;color:var(--t0);text-align:center;margin-bottom:16px;line-height:1.4">
-          Are you an Employee of the Company<br>or a Family Member / Authorized Driver?
-        </div>
-        <div style="display:flex;flex-direction:column;gap:12px">
-          <button class="opt-btn" id="btnEmployee" onclick="selectDriverType('employee')" style="padding:16px 18px">
-            <span style="font-size:28px">🏢</span>
+      <!-- Purpose selection -->
+      <div style="background:var(--bg2);border:1px solid var(--bd1);border-radius:var(--r16);padding:18px;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;text-align:center">Why are you here today?</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button class="opt-btn" id="btnNewAccident" onclick="selectPurpose('new')" style="padding:14px 18px">
+            <span style="font-size:26px">🚨</span>
             <div style="text-align:left;flex:1">
-              <div style="font-weight:800;font-size:16px;color:var(--t0)">Employee of the Company</div>
-              <div style="font-size:13px;color:var(--t1);margin-top:3px">I am an employee assigned to this vehicle</div>
+              <div style="font-weight:800;font-size:16px;color:var(--t0)">Report a New Accident</div>
+              <div style="font-size:13px;color:var(--t1);margin-top:2px">I need to file a new accident claim</div>
             </div>
           </button>
-          <button class="opt-btn" id="btnFamily" onclick="selectDriverType('family')" style="padding:16px 18px">
-            <span style="font-size:28px">👨‍👩‍👧</span>
+          <button class="opt-btn" id="btnPhase2" onclick="selectPurpose('phase2')" style="padding:14px 18px">
+            <span style="font-size:26px">📋</span>
+            <div style="text-align:left;flex:1">
+              <div style="font-weight:800;font-size:16px;color:var(--t0)">Complete My Phase 2 Report</div>
+              <div style="font-size:13px;color:var(--t1);margin-top:2px">I already submitted Phase 1 and have a reference number</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Employee/Family toggle — only shown for new accident -->
+      <div id="driverTypeSection" style="display:none;background:var(--bg2);border:1px solid var(--bd1);border-radius:var(--r16);padding:18px;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;text-align:center">Select One</div>
+        <div style="font-size:15px;font-weight:700;color:var(--t0);text-align:center;margin-bottom:14px;line-height:1.4">
+          Are you an Employee of the Company<br>or a Family Member / Authorized Driver?
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button class="opt-btn" id="btnEmployee" onclick="selectDriverType('employee')" style="padding:14px 18px">
+            <span style="font-size:26px">🏢</span>
+            <div style="text-align:left;flex:1">
+              <div style="font-weight:800;font-size:16px;color:var(--t0)">Employee of the Company</div>
+              <div style="font-size:13px;color:var(--t1);margin-top:2px">I am an employee assigned to this vehicle</div>
+            </div>
+          </button>
+          <button class="opt-btn" id="btnFamily" onclick="selectDriverType('family')" style="padding:14px 18px">
+            <span style="font-size:26px">👨‍👩‍👧</span>
             <div style="text-align:left;flex:1">
               <div style="font-weight:800;font-size:16px;color:var(--t0)">Family Member / Authorized Driver</div>
-              <div style="font-size:13px;color:var(--t1);margin-top:3px">I am not the assigned employee</div>
+              <div style="font-size:13px;color:var(--t1);margin-top:2px">I am not the assigned employee</div>
             </div>
           </button>
         </div>
@@ -632,37 +652,56 @@ input[type="datetime-local"].fi{color-scheme:dark}
       <div class="qtext" id="id2Title">Please provide your details</div>
     </div>
     <div style="padding:0 4px">
-      <!-- Employee fields -->
-      <div id="id2EmployeeFields">
-        <label class="fl">Driver ID</label>
-        <input class="fi" id="id2DriverID" placeholder="e.g. D1234, EMP-567…" type="text" style="margin-bottom:12px">
-      </div>
-      <!-- Shared fields -->
-      <label class="fl">Full Name</label>
-      <input class="fi" id="id2Name" placeholder="First and last name…" type="text" style="margin-bottom:12px">
-      <label class="fl">Mobile Phone Number</label>
-      <input class="fi" id="id2Phone" placeholder="e.g. 555-123-4567" type="tel" style="margin-bottom:12px">
-      <label class="fl">Email Address</label>
-      <input class="fi" id="id2Email" placeholder="your@email.com" type="email" style="margin-bottom:12px">
-      <!-- Family member additional fields -->
-      <div id="id2FamilyFields" style="display:none">
-        <label class="fl">Relationship to Assigned Employee</label>
-        <select class="fi" id="id2Relationship" style="margin-bottom:12px">
-          <option value="">Select relationship…</option>
-          <option>Spouse</option>
-          <option>Child</option>
-          <option>Other Authorized Driver</option>
-        </select>
-        <label class="fl">Was this driver authorized to use the vehicle?</label>
-        <div style="display:flex;gap:10px;margin-bottom:12px">
-          <button class="opt-btn" id="btnAuthYes" onclick="selectAuth('Yes')" style="flex:1;padding:12px">Yes</button>
-          <button class="opt-btn" id="btnAuthNo"  onclick="selectAuth('No')"  style="flex:1;padding:12px">No</button>
+
+      <!-- New accident fields -->
+      <div id="id2NewFields">
+        <div id="id2EmployeeFields">
+          <label class="fl">Driver ID</label>
+          <input class="fi" id="id2DriverID" placeholder="e.g. D1234, EMP-567…" type="text" style="margin-bottom:12px">
         </div>
-        <label class="fl">Assigned Employee Full Name</label>
-        <input class="fi" id="id2EmployeeName" placeholder="Employee full name…" type="text" style="margin-bottom:12px">
-        <label class="fl">Assigned Employee Driver ID</label>
-        <input class="fi" id="id2EmployeeID" placeholder="e.g. D1234…" type="text" style="margin-bottom:12px">
+        <label class="fl">Full Name</label>
+        <input class="fi" id="id2Name" placeholder="First and last name…" type="text" style="margin-bottom:12px">
+        <label class="fl">Mobile Phone Number</label>
+        <input class="fi" id="id2Phone" placeholder="e.g. 555-123-4567" type="tel" style="margin-bottom:12px">
+        <label class="fl">Email Address</label>
+        <input class="fi" id="id2Email" placeholder="your@email.com" type="email" style="margin-bottom:12px">
+        <!-- Family member additional fields -->
+        <div id="id2FamilyFields" style="display:none">
+          <label class="fl">Relationship to Assigned Employee</label>
+          <select class="fi" id="id2Relationship" style="margin-bottom:12px">
+            <option value="">Select relationship…</option>
+            <option>Spouse</option>
+            <option>Child</option>
+            <option>Other Authorized Driver</option>
+          </select>
+          <label class="fl">Was this driver authorized to use the vehicle?</label>
+          <div style="display:flex;gap:10px;margin-bottom:12px">
+            <button class="opt-btn" id="btnAuthYes" onclick="selectAuth('Yes')" style="flex:1;padding:12px">Yes</button>
+            <button class="opt-btn" id="btnAuthNo"  onclick="selectAuth('No')"  style="flex:1;padding:12px">No</button>
+          </div>
+          <label class="fl">Assigned Employee Full Name</label>
+          <input class="fi" id="id2EmployeeName" placeholder="Employee full name…" type="text" style="margin-bottom:12px">
+          <label class="fl">Assigned Employee Driver ID</label>
+          <input class="fi" id="id2EmployeeID" placeholder="e.g. D1234…" type="text" style="margin-bottom:12px">
+        </div>
       </div>
+
+      <!-- Phase 2 resume fields -->
+      <div id="id2Phase2Fields" style="display:none">
+        <div style="background:var(--blue-g);border:1px solid rgba(45,140,240,.2);border-radius:var(--r12);padding:14px;margin-bottom:18px;font-size:13px;color:var(--t1);line-height:1.6">
+          Enter your Driver ID, last 4 digits of your phone number, and the reference number from your Phase 1 confirmation email.
+        </div>
+        <label class="fl">Driver ID</label>
+        <input class="fi" id="id2P2DriverID" placeholder="e.g. D1234, EMP-567…" type="text" style="margin-bottom:12px">
+        <label class="fl">Last 4 Digits of Phone Number</label>
+        <input class="fi" id="id2P2Phone" placeholder="e.g. 4567" type="tel" maxlength="4" style="margin-bottom:12px">
+        <label class="fl">Reference Number</label>
+        <input class="fi" id="id2P2Ref" placeholder="e.g. CCM-2026-847291" type="text" style="margin-bottom:16px">
+        <button class="btn btn-ghost btn-sm" onclick="showResendRefFromScreen2()" style="margin-bottom:18px">
+          📧 I don't have my reference number — resend it
+        </button>
+      </div>
+
       <p class="field-err" id="id2Err" style="display:none;margin-bottom:10px"></p>
       <button class="btn btn-primary" onclick="submitID2()">Continue →</button>
       <button class="btn btn-ghost btn-sm" onclick="show('scrID1')" style="margin-top:10px">← Back</button>
@@ -1193,20 +1232,34 @@ function beginApp(){
   // Reset state
   S.ans={};S.idx=0;S.paused=false;S.photos=[];S.airbags=[];S.injSel={};
   S.contactMethod='';S.phase=1;S.refNum='';S.hasPending=false;S.pendingSaved=null;
-  S.identity={company:'',driverType:'',driverID:'',name:'',phone:'',email:''};
+  S.identity={company:'',purpose:'',driverType:'',driverID:'',name:'',phone:'',email:''};
   // Clear selections
   document.getElementById('id1Company').value='';
   document.getElementById('id1Err').style.display='none';
   document.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('driverTypeSection').style.display='none';
   // Init voice — must be called inside a user gesture (button tap) for AudioContext to work
   initVoice();
   show('scrID1');
   speak('Welcome to the Corporate Claims Management Accident Assistant. Please tell us your company name and who was driving the vehicle.');
 }
 
+function selectPurpose(purpose){
+  S.identity.purpose=purpose;
+  document.querySelectorAll('#btnNewAccident,#btnPhase2').forEach(b=>b.classList.remove('selected'));
+  document.getElementById(purpose==='new'?'btnNewAccident':'btnPhase2').classList.add('selected');
+  // Show/hide driver type section
+  document.getElementById('driverTypeSection').style.display=purpose==='new'?'block':'none';
+  // Reset driver type if switching purposes
+  if(purpose==='phase2'){
+    S.identity.driverType='employee'; // phase2 resume always uses employee path
+    document.querySelectorAll('#btnEmployee,#btnFamily').forEach(b=>b.classList.remove('selected'));
+  }
+}
+
 function selectDriverType(type){
   S.identity.driverType=type;
-  document.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('selected'));
+  document.querySelectorAll('#btnEmployee,#btnFamily').forEach(b=>b.classList.remove('selected'));
   document.getElementById(type==='employee'?'btnEmployee':'btnFamily').classList.add('selected');
 }
 
@@ -1214,32 +1267,88 @@ function submitID1(){
   const err=document.getElementById('id1Err');
   const company=document.getElementById('id1Company').value.trim();
   if(!company){ err.textContent='Please enter your company name.'; err.style.display='block'; return; }
-  if(!S.identity.driverType){ err.textContent='Please select who was driving.'; err.style.display='block'; return; }
+  if(!S.identity.purpose){ err.textContent='Please select why you are here today.'; err.style.display='block'; return; }
+  if(S.identity.purpose==='new'&&!S.identity.driverType){
+    err.textContent='Please select Employee or Family Member / Authorized Driver.'; err.style.display='block'; return;
+  }
   err.style.display='none';
   S.identity.company=company;
 
-  // Set up Screen 2 based on driver type
+  const isPhase2=S.identity.purpose==='phase2';
   const isEmployee=S.identity.driverType==='employee';
-  document.getElementById('id2Title').textContent=isEmployee
-    ?'Please provide your details as the assigned employee.'
-    :'Please provide the driver details.';
-  document.getElementById('id2EmployeeFields').style.display=isEmployee?'block':'none';
-  document.getElementById('id2FamilyFields').style.display=isEmployee?'none':'block';
-  document.getElementById('id2DriverID').value='';
-  document.getElementById('id2Name').value='';
-  document.getElementById('id2Phone').value='';
-  document.getElementById('id2Email').value='';
+
+  // Show/hide correct Screen 2 sections
+  document.getElementById('id2NewFields').style.display=isPhase2?'none':'block';
+  document.getElementById('id2Phase2Fields').style.display=isPhase2?'block':'none';
   document.getElementById('id2Err').style.display='none';
+
+  if(!isPhase2){
+    document.getElementById('id2Title').textContent=isEmployee
+      ?'Please provide your details as the assigned employee.'
+      :'Please provide the driver details.';
+    document.getElementById('id2EmployeeFields').style.display=isEmployee?'block':'none';
+    document.getElementById('id2FamilyFields').style.display=isEmployee?'none':'block';
+    document.getElementById('id2DriverID').value='';
+    document.getElementById('id2Name').value='';
+    document.getElementById('id2Phone').value='';
+    document.getElementById('id2Email').value='';
+  } else {
+    document.getElementById('id2Title').textContent='Enter your Phase 2 verification details.';
+    document.getElementById('id2P2DriverID').value='';
+    document.getElementById('id2P2Phone').value='';
+    document.getElementById('id2P2Ref').value='';
+  }
   show('scrID2');
 
-  const prompt2=isEmployee
-    ?'Please enter your Driver ID, full name, phone number and email address.'
-    :'Please enter your full name, phone number and email address.';
+  const prompt2=isPhase2
+    ?'Please enter your Driver ID, last 4 digits of your phone number, and your reference number.'
+    :isEmployee
+      ?'Please enter your Driver ID, full name, phone number and email address.'
+      :'Please enter your full name, phone number and email address.';
   speak(prompt2);
 }
 
 function submitID2(){
   const err=document.getElementById('id2Err');
+  const isPhase2=S.identity.purpose==='phase2';
+
+  // ── Phase 2 resume path ──
+  if(isPhase2){
+    const driverID=document.getElementById('id2P2DriverID').value.trim();
+    const last4=document.getElementById('id2P2Phone').value.trim();
+    const ref=document.getElementById('id2P2Ref').value.trim().toUpperCase();
+    if(!driverID){ err.textContent='Please enter your Driver ID.'; err.style.display='block'; return; }
+    if(!last4||last4.length<4){ err.textContent='Please enter the last 4 digits of your phone number.'; err.style.display='block'; return; }
+    if(!ref){ err.textContent='Please enter your reference number.'; err.style.display='block'; return; }
+    try{
+      const saved=JSON.parse(localStorage.getItem('ccm_p1_ans')||'null');
+      if(!saved){ err.textContent='No saved report found on this device. Please start a new accident report.'; err.style.display='block'; return; }
+      if(saved.drvId.toLowerCase()!==driverID.toLowerCase()){
+        err.textContent='Driver ID does not match. Please check and try again.'; err.style.display='block'; return;
+      }
+      if(saved.last4!==last4){
+        err.textContent='Phone number does not match. Please check and try again.'; err.style.display='block'; return;
+      }
+      if((saved.ref||'').toUpperCase()!==ref){
+        err.textContent='Reference number does not match. Please check and try again.'; err.style.display='block'; return;
+      }
+      // Verified — resume Phase 2
+      S.ans={...saved.ans||{}};
+      S.refNum=saved.ref||'';
+      S.identity.driverID=driverID;
+      S.phase=2; S.idx=0;
+      document.getElementById('progBar').classList.add('show');
+      document.getElementById('cbar').classList.add('show');
+      document.getElementById('pauseBtn').classList.remove('hidden');
+      initVoice();
+      speak('Welcome back. Let us complete the remaining details of your accident report.', ()=>{ goToQ(0); });
+    }catch(e){
+      err.textContent='Could not retrieve saved report. Please start a new accident report.'; err.style.display='block';
+    }
+    return;
+  }
+
+  // ── New accident path ──
   const isEmployee=S.identity.driverType==='employee';
   const driverID=document.getElementById('id2DriverID').value.trim();
   const name=document.getElementById('id2Name').value.trim();
@@ -1252,7 +1361,6 @@ function submitID2(){
   if(!email||!email.includes('@')){ err.textContent='Please enter a valid email address.'; err.style.display='block'; return; }
   err.style.display='none';
 
-  // Save to identity
   S.identity.driverID=driverID;
   S.identity.name=name;
   S.identity.phone=phone;
@@ -1264,24 +1372,6 @@ function submitID2(){
     S.identity.employeeID=document.getElementById('id2EmployeeID').value.trim();
   }
 
-  // Check for pending report
-  try{
-    const saved=JSON.parse(localStorage.getItem('ccm_p1_ans')||'null');
-    if(saved&&saved.drvId&&isEmployee){
-      const last4=String(phone).replace(/\D/g,'').slice(-4);
-      if(saved.drvId.toLowerCase()===driverID.toLowerCase()&&saved.last4===last4){
-        // Match found — show pending screen
-        S.hasPending=true;
-        S.pendingSaved=saved;
-        document.getElementById('pendingRefNum').textContent=saved.ref||'Unknown';
-        show('scrPending');
-        speak('We found a pending accident report for you. Would you like to complete Phase 2, or start a new claim?');
-        return;
-      }
-    }
-  }catch(e){}
-
-  // No pending — start fresh Phase 1
   startInterview();
 }
 
@@ -2219,6 +2309,44 @@ function selectAuth(val){
   document.getElementById('btnAuthNo').classList.toggle('selected',  val==='No');
 }
 
+function showResendRefFromScreen2(){
+  const err=document.getElementById('id2Err');
+  const driverID=document.getElementById('id2P2DriverID').value.trim();
+  const last4=document.getElementById('id2P2Phone').value.trim();
+  if(!driverID||!last4){
+    err.textContent='Please enter your Driver ID and last 4 digits of phone first.';
+    err.style.display='block'; return;
+  }
+  try{
+    const saved=JSON.parse(localStorage.getItem('ccm_p1_ans')||'null');
+    if(!saved){ err.textContent='No saved report found on this device.'; err.style.display='block'; return; }
+    if(saved.drvId.toLowerCase()!==driverID.toLowerCase()||saved.last4!==last4){
+      err.textContent='Driver ID or phone does not match. Cannot resend reference number.'; err.style.display='block'; return;
+    }
+    const driverEmail=saved.ans&&saved.ans[-10]||S.identity.email||'';
+    if(!driverEmail||!driverEmail.includes('@')){
+      err.textContent='No email address on file. Please call Corporate Claims Management for assistance.'; err.style.display='block'; return;
+    }
+    const appUrl=window.location.origin+window.location.pathname;
+    emailjs.send('service_lefri76','template_g91f9a7',{
+      driver_name: saved.ans&&saved.ans[-2]||'Driver',
+      driver_id: driverID,
+      company: S.identity.company||'',
+      date: new Date().toLocaleString(),
+      to_email: driverEmail,
+      report: 'Your reference number has been resent.\n\nReference Number: '+saved.ref+'\n\nReturn to: '+appUrl+'\n\n— Corporate Claims Management'
+    }).then(()=>{
+      err.style.color='var(--teal)';
+      err.textContent='✓ Reference number resent to '+driverEmail+'. Check your inbox.';
+      err.style.display='block';
+    }).catch(()=>{
+      err.textContent='Failed to send email. Please call Corporate Claims Management.'; err.style.display='block';
+    });
+  }catch(e){
+    err.textContent='An error occurred. Please call Corporate Claims Management.'; err.style.display='block';
+  }
+}
+
 function dismissResume(){
   try{localStorage.removeItem('ccm_p1_ans');}catch(e){}
   S.hasPending=false; S.pendingSaved=null;
@@ -2304,3 +2432,4 @@ window.addEventListener('load',()=>{
 </script>
 </body>
 </html>
+
