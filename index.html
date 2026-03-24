@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-03-24 07:03 AM ET -->
+<!-- CCM Accident Assistant — Built: 2026-03-24 10:39 AM ET -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-03-24 06:49 AM ET</title>
+<title>CCM Accident Assistant — 2026-03-24 10:39 AM ET</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -567,7 +567,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-24 06:49 AM ET</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-24 10:39 AM ET</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -593,24 +593,33 @@ input[type="datetime-local"].fi{color-scheme:dark}
       <div class="qtext">What is the name of your company working with Corporate Claims Management?</div>
     </div>
     <div style="padding:0 4px">
-      <input class="fi" id="id1Company" placeholder="Company name…" type="text" style="margin-bottom:16px">
-      <div style="font-size:13px;font-weight:700;color:var(--t1);margin-bottom:10px;text-transform:uppercase;letter-spacing:.08em;font-size:11px">Are you an employee of this company or a family member / authorized driver?</div>
-      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
-        <button class="opt-btn" id="btnEmployee" onclick="selectDriverType('employee')">
-          <span style="font-size:20px">👤</span>
-          <div style="text-align:left">
-            <div style="font-weight:700;font-size:15px">Employee</div>
-            <div style="font-size:12px;color:var(--t1)">I am an employee of this company</div>
-          </div>
-        </button>
-        <button class="opt-btn" id="btnFamily" onclick="selectDriverType('family')">
-          <span style="font-size:20px">👨‍👩‍👧</span>
-          <div style="text-align:left">
-            <div style="font-weight:700;font-size:15px">Family Member / Authorized Driver</div>
-            <div style="font-size:12px;color:var(--t1)">I am a family member or authorized driver</div>
-          </div>
-        </button>
+      <input class="fi" id="id1Company" placeholder="Company name…" type="text" style="margin-bottom:24px">
+
+      <div style="background:var(--bg2);border:1px solid var(--bd1);border-radius:var(--r16);padding:18px;margin-bottom:20px">
+        <div style="font-size:13px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px;text-align:center">
+          Select One
+        </div>
+        <div style="font-size:15px;font-weight:700;color:var(--t0);text-align:center;margin-bottom:16px;line-height:1.4">
+          Are you an Employee of the Company<br>or a Family Member / Authorized Driver?
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <button class="opt-btn" id="btnEmployee" onclick="selectDriverType('employee')" style="padding:16px 18px">
+            <span style="font-size:28px">🏢</span>
+            <div style="text-align:left;flex:1">
+              <div style="font-weight:800;font-size:16px;color:var(--t0)">Employee of the Company</div>
+              <div style="font-size:13px;color:var(--t1);margin-top:3px">I am an employee assigned to this vehicle</div>
+            </div>
+          </button>
+          <button class="opt-btn" id="btnFamily" onclick="selectDriverType('family')" style="padding:16px 18px">
+            <span style="font-size:28px">👨‍👩‍👧</span>
+            <div style="text-align:left;flex:1">
+              <div style="font-weight:800;font-size:16px;color:var(--t0)">Family Member / Authorized Driver</div>
+              <div style="font-size:13px;color:var(--t1);margin-top:3px">I am not the assigned employee</div>
+            </div>
+          </button>
+        </div>
       </div>
+
       <p class="field-err" id="id1Err" style="display:none;margin-bottom:10px"></p>
       <button class="btn btn-primary" onclick="submitID1()">Continue →</button>
     </div>
@@ -1936,7 +1945,10 @@ function buildSummary(){
   document.getElementById('sumDt').textContent=new Date().toLocaleString('en-US',{dateStyle:'full',timeStyle:'short'});
   document.querySelector('.sum-title').textContent=S.phase===1?'Phase 1 — Scene Report':'Phase 2 — Detailed Report';
   const sb=document.getElementById('submitBtn');
-  if(sb) sb.textContent=S.phase===1?'✅  Submit Phase 1 to Claims':'✅  Submit Phase 2 to Claims';
+  if(sb){
+    sb.textContent=S.phase===1?'✅  Submit Phase 1 to Claims':'✅  Submit Phase 2 to Claims';
+    sb.disabled=false;  // always re-enable on new summary screen
+  }
   // Show identity info in summary banner
   const _co  = S.identity.company||S.ans[0]||'Not provided';
   const _drv = S.identity.name||'Not provided';
@@ -2216,6 +2228,8 @@ function showResumePhase2(){
   resumePhase2Direct();
 }
 function resetApp(){
+  const sb=document.getElementById('submitBtn');
+  if(sb){sb.disabled=false;}
   stopSpeak();stopListen();clearDraft();
   S.ans={};S.idx=0;S.paused=false;S.photos=[];S.airbags=[];S.injSel={};S.contactMethod='';
   document.getElementById('progBar').classList.remove('show');
@@ -2290,4 +2304,3 @@ window.addEventListener('load',()=>{
 </script>
 </body>
 </html>
-
