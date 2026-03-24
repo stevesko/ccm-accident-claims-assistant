@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-03-23 07:45 PM ET -->
+<!-- CCM Accident Assistant — Built: 2026-03-24 06:44 AM ET -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1048,7 +1048,7 @@ function initVoice(){
   if(SR){S.rec=new SR();S.rec.continuous=false;S.rec.interimResults=false;S.rec.lang='en-US';S.hasMic=true;}
 }
 /* ── AUDIO ENGINE ─────────────────────────────────────────
-   Voice:   Google Cloud TTS  Neural2-F (warm professional female, consistent pace)
+   Voice:   Google Cloud TTS  Chirp 3 HD — Callirrhoe
             Natural, warm professional female. Never robotic.
    KEY:     Replace PASTE_YOUR_KEY_HERE with your AIza... key
    Cache:   Each question fetched once per session only.
@@ -1080,7 +1080,7 @@ function stopSpeak(){
 async function _fetchAudio(text){
   if(S.audioCache[text]) return S.audioCache[text];
   const r=await fetch(
-    'https://texttospeech.googleapis.com/v1/text:synthesize?key='+GOOGLE_TTS_KEY,
+    'https://texttospeech.googleapis.com/v1beta1/text:synthesize?key='+GOOGLE_TTS_KEY,
     {
       method:'POST',
       headers:{'Content-Type':'application/json'},
@@ -1088,12 +1088,10 @@ async function _fetchAudio(text){
         input:{text:text.slice(0,5000)},
         voice:{
           languageCode:'en-US',
-          name:'en-US-Neural2-F'
+          name:'en-US-chirp3-hd-callirrhoe'
         },
         audioConfig:{
-          audioEncoding:'MP3',
-          speakingRate:0.95,
-          volumeGainDb:1.0,
+          audioEncoding:'MP3'
         }
       })
     }
@@ -1186,6 +1184,8 @@ function beginApp(){
   document.getElementById('id1Company').value='';
   document.getElementById('id1Err').style.display='none';
   document.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('selected'));
+  // Init voice — must be called inside a user gesture (button tap) for AudioContext to work
+  initVoice();
   show('scrID1');
   speak('Welcome to the Corporate Claims Management Accident Assistant. Please tell us your company name and who was driving the vehicle.');
 }
