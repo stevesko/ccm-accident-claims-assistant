@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-03-24 10:58 AM ET -->
+<!-- CCM Accident Assistant — Built: 2026-03-24 11:20 AM ET -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-03-24 10:58 AM ET</title>
+<title>CCM Accident Assistant — 2026-03-24 11:20 AM ET</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -567,7 +567,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-24 10:58 AM ET</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-24 11:20 AM ET</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -586,7 +586,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
     </div>
   </section>
 
-  <!-- IDENTIFICATION SCREEN 1: Company + Purpose + Driver Type -->
+  <!-- IDENTIFICATION SCREEN 1: Company + Driver Type + Purpose -->
   <section class="scr" id="scrID1">
     <div class="qcard">
       <div class="qstep">Step 1 of 2 — Identification</div>
@@ -595,29 +595,8 @@ input[type="datetime-local"].fi{color-scheme:dark}
     <div style="padding:0 4px">
       <input class="fi" id="id1Company" placeholder="Company name…" type="text" style="margin-bottom:20px">
 
-      <!-- Purpose selection -->
+      <!-- Employee/Family selection — always shown first -->
       <div style="background:var(--bg2);border:1px solid var(--bd1);border-radius:var(--r16);padding:18px;margin-bottom:16px">
-        <div style="font-size:13px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;text-align:center">Why are you here today?</div>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <button class="opt-btn" id="btnNewAccident" onclick="selectPurpose('new')" style="padding:14px 18px">
-            <span style="font-size:26px">🚨</span>
-            <div style="text-align:left;flex:1">
-              <div style="font-weight:800;font-size:16px;color:var(--t0)">Report a New Accident</div>
-              <div style="font-size:13px;color:var(--t1);margin-top:2px">I need to file a new accident claim</div>
-            </div>
-          </button>
-          <button class="opt-btn" id="btnPhase2" onclick="selectPurpose('phase2')" style="padding:14px 18px">
-            <span style="font-size:26px">📋</span>
-            <div style="text-align:left;flex:1">
-              <div style="font-weight:800;font-size:16px;color:var(--t0)">Complete My Phase 2 Report</div>
-              <div style="font-size:13px;color:var(--t1);margin-top:2px">I already submitted Phase 1 and have a reference number</div>
-            </div>
-          </button>
-        </div>
-      </div>
-
-      <!-- Employee/Family toggle — only shown for new accident -->
-      <div id="driverTypeSection" style="display:none;background:var(--bg2);border:1px solid var(--bd1);border-radius:var(--r16);padding:18px;margin-bottom:16px">
         <div style="font-size:13px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;text-align:center">Select One</div>
         <div style="font-size:15px;font-weight:700;color:var(--t0);text-align:center;margin-bottom:14px;line-height:1.4">
           Are you an Employee of the Company<br>or a Family Member / Authorized Driver?
@@ -635,6 +614,27 @@ input[type="datetime-local"].fi{color-scheme:dark}
             <div style="text-align:left;flex:1">
               <div style="font-weight:800;font-size:16px;color:var(--t0)">Family Member / Authorized Driver</div>
               <div style="font-size:13px;color:var(--t1);margin-top:2px">I am not the assigned employee</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Purpose selection — only shown after Employee selected (Family always = new accident) -->
+      <div id="purposeSection" style="display:none;background:var(--bg2);border:1px solid var(--bd1);border-radius:var(--r16);padding:18px;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;text-align:center">Why are you here today?</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button class="opt-btn" id="btnNewAccident" onclick="selectPurpose('new')" style="padding:14px 18px">
+            <span style="font-size:26px">🚨</span>
+            <div style="text-align:left;flex:1">
+              <div style="font-weight:800;font-size:16px;color:var(--t0)">Report a New Accident</div>
+              <div style="font-size:13px;color:var(--t1);margin-top:2px">I need to file a new accident claim</div>
+            </div>
+          </button>
+          <button class="opt-btn" id="btnPhase2" onclick="selectPurpose('phase2')" style="padding:14px 18px">
+            <span style="font-size:26px">📋</span>
+            <div style="text-align:left;flex:1">
+              <div style="font-weight:800;font-size:16px;color:var(--t0)">Complete My Phase 2 Report</div>
+              <div style="font-size:13px;color:var(--t1);margin-top:2px">I already submitted Phase 1 and have a reference number</div>
             </div>
           </button>
         </div>
@@ -688,18 +688,36 @@ input[type="datetime-local"].fi{color-scheme:dark}
 
       <!-- Phase 2 resume fields -->
       <div id="id2Phase2Fields" style="display:none">
-        <div style="background:var(--blue-g);border:1px solid rgba(45,140,240,.2);border-radius:var(--r12);padding:14px;margin-bottom:18px;font-size:13px;color:var(--t1);line-height:1.6">
-          Enter your Driver ID, last 4 digits of your phone number, and the reference number from your Phase 1 confirmation email.
+        <div style="background:var(--blue-g);border:1px solid rgba(45,140,240,.2);border-radius:var(--r12);padding:14px;margin-bottom:18px;font-size:13px;color:var(--t1);line-height:1.6" id="id2P2Hint">
+          Enter your details and the reference number from your Phase 1 confirmation email.
         </div>
-        <label class="fl">Driver ID</label>
-        <input class="fi" id="id2P2DriverID" placeholder="e.g. D1234, EMP-567…" type="text" style="margin-bottom:12px">
+        <div id="id2P2EmployeeField">
+          <label class="fl">Driver ID</label>
+          <input class="fi" id="id2P2DriverID" placeholder="e.g. D1234, EMP-567…" type="text" style="margin-bottom:12px">
+        </div>
+        <div id="id2P2FamilyField" style="display:none">
+          <label class="fl">Full Name (as entered in Phase 1)</label>
+          <input class="fi" id="id2P2Name" placeholder="First and last name…" type="text" style="margin-bottom:12px">
+        </div>
         <label class="fl">Last 4 Digits of Phone Number</label>
         <input class="fi" id="id2P2Phone" placeholder="e.g. 4567" type="tel" maxlength="4" style="margin-bottom:12px">
         <label class="fl">Reference Number</label>
         <input class="fi" id="id2P2Ref" placeholder="e.g. CCM-2026-847291" type="text" style="margin-bottom:16px">
-        <button class="btn btn-ghost btn-sm" onclick="showResendRefFromScreen2()" style="margin-bottom:18px">
+        <button class="btn btn-ghost btn-sm" onclick="showResendRefFromScreen2()" style="margin-bottom:16px">
           📧 I don't have my reference number — resend it
         </button>
+        <!-- Shown after 3 failed attempts -->
+        <div id="id2P2HelpBox" style="display:none;background:var(--amber-g);border:1.5px solid rgba(245,166,35,.4);border-radius:var(--r12);padding:16px;margin-bottom:16px">
+          <div style="font-size:14px;font-weight:700;color:var(--amber);margin-bottom:10px">Need help accessing your report?</div>
+          <button class="btn btn-warn" onclick="showResendRefFromScreen2()" style="margin-bottom:10px;width:100%">
+            📧 Resend My Reference Number by Email
+          </button>
+          <a href="tel:1-800-000-0000" style="display:block">
+            <button class="btn btn-primary" style="width:100%">
+              📞 Call CCM Support: 1-800-000-0000
+            </button>
+          </a>
+        </div>
       </div>
 
       <p class="field-err" id="id2Err" style="display:none;margin-bottom:10px"></p>
@@ -1237,7 +1255,7 @@ function beginApp(){
   document.getElementById('id1Company').value='';
   document.getElementById('id1Err').style.display='none';
   document.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('selected'));
-  document.getElementById('driverTypeSection').style.display='none';
+  document.getElementById('purposeSection').style.display='none';
   // Init voice — must be called inside a user gesture (button tap) for AudioContext to work
   initVoice();
   show('scrID1');
@@ -1248,28 +1266,30 @@ function selectPurpose(purpose){
   S.identity.purpose=purpose;
   document.querySelectorAll('#btnNewAccident,#btnPhase2').forEach(b=>b.classList.remove('selected'));
   document.getElementById(purpose==='new'?'btnNewAccident':'btnPhase2').classList.add('selected');
-  // Show/hide driver type section
-  document.getElementById('driverTypeSection').style.display=purpose==='new'?'block':'none';
-  // Reset driver type if switching purposes
-  if(purpose==='phase2'){
-    S.identity.driverType='employee'; // phase2 resume always uses employee path
-    document.querySelectorAll('#btnEmployee,#btnFamily').forEach(b=>b.classList.remove('selected'));
-  }
 }
 
 function selectDriverType(type){
   S.identity.driverType=type;
   document.querySelectorAll('#btnEmployee,#btnFamily').forEach(b=>b.classList.remove('selected'));
   document.getElementById(type==='employee'?'btnEmployee':'btnFamily').classList.add('selected');
+  // Show purpose section only for employees — family members always file new claims
+  const purposeSection=document.getElementById('purposeSection');
+  if(type==='employee'){
+    purposeSection.style.display='block';
+  } else {
+    purposeSection.style.display='none';
+    S.identity.purpose='new'; // family members always start a new claim
+    document.querySelectorAll('#btnNewAccident,#btnPhase2').forEach(b=>b.classList.remove('selected'));
+  }
 }
 
 function submitID1(){
   const err=document.getElementById('id1Err');
   const company=document.getElementById('id1Company').value.trim();
   if(!company){ err.textContent='Please enter your company name.'; err.style.display='block'; return; }
-  if(!S.identity.purpose){ err.textContent='Please select why you are here today.'; err.style.display='block'; return; }
-  if(S.identity.purpose==='new'&&!S.identity.driverType){
-    err.textContent='Please select Employee or Family Member / Authorized Driver.'; err.style.display='block'; return;
+  if(!S.identity.driverType){ err.textContent='Please select Employee or Family Member / Authorized Driver.'; err.style.display='block'; return; }
+  if(S.identity.driverType==='employee'&&!S.identity.purpose){
+    err.textContent='Please select why you are here today.'; err.style.display='block'; return;
   }
   err.style.display='none';
   S.identity.company=company;
@@ -1294,9 +1314,18 @@ function submitID1(){
     document.getElementById('id2Email').value='';
   } else {
     document.getElementById('id2Title').textContent='Enter your Phase 2 verification details.';
-    document.getElementById('id2P2DriverID').value='';
+    const isFam = S.identity.driverType==='family';
+    document.getElementById('id2P2EmployeeField').style.display=isFam?'none':'block';
+    document.getElementById('id2P2FamilyField').style.display=isFam?'block':'none';
+    document.getElementById('id2P2Hint').textContent=isFam
+      ?'Enter your full name, last 4 digits of your phone number, and the reference number from your Phase 1 email.'
+      :'Enter your Driver ID, last 4 digits of your phone number, and the reference number from your Phase 1 email.';
+    if(document.getElementById('id2P2DriverID')) document.getElementById('id2P2DriverID').value='';
+    if(document.getElementById('id2P2Name')) document.getElementById('id2P2Name').value='';
     document.getElementById('id2P2Phone').value='';
     document.getElementById('id2P2Ref').value='';
+    document.getElementById('id2P2HelpBox').style.display='none';
+    S._p2Attempts=0;
   }
   show('scrID2');
 
@@ -1314,28 +1343,53 @@ function submitID2(){
 
   // ── Phase 2 resume path ──
   if(isPhase2){
-    const driverID=document.getElementById('id2P2DriverID').value.trim();
+    if(!S._p2Attempts) S._p2Attempts=0;
+    const isFamP2 = S.identity.driverType==='family';
     const last4=document.getElementById('id2P2Phone').value.trim();
     const ref=document.getElementById('id2P2Ref').value.trim().toUpperCase();
-    if(!driverID){ err.textContent='Please enter your Driver ID.'; err.style.display='block'; return; }
+    const driverID=isFamP2?'':(document.getElementById('id2P2DriverID')||{value:''}).value.trim();
+    const p2Name=isFamP2?(document.getElementById('id2P2Name')||{value:''}).value.trim():'';
+
+    if(!isFamP2&&!driverID){ err.textContent='Please enter your Driver ID.'; err.style.display='block'; return; }
+    if(isFamP2&&!p2Name){ err.textContent='Please enter your full name.'; err.style.display='block'; return; }
     if(!last4||last4.length<4){ err.textContent='Please enter the last 4 digits of your phone number.'; err.style.display='block'; return; }
     if(!ref){ err.textContent='Please enter your reference number.'; err.style.display='block'; return; }
+
     try{
       const saved=JSON.parse(localStorage.getItem('ccm_p1_ans')||'null');
-      if(!saved){ err.textContent='No saved report found on this device. Please start a new accident report.'; err.style.display='block'; return; }
-      if(saved.drvId.toLowerCase()!==driverID.toLowerCase()){
-        err.textContent='Driver ID does not match. Please check and try again.'; err.style.display='block'; return;
+      if(!saved){
+        err.textContent='No saved report found on this device. Please start a new accident report.';
+        err.style.display='block'; return;
       }
-      if(saved.last4!==last4){
-        err.textContent='Phone number does not match. Please check and try again.'; err.style.display='block'; return;
+      // Verify based on driver type
+      let verified=true;
+      if(!isFamP2){
+        if((saved.drvId||'').toLowerCase()!==driverID.toLowerCase()) verified=false;
+      } else {
+        const savedName=(saved.familyName||saved.ans&&saved.ans[-4]||'').toLowerCase().trim();
+        if(savedName && p2Name.toLowerCase()!==savedName) verified=false;
       }
-      if((saved.ref||'').toUpperCase()!==ref){
-        err.textContent='Reference number does not match. Please check and try again.'; err.style.display='block'; return;
+      if(saved.last4!==last4) verified=false;
+      if((saved.ref||'').toUpperCase()!==ref) verified=false;
+
+      if(!verified){
+        S._p2Attempts++;
+        if(S._p2Attempts>=3){
+          err.textContent='3 failed attempts. Please use one of the options below for assistance.';
+          err.style.display='block';
+          document.getElementById('id2P2HelpBox').style.display='block';
+        } else {
+          err.textContent='Details do not match. Please check and try again. (Attempt '+S._p2Attempts+' of 3)';
+          err.style.display='block';
+        }
+        return;
       }
+
       // Verified — resume Phase 2
+      S._p2Attempts=0;
       S.ans={...saved.ans||{}};
       S.refNum=saved.ref||'';
-      S.identity.driverID=driverID;
+      if(!isFamP2) S.identity.driverID=driverID;
       S.phase=2; S.idx=0;
       document.getElementById('progBar').classList.add('show');
       document.getElementById('cbar').classList.add('show');
@@ -1343,7 +1397,8 @@ function submitID2(){
       initVoice();
       speak('Welcome back. Let us complete the remaining details of your accident report.', ()=>{ goToQ(0); });
     }catch(e){
-      err.textContent='Could not retrieve saved report. Please start a new accident report.'; err.style.display='block';
+      err.textContent='Could not retrieve saved report. Please start a new accident report.';
+      err.style.display='block';
     }
     return;
   }
@@ -2432,4 +2487,5 @@ window.addEventListener('load',()=>{
 </script>
 </body>
 </html>
+
 
