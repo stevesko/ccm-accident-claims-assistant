@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-03-26 06:34 AM EST -->
+<!-- CCM Accident Assistant — Built: 2026-03-26 06:57 AM EST -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-03-26 06:34 AM EST</title>
+<title>CCM Accident Assistant — 2026-03-26 06:57 AM EST</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -1132,7 +1132,10 @@ S.audioSource = null;
 function _getCtx(){
   if(!S.audioCtx||S.audioCtx.state==='closed')
     S.audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-  if(S.audioCtx.state==='suspended') S.audioCtx.resume();
+  // iOS requires resume() to be called — returns a promise we wait on
+  if(S.audioCtx.state==='suspended'){
+    S.audioCtx.resume().catch(e=>console.warn('AudioContext resume failed:',e));
+  }
   return S.audioCtx;
 }
 
@@ -1247,19 +1250,35 @@ function getVis(){
 // ── IDENTIFICATION SCREEN FUNCTIONS ──────────────────────────
 
 function beginApp(){
+  // ── iOS AudioContext unlock — must happen synchronously in the tap handler ──
+  try{
+    if(!S.audioCtx||S.audioCtx.state==='closed'){
+      S.audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    }
+    if(S.audioCtx.state==='suspended') S.audioCtx.resume();
+  }catch(e){ console.warn('AudioContext init failed:',e); }
+
   // Reset state
   S.ans={};S.idx=0;S.paused=false;S.photos=[];S.airbags=[];S.injSel={};
   S.contactMethod='';S.phase=1;S.refNum='';S.hasPending=false;S.pendingSaved=null;
   S.identity={company:'',purpose:'',driverType:'',driverID:'',name:'',phone:'',email:''};
-  // Clear selections
+
+  // Clear UI
   document.getElementById('id1Company').value='';
   document.getElementById('id1Err').style.display='none';
   document.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('selected'));
   document.getElementById('purposeSection').style.display='none';
-  // Init voice — must be called inside a user gesture (button tap) for AudioContext to work
+
+  // Init speech recognition
   initVoice();
+
+  // Show first screen
   show('scrID1');
-  speak('Welcome to the Corporate Claims Management Accident Assistant. Please tell us your company name and who was driving the vehicle.');
+
+  // Defer speak slightly — gives iOS time to fully unlock AudioContext
+  setTimeout(()=>{
+    speak('Welcome to the Corporate Claims Management Accident Assistant. Please tell us your company name and who was driving the vehicle.');
+  }, 300);
 }
 
 function selectPurpose(purpose){
