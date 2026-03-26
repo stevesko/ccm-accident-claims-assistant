@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-03-26 05:55 AM EST -->
+<!-- CCM Accident Assistant — Built: 2026-03-26 06:34 AM EST -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-03-26 05:55 AM EST</title>
+<title>CCM Accident Assistant — 2026-03-26 06:34 AM EST</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -842,7 +842,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <div class="cbar-in">
     <button class="cb c-blue" onclick="openPhotos()">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="3"/></svg>
-      <span id="phlbl">Photos</span>
+      <span id="phlbl">Accident Photos</span>
       <span class="pbadge" id="pbadge">0</span>
     </button>
     <button class="cb" id="btnBack" onclick="goBack()" disabled>
@@ -869,7 +869,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <div class="modal">
     <div class="mpill"></div>
     <div class="mh">📸 Attach Files</div>
-    <div class="ms">Photos of damage, insurance cards, or police report PDFs.</div>
+    <div class="ms">Photograph the accident scene, vehicle damage, road conditions, or anything else relevant at the scene.</div>
     <label class="uzone" for="fInput">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
       <p>Tap to add photos or PDFs</p><span>JPEG, PNG, HEIC, PDF</span>
@@ -1718,7 +1718,7 @@ function rFDriver(a,q){
       ${fg('Driver License #',inp('dL','License number'))}
       ${fg('State',sel(ST,'dS','State'))}
     </div>
-    <div class="fg"><label class="fl">Photo of Driver License (optional)</label><label class="uzone" for="dlFile" style="flex-direction:row;padding:13px;gap:10px"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg><p style="margin:0;font-size:13px">Tap to photograph or upload</p></label><input type="file" id="dlFile" accept="image/*,application/pdf" class="hidden" onchange="addFiles(event)" capture="environment"></div>
+    <div class="fg"><label class="fl">Driver License Photo</label><label class="uzone" for="dlFile" style="flex-direction:row;padding:13px;gap:10px"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg><div><p style="margin:0;font-size:14px;font-weight:700;color:var(--t0)">📷 Photograph Your Driver License</p><p style="margin:2px 0 0;font-size:11px;color:var(--t1)">Photo or PDF accepted</p></div></label><input type="file" id="dlFile" accept="image/*,application/pdf" class="hidden" onchange="addFiles(event,'Driver License')" capture="environment"><p id="dlFileConfirm" style="display:none;color:var(--teal);font-size:12px;margin-top:6px">✓ Photo attached</p></div>
     <button class="btn btn-primary" onclick="
       const n='${knownName}'||document.getElementById('dN')?.value.trim()||'N/A';
       const l=document.getElementById('dL').value.trim();
@@ -1765,7 +1765,7 @@ function rFIns(a,q){
         <button class="opt" style="padding:12px 8px;font-size:12px;margin-bottom:0" onclick="document.getElementById('${p}P').value='Unknown'">Unknown</button>
       </div>
     </div>
-    <div class="fg"><label class="fl">Photo of Insurance Card (optional)</label><label class="uzone" for="${p}InsFile" style="flex-direction:row;padding:13px;gap:10px"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg><p style="margin:0;font-size:13px">Tap to photograph or upload</p></label><input type="file" id="${p}InsFile" accept="image/*,application/pdf" class="hidden" onchange="addFiles(event)" capture="environment"></div>
+    <div class="fg"><label class="fl">Insurance Card Photo</label><label class="uzone" for="${p}InsFile" style="flex-direction:row;padding:13px;gap:10px"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg><div><p style="margin:0;font-size:14px;font-weight:700;color:var(--t0)">📷 Photograph Your Insurance Card</p><p style="margin:2px 0 0;font-size:11px;color:var(--t1)">Photo or PDF accepted</p></div></label><input type="file" id="${p}InsFile" accept="image/*,application/pdf" class="hidden" onchange="addFiles(event,'Insurance Card')" capture="environment"><p id="${p}InsFileConfirm" style="display:none;color:var(--teal);font-size:12px;margin-top:6px">✓ Photo attached</p></div>
     <button class="btn btn-primary" onclick="subIns('${p}',${q.id})">Submit</button>
   </div>`;
   document.getElementById(p+'I').addEventListener('change',function(){
@@ -1789,7 +1789,7 @@ function rFOtherDrv(a,q){
       ${fg('License #',inp('oL','License #'))}
       ${fg('State',sel(ST,'oS','State'))}
     </div>
-    <div class="fg"><label class="fl">Photo of Other Driver's License (optional)</label><label class="uzone" for="odLicFile" style="flex-direction:row;padding:13px;gap:10px"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg><p style="margin:0;font-size:13px">Tap to photograph or upload</p></label><input type="file" id="odLicFile" accept="image/*,application/pdf" class="hidden" onchange="addFiles(event)" capture="environment"></div>
+    <div class="fg"><label class="fl">Other Driver's License Photo</label><label class="uzone" for="odLicFile" style="flex-direction:row;padding:13px;gap:10px"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg><div><p style="margin:0;font-size:14px;font-weight:700;color:var(--t0)">📷 Photograph Other Driver's License</p><p style="margin:2px 0 0;font-size:11px;color:var(--t1)">Photo or PDF accepted</p></div></label><input type="file" id="odLicFile" accept="image/*,application/pdf" class="hidden" onchange="addFiles(event,'Other Driver License')" capture="environment"><p id="odLicFileConfirm" style="display:none;color:var(--teal);font-size:12px;margin-top:6px">✓ Photo attached</p></div>
     <button class="btn btn-primary" onclick="
       const n=document.getElementById('oN').value.trim();
       const p=document.getElementById('oP').value.trim();
@@ -2030,10 +2030,11 @@ function subAirbags(qid){
 /* ─────────────────────────────────
    PHOTOS
 ───────────────────────────────── */
-function addFiles(e){
+function addFiles(e,category){
+  category=category||'Accident Scene';
   Array.from(e.target.files).forEach(f=>{
     const r=new FileReader();
-    r.onload=ev=>{S.photos.push({name:f.name,url:ev.target.result,isPdf:f.type==='application/pdf'});redrawPhotos();};
+    r.onload=ev=>{S.photos.push({name:f.name,url:ev.target.result,isPdf:f.type==='application/pdf',category:category});redrawPhotos();};
     r.readAsDataURL(f);
   });
   e.target.value='';
@@ -2045,6 +2046,7 @@ function redrawPhotos(){
       ${p.isPdf
         ?`<div class="pdf-ic">📄<span>${p.name.slice(0,14)}</span></div>`
         :`<img src="${p.url}" alt="${p.name}">`}
+      <div style="position:absolute;bottom:20px;left:0;right:0;background:rgba(0,0,0,.65);font-size:9px;color:#fff;padding:2px 4px;text-align:center;line-height:1.3">${p.category||'Scene'}</div>
       <button class="pthumb-del" onclick="delPhoto(${i})">×</button>
     </div>`).join('');
   refreshPhotoUI();
@@ -2053,8 +2055,8 @@ function delPhoto(i){S.photos.splice(i,1);redrawPhotos();}
 function refreshPhotoUI(){
   const b=document.getElementById('pbadge');
   const l=document.getElementById('phlbl');
-  if(S.photos.length){b.textContent=S.photos.length;b.classList.add('on');if(l)l.textContent=`Photos (${S.photos.length})`;}
-  else{b.classList.remove('on');if(l)l.textContent='Photos';}
+  if(S.photos.length){b.textContent=S.photos.length;b.classList.add('on');if(l)l.textContent=`Accident Photos (${S.photos.length})`;}
+  else{b.classList.remove('on');if(l)l.textContent='Accident Photos';}
 }
 function openPhotos(){document.getElementById('mPhotos').classList.add('on');redrawPhotos();}
 function closeM(id){document.getElementById(id).classList.remove('on');}
@@ -2129,9 +2131,13 @@ function buildSummary(){
       if(rows)html+=`<div class="scard"><div class="scard-hd">${sec.t}</div>${rows}</div>`;
     });
     if(S.photos.length)
-      html+=`<div class="scard"><div class="scard-hd">Attachments</div>
-        <div class="srow"><span class="slbl">Files</span><span class="sval">${S.photos.length} file(s): ${S.photos.map(p=>p.name).join(', ')}</span></div>
-      </div>`;
+      const cats2=['Driver License','Insurance Card','Other Driver License','Police Report','Accident Scene'];
+    let attachRows='';
+    cats2.forEach(cat=>{
+      const files=S.photos.filter(p=>(p.category||'Accident Scene')===cat);
+      if(files.length) attachRows+=`<div class="srow"><span class="slbl">${cat}</span><span class="sval">${files.map(p=>p.name).join(', ')}</span></div>`;
+    });
+    if(attachRows) html+=`<div class="scard"><div class="scard-hd">Attachments</div>${attachRows}</div>`;
     document.getElementById('sumBody').innerHTML=html;
     show('scrSum');
   },900);
@@ -2280,8 +2286,17 @@ async function submitReport(){
     }).filter(Boolean);
     if(rows.length) report+='[ '+sec.t.toUpperCase()+' ]\n'+rows.join('\n\n')+'\n\n';
   });
-  if(S.photos.length)
-    report+='[ ATTACHMENTS ]\n'+S.photos.length+' file(s) attached by driver.\nFiles: '+S.photos.map(p=>p.name).join(', ')+'\n\n';
+  if(S.photos.length){
+    report+='[ ATTACHMENTS ]\n';
+    const cats=['Driver License','Insurance Card','Other Driver License','Police Report','Accident Scene'];
+    cats.forEach(cat=>{
+      const files=S.photos.filter(p=>(p.category||'Accident Scene')===cat);
+      if(files.length) report+='  '+cat+': '+files.map(p=>p.name).join(', ')+'\n';
+    });
+    const other=S.photos.filter(p=>!cats.includes(p.category||'Accident Scene'));
+    if(other.length) report+='  Other: '+other.map(p=>p.name).join(', ')+'\n';
+    report+='\n';
+  }
   report+='='.repeat(58);
 
   try{
