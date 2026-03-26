@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-03-26 08:39 AM ET -->
+<!-- CCM Accident Assistant — Built: 2026-03-26 10:08 AM ET -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-03-26 08:39 AM ET</title>
+<title>CCM Accident Assistant — 2026-03-26 10:08 AM ET</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -567,7 +567,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-26 08:39 AM ET</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-26 10:08 AM ET</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -662,7 +662,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
         <label class="fl">Full Name</label>
         <input class="fi" id="id2Name" placeholder="First and last name…" type="text" style="margin-bottom:12px">
         <label class="fl">Mobile Phone Number</label>
-        <input class="fi" id="id2Phone" placeholder="e.g. 555-123-4567" type="tel" style="margin-bottom:12px">
+        <input class="fi" id="id2Phone" placeholder="(555)-123-4567" type="tel" style="margin-bottom:12px" oninput="formatPhone(this)">
         <label class="fl">Email Address</label>
         <input class="fi" id="id2Email" placeholder="your@email.com" type="email" style="margin-bottom:12px">
         <!-- Family member additional fields -->
@@ -921,6 +921,37 @@ const DRAFT_KEY     = 'ccm_acc_draft';
 ───────────────────────────────── */
 const ST   = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY','DC'];
 const MK   = ['Acura','Audi','BMW','Buick','Cadillac','Chevrolet','Chrysler','Dodge','Ford','GMC','Genesis','Honda','Hyundai','Infiniti','Jeep','Kia','Lexus','Lincoln','Mazda','Mercedes-Benz','Mitsubishi','Nissan','Ram','Subaru','Tesla','Toyota','Volkswagen','Volvo','Other'];
+const MODELS={
+  'Acura':        ['ILX','Integra','MDX','RDX','RLX','TLX','ZDX'],
+  'Audi':         ['A3','A4','A5','A6','A7','A8','e-tron','Q3','Q5','Q7','Q8','TT'],
+  'BMW':          ['2 Series','3 Series','4 Series','5 Series','7 Series','8 Series','X1','X2','X3','X4','X5','X6','X7','Z4','i3','i4','iX'],
+  'Buick':        ['Enclave','Encore','Encore GX','Envision','LaCrosse'],
+  'Cadillac':     ['CT4','CT5','Escalade','Escalade ESV','Lyriq','XT4','XT5','XT6'],
+  'Chevrolet':    ['Blazer','Bolt EV','Camaro','Colorado','Corvette','Equinox','Express','Impala','Malibu','Silverado 1500','Silverado 2500HD','Silverado 3500HD','Suburban','Tahoe','Traverse','Trax'],
+  'Chrysler':     ['300','Pacifica','Voyager'],
+  'Dodge':        ['Challenger','Charger','Durango','Grand Caravan','Hornet','Journey'],
+  'Ford':         ['Bronco','Bronco Sport','E-Series','Edge','Escape','Expedition','Explorer','F-150','F-250','F-350','F-450','Maverick','Mustang','Mustang Mach-E','Ranger','Transit','Transit Connect'],
+  'GMC':          ['Acadia','Canyon','Envoy','Savana','Sierra 1500','Sierra 2500HD','Sierra 3500HD','Terrain','Yukon','Yukon XL'],
+  'Genesis':      ['G70','G80','G90','GV70','GV80'],
+  'Honda':        ['Accord','CR-V','HR-V','Odyssey','Passport','Pilot','Prologue','Ridgeline','Civic','Fit'],
+  'Hyundai':      ['Elantra','Ioniq 5','Ioniq 6','Kona','Palisade','Santa Cruz','Santa Fe','Sonata','Tucson','Venue'],
+  'Infiniti':     ['Q50','Q60','QX50','QX55','QX60','QX80'],
+  'Jeep':         ['Cherokee','Compass','Gladiator','Grand Cherokee','Grand Cherokee L','Grand Wagoneer','Renegade','Wagoneer','Wrangler'],
+  'Kia':          ['Carnival','EV6','Forte','K5','Niro','Seltos','Sorento','Soul','Sportage','Stinger','Telluride'],
+  'Lexus':        ['ES','GX','IS','LC','LS','LX','NX','RX','RZ','UX'],
+  'Lincoln':      ['Aviator','Corsair','Nautilus','Navigator'],
+  'Mazda':        ['CX-30','CX-5','CX-50','CX-90','Mazda3','Mazda6','MX-5 Miata'],
+  'Mercedes-Benz':['A-Class','C-Class','CLA','E-Class','EQB','EQE','EQS','G-Class','GLA','GLB','GLC','GLE','GLS','S-Class','Sprinter'],
+  'Mitsubishi':   ['Eclipse Cross','Mirage','Outlander','Outlander Sport'],
+  'Nissan':       ['Altima','Armada','Frontier','Kicks','Leaf','Maxima','Murano','Pathfinder','Rogue','Sentra','Titan','Versa'],
+  'Ram':          ['1500','2500','3500','ProMaster','ProMaster City'],
+  'Subaru':       ['Ascent','BRZ','Crosstrek','Forester','Impreza','Legacy','Outback','Solterra','WRX'],
+  'Tesla':        ['Model 3','Model S','Model X','Model Y','Cybertruck'],
+  'Toyota':       ['4Runner','Avalon','bZ4X','Camry','Corolla','Crown','GR86','Highlander','Land Cruiser','Prius','RAV4','Sequoia','Sienna','Tacoma','Tundra','Venza'],
+  'Volkswagen':   ['Atlas','Golf','ID.4','Jetta','Passat','Taos','Tiguan'],
+  'Volvo':        ['S60','S90','V60','V90','XC40','XC60','XC90'],
+  'Other':        ['Other / Not Listed']
+};
 const CL   = ['Black','White','Silver','Gray','Red','Blue','Green','Brown','Orange','Yellow','Gold','Beige','Purple','Other'];
 const INS  = ['Allstate','Farmers','GEICO','Liberty Mutual','Nationwide','Progressive','State Farm','USAA','Travelers','AAA','Erie Insurance','MetLife','American Family','Chubb','Hartford','Other','Not Known'];
 const WX   = ['Clear / Sunny','Partly Cloudy','Overcast','Rain','Heavy Rain','Drizzle','Fog / Mist','Snow','Sleet / Freezing Rain','Black Ice','Windy','Night / Low Visibility','Unknown'];
@@ -1108,6 +1139,41 @@ function restoreDraft(){
 /* ─────────────────────────────────
    VOICE
 ───────────────────────────────── */
+function mkSel(mkId, moId){
+  const opts=MK.map(x=>'<option value="'+x+'">'+x+'</option>').join('');
+  return '<select class="fs" id="'+mkId+'" onchange="loadModels(this.value,'+JSON.stringify(moId)+')">'
+    +'<option value="">Make</option>'+opts+'</select>';
+}
+function loadModels(make, modelId){
+  const modelSel = document.getElementById(modelId);
+  const models = MODELS[make] || [];
+  if(models.length === 0){
+    // Unknown make — switch to free text input
+    const parent = modelSel.parentNode;
+    const inp = document.createElement('input');
+    inp.className='fi'; inp.id=modelId; inp.placeholder='Enter model…'; inp.type='text';
+    parent.replaceChild(inp, modelSel);
+    return;
+  }
+  // Ensure it's still a select (not replaced by input)
+  if(modelSel.tagName!=='SELECT'){
+    const sel = document.createElement('select');
+    sel.className='fs'; sel.id=modelId;
+    modelSel.parentNode.replaceChild(sel, modelSel);
+  }
+  const sel2 = document.getElementById(modelId);
+  sel2.innerHTML='<option value="">Select model…</option>'+
+    models.map(m=>`<option value="${m}">${m}</option>`).join('');
+}
+
+function formatPhone(el){
+  let v=el.value.replace(/\D/g,'').slice(0,10);
+  let out='';
+  if(v.length>0) out='('+v.slice(0,3);
+  if(v.length>=4) out+=')'+'-'+v.slice(3,6);
+  if(v.length>=7) out+='-'+v.slice(6,10);
+  el.value=out;
+}
 function initVoice(){
   // Speech recognition only — TTS is handled by OpenAI via /api/speak
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -1751,9 +1817,9 @@ function rFVehicle(a,q){
   a.innerHTML=`<div class="fcard">
     <div class="r2">
       ${fg('Year',sel(YRS,'vY','Year'))}
-      ${fg('Make',sel(MK,'vMk','Make'))}
+      ${fg('Make',mkSel('vMk','vMo'))}
     </div>
-    ${fg('Model',inp('vMo','e.g. Camry, F-150, Explorer…'))}
+    ${fg('Model','<select class="fs" id="vMo"><option value="">Select Make first…</option></select>')}
     ${fg('Color',sel(CL,'vCl','Color'))}
     <div class="r32">
       ${fg('License Plate',inp('vPl','ABC-1234'))}
@@ -1766,7 +1832,7 @@ function rFVehicle(a,q){
 function subVeh(qid){
   const y=document.getElementById('vY').value;
   const mk=document.getElementById('vMk').value;
-  const mo=document.getElementById('vMo').value.trim();
+  const mo=document.getElementById('vMo').value||document.getElementById('vMo').options[document.getElementById('vMo').selectedIndex]?.text||'';
   const cl=document.getElementById('vCl').value;
   const pl=document.getElementById('vPl').value.trim();
   const ps=document.getElementById('vPs').value;
@@ -1794,7 +1860,21 @@ function rFIns(a,q){
 }
 function subIns(p,qid){
   const ins=document.getElementById(p+'I').value;
-  if(!ins){alert('Please select an insurance company.');return;}
+  if(!ins){
+    // Show inline error instead of alert
+    let errEl=document.getElementById(p+'InsErr');
+    if(!errEl){
+      errEl=document.createElement('p');
+      errEl.id=p+'InsErr';
+      errEl.style.cssText='color:var(--red);font-size:12px;margin:6px 0 0';
+      document.getElementById(p+'I').parentNode.appendChild(errEl);
+    }
+    errEl.textContent='Please select an insurance company.';
+    return;
+  }
+  // Clear any error
+  const errEl=document.getElementById(p+'InsErr');
+  if(errEl) errEl.textContent='';
   if(ins==='Not Known'){ans(gQ(qid),'Insurance: Not Known');return;}
   const co=ins==='Other'?(document.getElementById(p+'OI')?.value.trim()||'Other'):ins;
   const pol=document.getElementById(p+'P')?.value.trim()||'Not Provided';
@@ -1803,7 +1883,7 @@ function subIns(p,qid){
 function rFOtherDrv(a,q){
   a.innerHTML=`<div class="fcard">
     ${fg('Driver Name',inp('oN','Full name'))}
-    ${fg('Phone / Contact',inp('oP','555-123-4567','tel'))}
+    ${fg('Phone / Contact',inp('oP','(555)-123-4567','tel','oninput="formatPhone(this)"'))}
     <div class="r2">
       ${fg('License #',inp('oL','License #'))}
       ${fg('State',sel(ST,'oS','State'))}
@@ -1822,9 +1902,9 @@ function rFOtherVeh(a,q){
   a.innerHTML=`<div class="fcard">
     <div class="r2">
       ${fg('Year',sel(YRS,'ovY','Year'))}
-      ${fg('Make',sel(MK,'ovMk','Make'))}
+      ${fg('Make',mkSel('ovMk','ovMo'))}
     </div>
-    ${fg('Model',inp('ovMo','Model'))}
+    ${fg('Model','<select class="fs" id="ovMo"><option value="">Select Make first…</option></select>')}
     ${fg('Color',sel(CL,'ovCl','Color'))}
     <div class="r32">
       ${fg('License Plate',inp('ovPl','Plate'))}
@@ -1833,7 +1913,7 @@ function rFOtherVeh(a,q){
     <button class="btn btn-primary" onclick="
       const y=document.getElementById('ovY').value;
       const mk=document.getElementById('ovMk').value;
-      const mo=document.getElementById('ovMo').value.trim();
+      const mo=document.getElementById('ovMo').value||'';
       const cl=document.getElementById('ovCl').value;
       const pl=document.getElementById('ovPl').value.trim();
       const ps=document.getElementById('ovPs').value;
@@ -2053,7 +2133,13 @@ function addFiles(e,category){
   category=category||'Accident Scene';
   Array.from(e.target.files).forEach(f=>{
     const r=new FileReader();
-    r.onload=ev=>{S.photos.push({name:f.name,url:ev.target.result,isPdf:f.type==='application/pdf',category:category});redrawPhotos();};
+    r.onload=ev=>{
+        S.photos.push({name:f.name,url:ev.target.result,isPdf:f.type==='application/pdf',category:category});
+        redrawPhotos();
+        // Show confirmation message on the upload button if it exists
+        const confirmEl=document.getElementById(e.target.id+'Confirm');
+        if(confirmEl){confirmEl.style.display='block';confirmEl.textContent='✓ '+category+' photo attached';}
+      };
     r.readAsDataURL(f);
   });
   e.target.value='';
