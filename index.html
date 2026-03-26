@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-03-26 06:57 AM EST -->
+<!-- CCM Accident Assistant — Built: 2026-03-26 07:07 AM EST -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-03-26 06:57 AM EST</title>
+<title>CCM Accident Assistant — 2026-03-26 07:07 AM EST</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -2149,14 +2149,17 @@ function buildSummary(){
       }).filter(Boolean).join('');
       if(rows)html+=`<div class="scard"><div class="scard-hd">${sec.t}</div>${rows}</div>`;
     });
-    if(S.photos.length)
+    if(S.photos.length){
       const cats2=['Driver License','Insurance Card','Other Driver License','Police Report','Accident Scene'];
-    let attachRows='';
-    cats2.forEach(cat=>{
-      const files=S.photos.filter(p=>(p.category||'Accident Scene')===cat);
-      if(files.length) attachRows+=`<div class="srow"><span class="slbl">${cat}</span><span class="sval">${files.map(p=>p.name).join(', ')}</span></div>`;
-    });
-    if(attachRows) html+=`<div class="scard"><div class="scard-hd">Attachments</div>${attachRows}</div>`;
+      let attachRows='';
+      cats2.forEach(cat=>{
+        const files=S.photos.filter(p=>(p.category||'Accident Scene')===cat);
+        if(files.length) attachRows+=`<div class="srow"><span class="slbl">${cat}</span><span class="sval">${files.map(p=>p.name).join(', ')}</span></div>`;
+      });
+      const other=S.photos.filter(p=>!cats2.includes(p.category||'Accident Scene'));
+      if(other.length) attachRows+=`<div class="srow"><span class="slbl">Other</span><span class="sval">${other.map(p=>p.name).join(', ')}</span></div>`;
+      if(attachRows) html+=`<div class="scard"><div class="scard-hd">Attachments</div>${attachRows}</div>`;
+    }
     document.getElementById('sumBody').innerHTML=html;
     show('scrSum');
   },900);
