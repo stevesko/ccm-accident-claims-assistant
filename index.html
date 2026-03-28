@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-03-28 09:28 AM ET -->
+<!-- CCM Accident Assistant — Built: 2026-03-28 09:38 AM ET -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-03-28 09:28 AM ET</title>
+<title>CCM Accident Assistant — 2026-03-28 09:38 AM ET</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -567,7 +567,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-28 09:28 AM ET</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-28 09:38 AM ET</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -630,26 +630,6 @@ input[type="datetime-local"].fi{color-scheme:dark}
         </div>
       </div>
 
-      <!-- Purpose selection — only shown after Employee selected (Family always = new accident) -->
-      <div id="purposeSection" style="display:none;background:var(--bg2);border:1px solid var(--bd1);border-radius:var(--r16);padding:18px;margin-bottom:16px">
-        <div style="font-size:13px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;text-align:center">Why are you here today?</div>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <button class="opt-btn" id="btnNewAccident" onclick="selectPurpose('new')" style="padding:14px 18px">
-            <span style="font-size:26px">🚨</span>
-            <div style="text-align:left;flex:1">
-              <div style="font-weight:800;font-size:16px;color:var(--t0)">Report a New Accident</div>
-              <div style="font-size:13px;color:var(--t1);margin-top:2px">I need to file a new accident claim</div>
-            </div>
-          </button>
-          <button class="opt-btn" id="btnPhase2" onclick="selectPurpose('phase2')" style="padding:14px 18px">
-            <span style="font-size:26px">📋</span>
-            <div style="text-align:left;flex:1">
-              <div style="font-weight:800;font-size:16px;color:var(--t0)">Complete My Phase 2 Report</div>
-              <div style="font-size:13px;color:var(--t1);margin-top:2px">I already submitted Phase 1 and have a reference number</div>
-            </div>
-          </button>
-        </div>
-      </div>
 
       <p class="field-err" id="id1Err" style="display:none;margin-bottom:10px"></p>
       <button class="btn btn-primary" onclick="submitID1()">Continue →</button>
@@ -1011,7 +991,7 @@ const Qs=[
   {id:8,  text:"Where did the accident occur?",                                   type:'loc'},
   {id:9,  text:"What was the date and time of the accident?",                     type:'dt'},
   {id:13, text:"What type of accident was this?",                                 type:'dd',opts:AT,ph:'Select accident type…'},
-  {id:50, text:"Please photograph all documents and damage now while at the scene.", type:'photoprompt'},
+  {id:50, text:"Please photograph all documents and damage while at the scene.",    type:'photoprompt'},
   {id:14, text:"Was your vehicle moving, parked, or stopped at impact?",          type:'og3',opts:['Moving','Parked','Stopped'],
     skip:a=>{
       const parkedTypes=['Hit While Parked','Parking Lot','Vandalism','Vehicle Theft','Hit & Run — Parked'];
@@ -1372,7 +1352,7 @@ function beginApp(){
   document.getElementById('id1Company').value='';
   document.getElementById('id1Err').style.display='none';
   document.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('selected'));
-  document.getElementById('purposeSection').style.display='none';
+
 
   // Init speech recognition
   initVoice();
@@ -1386,25 +1366,11 @@ function beginApp(){
   }, 300);
 }
 
-function selectPurpose(purpose){
-  S.identity.purpose=purpose;
-  document.querySelectorAll('#btnNewAccident,#btnPhase2').forEach(b=>b.classList.remove('selected'));
-  document.getElementById(purpose==='new'?'btnNewAccident':'btnPhase2').classList.add('selected');
-}
-
 function selectDriverType(type){
   S.identity.driverType=type;
+  S.identity.purpose='new'; // always new accident — Phase 2 accessed via teal banner
   document.querySelectorAll('#btnEmployee,#btnFamily').forEach(b=>b.classList.remove('selected'));
   document.getElementById(type==='employee'?'btnEmployee':'btnFamily').classList.add('selected');
-  // Show purpose section only for employees — family members always file new claims
-  const purposeSection=document.getElementById('purposeSection');
-  if(type==='employee'){
-    purposeSection.style.display='block';
-  } else {
-    purposeSection.style.display='none';
-    S.identity.purpose='new'; // family members always start a new claim
-    document.querySelectorAll('#btnNewAccident,#btnPhase2').forEach(b=>b.classList.remove('selected'));
-  }
 }
 
 function submitID1(){
@@ -1412,60 +1378,36 @@ function submitID1(){
   const company=document.getElementById('id1Company').value.trim();
   if(!company){ err.textContent='Please enter your company name.'; err.style.display='block'; return; }
   if(!S.identity.driverType){ err.textContent='Please select Employee or Family Member / Authorized Driver.'; err.style.display='block'; return; }
-  if(S.identity.driverType==='employee'&&!S.identity.purpose){
-    err.textContent='Please select why you are here today.'; err.style.display='block'; return;
-  }
   err.style.display='none';
   S.identity.company=company;
 
-  const isPhase2=S.identity.purpose==='phase2';
   const isEmployee=S.identity.driverType==='employee';
 
-  // Show/hide correct Screen 2 sections
-  document.getElementById('id2NewFields').style.display=isPhase2?'none':'block';
-  document.getElementById('id2Phase2Fields').style.display=isPhase2?'block':'none';
+  // Set up Screen 2 for new accident flow
+  document.getElementById('id2NewFields').style.display='block';
+  document.getElementById('id2Phase2Fields').style.display='none';
   document.getElementById('id2Err').style.display='none';
-
-  if(!isPhase2){
-    document.getElementById('id2Title').textContent=isEmployee
-      ?'Please provide your details as the assigned employee.'
-      :'Please provide the driver details.';
-    document.getElementById('id2EmployeeFields').style.display=isEmployee?'block':'none';
-    document.getElementById('id2FamilyFields').style.display=isEmployee?'none':'block';
-    document.getElementById('id2DriverID').value='';
-    document.getElementById('id2Name').value='';
-    document.getElementById('id2Phone').value='';
-    document.getElementById('id2Email').value='';
-  } else {
-    document.getElementById('id2Title').textContent='Enter your Phase 2 verification details.';
-    const isFam = S.identity.driverType==='family';
-    document.getElementById('id2P2EmployeeField').style.display=isFam?'none':'block';
-    document.getElementById('id2P2FamilyField').style.display=isFam?'block':'none';
-    document.getElementById('id2P2Hint').textContent=isFam
-      ?'Enter your full name, last 4 digits of your phone number, and the reference number from your Phase 1 email.'
-      :'Enter your Driver ID, last 4 digits of your phone number, and the reference number from your Phase 1 email.';
-    if(document.getElementById('id2P2DriverID')) document.getElementById('id2P2DriverID').value='';
-    if(document.getElementById('id2P2Name')) document.getElementById('id2P2Name').value='';
-    document.getElementById('id2P2Phone').value='';
-    document.getElementById('id2P2Ref').value='';
-    document.getElementById('id2P2HelpBox').style.display='none';
-    S._p2Attempts=0;
-  }
+  document.getElementById('id2Title').textContent=isEmployee
+    ?'Please provide your details as the assigned employee.'
+    :'Please provide the driver details.';
+  document.getElementById('id2EmployeeFields').style.display=isEmployee?'block':'none';
+  document.getElementById('id2FamilyFields').style.display=isEmployee?'none':'block';
+  document.getElementById('id2DriverID').value='';
+  document.getElementById('id2Name').value='';
+  document.getElementById('id2Phone').value='';
+  document.getElementById('id2Email').value='';
   show('scrID2');
 
-  const prompt2=isPhase2
-    ?'Please enter your Driver ID, last 4 digits of your phone number, and your reference number.'
-    :isEmployee
-      ?'Please enter your Driver ID, full name, phone number and email address.'
-      :'Please enter your full name, phone number and email address.';
-  speak(prompt2);
+  speak(isEmployee
+    ?'Please enter your Driver ID, full name, phone number and email address.'
+    :'Please enter your full name, phone number and email address.');
 }
 
 function submitID2(){
   const err=document.getElementById('id2Err');
-  const isPhase2=S.identity.purpose==='phase2';
+  const isPhase2=false; // Phase 2 now accessed via teal banner only
 
-  // ── Phase 2 resume path ──
+  // ── Phase 2 resume path (kept for legacy but not triggered) ──
   if(isPhase2){
     if(!S._p2Attempts) S._p2Attempts=0;
     const isFamP2 = S.identity.driverType==='family';
@@ -1829,37 +1771,37 @@ function rNarr(a,q){
 
 /* ── FORMS ── */
 function rFPhotoPrompt(a,q){
-  const svg='<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>';
-  const uzone=(id,lbl,cat)=>`
-    <div class="fg">
-      <label class="fl">${lbl}</label>
-      <label class="uzone" for="${id}" style="flex-direction:row;padding:13px;gap:10px">
-        ${svg}
-        <div>
-          <p style="margin:0;font-size:14px;font-weight:700;color:var(--t0)">📷 Photograph Now</p>
-          <p style="margin:2px 0 0;font-size:11px;color:var(--t1)">Photo or PDF accepted</p>
-        </div>
-      </label>
-      <input type="file" id="${id}" accept="image/*,application/pdf" class="hidden" onchange="addFiles(event,'${cat}')" capture="environment">
-      <p id="${id}Confirm" style="display:none;color:var(--teal);font-size:12px;margin-top:6px">✓ Photo attached</p>
-    </div>`;
-
-  a.innerHTML=`<div class="fcard">
-    <div style="background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);border-radius:var(--r8);padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--amber);line-height:1.5">
-      <strong>📸 Do this now while at the scene.</strong> Once you leave, these photos may no longer be possible to obtain.
-    </div>
-    ${uzone('pp_myLic',    'Your Driver License',              'Driver License')}
-    ${uzone('pp_myIns',    'Your Insurance Card',              'Insurance Card')}
-    ${uzone('pp_odLic',    "Other Driver's License",           'Other Driver License')}
-    ${uzone('pp_odIns',    "Other Driver's Insurance Card",    'Other Driver Insurance')}
-    ${uzone('pp_myDmg',    'Damage to Your Vehicle',           'Vehicle Damage - Yours')}
-    ${uzone('pp_odDmg',    'Damage to Other Vehicle',          'Vehicle Damage - Other')}
-    ${uzone('pp_scene',    'Overall Accident Scene',           'Accident Scene')}
-    <p style="font-size:12px;color:var(--t2);text-align:center;margin-top:8px">All photos are optional but highly recommended</p>
-    <button class="btn btn-primary mt14" onclick="ans(gQ(${q.id}),'Photos captured: '+S.photos.length+' photo(s)')">Continue →</button>
-  </div>`;
+  function uzone(id,lbl,cat){
+    return '<div class="fg">'
+      +'<label class="fl">'+lbl+'</label>'
+      +'<label class="uzone" for="'+id+'" style="flex-direction:row;padding:13px;gap:10px">'
+      +'<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>'
+      +'<div><p style="margin:0;font-size:14px;font-weight:700;color:var(--t0)">📷 Photograph Now</p>'
+      +'<p style="margin:2px 0 0;font-size:11px;color:var(--t1)">Photo or PDF accepted</p></div></label>'
+      +'<input type="file" id="'+id+'" accept="image/*,application/pdf" class="hidden" '
+      +'data-cat="'+cat+'" onchange="addFiles(event,this.dataset.cat)" capture="environment">'
+      +'<p id="'+id+'Confirm" style="display:none;color:var(--teal);font-size:12px;margin-top:6px">&#10003; Photo attached</p>'
+      +'</div>';
+  }
+  const qid=q.id;
+  a.innerHTML='<div class="fcard">'
+    +'<div style="background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);border-radius:var(--r8);padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--amber);line-height:1.5">'
+    +'<strong>📸 Do this now while at the scene.</strong> Once you leave, these opportunities are gone.</div>'
+    +uzone('pp_myLic', 'Your Driver License',           'Driver License')
+    +uzone('pp_myIns', 'Your Insurance Card',           'Insurance Card')
+    +uzone('pp_odLic', 'Other Driver License',          'Other Driver License')
+    +uzone('pp_odIns', 'Other Driver Insurance Card',   'Other Driver Insurance')
+    +uzone('pp_myDmg', 'Damage to Your Vehicle',        'Vehicle Damage - Yours')
+    +uzone('pp_odDmg', 'Damage to Other Vehicle',       'Vehicle Damage - Other')
+    +uzone('pp_scene', 'Overall Accident Scene',        'Accident Scene')
+    +'<p style="font-size:12px;color:var(--t2);text-align:center;margin-top:8px">All photos are optional but highly recommended</p>'
+    +'<button class="btn btn-primary mt14" onclick="photosDone('+(qid)+')">Continue →</button>'
+    +'</div>';
 }
 
+function photosDone(qid){
+  ans(gQ(qid), S.photos.length>0 ? S.photos.length+' photo(s) captured' : 'No photos taken');
+}
 function rFDriver(a,q){
   // Use name already collected upfront — employee name (id:-2) or family driver name (id:-4)
   const knownName = S.identity.name||'';
@@ -1952,17 +1894,13 @@ function subIns(p,qid){
   ans(gQ(qid),`Company: ${co} | Policy: ${pol}`);
 }
 function rFOtherDrv(a,q){
-  // In Phase 1 just collect name and phone — license photo already taken
-  // In Phase 2 collect full details
-  const isP1 = S.phase===1;
   a.innerHTML=`<div class="fcard">
-    ${isP1?`<div style="background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);border-radius:var(--r8);padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--amber)">Get this information before the other driver leaves the scene.</div>`:''}
     ${fg('Driver Name',inp('oN','Full name'))}
     ${fg('Phone / Contact',inp('oP','(555)-123-4567','tel','oninput="formatPhone(this)"'))}
-    ${isP1?'':`<div class="r2">
+    <div class="r2">
       ${fg('License #',inp('oL','License #'))}
       ${fg('State',sel(ST,'oS','State'))}
-    </div>`}
+    </div>
     <div class="fg"><label class="fl">Other Driver's License Photo</label><label class="uzone" for="odLicFile" style="flex-direction:row;padding:13px;gap:10px"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg><div><p style="margin:0;font-size:14px;font-weight:700;color:var(--t0)">📷 Photograph Other Driver's License</p><p style="margin:2px 0 0;font-size:11px;color:var(--t1)">Photo or PDF accepted</p></div></label><input type="file" id="odLicFile" accept="image/*,application/pdf" class="hidden" onchange="addFiles(event,'Other Driver License')" capture="environment"><p id="odLicFileConfirm" style="display:none;color:var(--teal);font-size:12px;margin-top:6px">✓ Photo attached</p></div>
     <button class="btn btn-primary" onclick="
       const n=document.getElementById('oN').value.trim();
