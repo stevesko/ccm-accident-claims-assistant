@@ -2,9 +2,6 @@
  * CCM Accident Assistant — Resend Numbers API
  * POST /api/resend-numbers
  * Body: { phone: "2155551234" }
- *
- * Looks up claim by phone number, sends email with claim and reference numbers.
- * TODO: Replace emailjs send with Twilio SMS when ready for production.
  */
 
 import { createClient } from '@libsql/client';
@@ -14,10 +11,6 @@ function getClient() {
     url:       process.env.TURSO_DATABASE_URL,
     authToken: process.env.TURSO_AUTH_TOKEN,
   });
-}
-
-function normalizePhone(phone) {
-  return String(phone || '').replace(/\D/g, '').slice(-10);
 }
 
 export default async function handler(req, res) {
@@ -31,40 +24,45 @@ export default async function handler(req, res) {
   const { phone } = req.body || {};
   if (!phone) return res.status(400).json({ error: 'Missing phone number' });
 
+  // Extract last 7 digits for matching
+  const last7 = String(phone).replace(/\D/g, '').slice(-7);
+  if (last7.length < 4) return res.status(400).json({ error: 'Invalid phone number' });
+
   const client = getClient();
 
   try {
-    // Search by last 10 digits of phone — most recent Phase 1 claim first
-    const normalized = normalizePhone(phone);
+    // Pull recent Phase 1 claims and match by phone in JS
+    // Avoids complex SQL REPLACE chains that hit length limits
     const result = await client.execute({
-      sql: `SELECT claim_number, ref_number, driver_email, driver_name, driver_phone
-            FROM claims
-            WHERE REPLACE(REPLACE(REPLACE(REPLACE(driver_phone,'-',''),'(',''),')',''),' ','') LIKE ?
-            AND phase = 1
-            ORDER BY submitted_at DESC
-            LIMIT 1`,
-      args: ['%' + normalized.slice(-7)]  // match last 7 digits to handle area code variations
+      sql: 'SELECT claim_number, ref_number, driver_email, driver_name, driver_phone FROM claims WHERE phase = 1 ORDER BY submitted_at DESC LIMIT 100',
+      args: []
     });
 
     if (!result.rows || result.rows.length === 0) {
-      return res.status(404).json({ error: 'No claim found for that phone number.' });
+      return res.status(404).json({ error: 'No claims found. Please call CCM for assistance.' });
     }
 
-    const claim = result.rows[0];
-    const email = claim.driver_email;
+    // Match by last 7 digits of stored phone
+    const match = result.rows.find(row => {
+      const stored = String(row.driver_phone || '').replace(/\D/g, '').slice(-7);
+      return stored === last7;
+    });
 
+    if (!match) {
+      return res.status(404).json({ error: 'No claim found for that phone number. Please call CCM for assistance.' });
+    }
+
+    const email = match.driver_email;
     if (!email || !email.includes('@')) {
-      return res.status(404).json({ error: 'No email address on file for this claim. Please call CCM for assistance.' });
+      return res.status(404).json({ error: 'No email address on file. Please call CCM for assistance.' });
     }
 
-    // For now return the data to the app which will send via EmailJS
-    // TODO: Replace with Twilio SMS when ready
     res.status(200).json({
-      success: true,
-      claimNumber: claim.claim_number,
-      refNumber:   claim.ref_number,
+      success:     true,
+      claimNumber: match.claim_number,
+      refNumber:   match.ref_number,
       email:       email,
-      driverName:  claim.driver_name,
+      driverName:  match.driver_name,
     });
 
   } catch (err) {
