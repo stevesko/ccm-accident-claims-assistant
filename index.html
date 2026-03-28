@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-03-28 08:07 AM ET -->
+<!-- CCM Accident Assistant — Built: 2026-03-28 08:28 AM ET -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-03-28 08:07 AM ET</title>
+<title>CCM Accident Assistant — 2026-03-28 08:28 AM ET</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -567,7 +567,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-28 08:07 AM ET</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-28 08:28 AM ET</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -593,6 +593,17 @@ input[type="datetime-local"].fi{color-scheme:dark}
       <div class="qtext">What is the name of your company working with Corporate Claims Management?</div>
     </div>
     <div style="padding:0 4px">
+
+      <!-- Phase 2 quick access — visible to everyone at top of screen -->
+      <div style="background:rgba(0,212,170,.08);border:1.5px solid rgba(0,212,170,.25);border-radius:var(--r12);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="showPhase2Entry()">
+        <span style="font-size:24px">📋</span>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:800;color:var(--teal)">Complete Phase 2 of Your Report</div>
+          <div style="font-size:12px;color:var(--t1);margin-top:2px">Already submitted Phase 1? Tap here to continue.</div>
+        </div>
+        <span style="color:var(--teal);font-size:18px">→</span>
+      </div>
+
       <input class="fi" id="id1Company" placeholder="Company name…" type="text" style="margin-bottom:20px">
 
       <!-- Employee/Family selection — always shown first -->
@@ -723,6 +734,33 @@ input[type="datetime-local"].fi{color-scheme:dark}
       <p class="field-err" id="id2Err" style="display:none;margin-bottom:10px"></p>
       <button class="btn btn-primary" onclick="submitID2()">Continue →</button>
       <button class="btn btn-ghost btn-sm" onclick="show('scrID1')" style="margin-top:10px">← Back</button>
+    </div>
+  </section>
+
+  <!-- PHASE 2 QUICK ENTRY SCREEN — for anyone returning to complete Phase 2 -->
+  <section class="scr" id="scrPhase2Entry">
+    <div class="qcard">
+      <div class="qstep">Complete Phase 2</div>
+      <div class="qtext">Enter your details to continue your accident report.</div>
+    </div>
+    <div style="padding:0 4px">
+      <label class="fl">Company Name</label>
+      <input class="fi" id="p2Company" placeholder="Company name…" type="text" style="margin-bottom:12px">
+      <label class="fl">Driver ID <span style="color:var(--t2);font-weight:400">(employees only)</span></label>
+      <input class="fi" id="p2DriverID" placeholder="e.g. D1234 — leave blank if family member" type="text" style="margin-bottom:12px">
+      <label class="fl">Full Name</label>
+      <input class="fi" id="p2Name" placeholder="First and last name…" type="text" style="margin-bottom:12px">
+      <label class="fl">Last 4 Digits of Phone</label>
+      <input class="fi" id="p2Phone" placeholder="e.g. 4567" type="tel" maxlength="4" style="margin-bottom:12px">
+      <label class="fl">Reference Number</label>
+      <input class="fi" id="p2Ref" placeholder="e.g. CCM-2026-847291" type="text" style="margin-bottom:8px">
+      <p class="field-err" id="p2Err" style="display:none;margin-bottom:10px"></p>
+      <button class="btn btn-primary" onclick="submitPhase2Entry()" style="margin-bottom:10px">Continue to Phase 2 →</button>
+      <button class="btn btn-ghost btn-sm" onclick="show('scrID1')">← Back</button>
+      <div style="margin-top:16px;padding:12px;background:var(--bg2);border-radius:var(--r8);font-size:12px;color:var(--t1)">
+        <strong style="color:var(--t0)">Don't have your reference number?</strong><br>
+        Enter your Driver ID and last 4 of your phone — we'll look up your report automatically.
+      </div>
     </div>
   </section>
 
@@ -1223,7 +1261,7 @@ async function _fetchAudio(text){
         input:{text:text.slice(0,5000)},
         voice:{
           languageCode:'en-US',
-          name:'en-US-chirp3-hd-callirrhoe'
+          name:'en-US-chirp3-hd-leda'
         },
         audioConfig:{
           audioEncoding:'MP3'
@@ -2537,6 +2575,66 @@ function showResendRefFromScreen2(){
     });
   }catch(e){
     err.textContent='An error occurred. Please call Corporate Claims Management.'; err.style.display='block';
+  }
+}
+
+function showPhase2Entry(){
+  document.getElementById('p2Err').style.display='none';
+  document.getElementById('p2Company').value='';
+  document.getElementById('p2DriverID').value='';
+  document.getElementById('p2Name').value='';
+  document.getElementById('p2Phone').value='';
+  document.getElementById('p2Ref').value='';
+  show('scrPhase2Entry');
+}
+
+function submitPhase2Entry(){
+  const err     = document.getElementById('p2Err');
+  err.style.display='none';
+  const company = document.getElementById('p2Company').value.trim();
+  const driverID= document.getElementById('p2DriverID').value.trim();
+  const name    = document.getElementById('p2Name').value.trim();
+  const phone   = document.getElementById('p2Phone').value.trim();
+  const ref     = document.getElementById('p2Ref').value.trim().toUpperCase();
+
+  if(!company){ err.textContent='Please enter your company name.'; err.style.display='block'; return; }
+  if(!name){ err.textContent='Please enter your full name.'; err.style.display='block'; return; }
+  if(!phone){ err.textContent='Please enter the last 4 digits of your phone number.'; err.style.display='block'; return; }
+
+  try{
+    const saved=JSON.parse(localStorage.getItem('ccm_p1_ans')||'null');
+
+    // If reference number provided — verify all three fields
+    if(ref){
+      if(!saved){ err.textContent='Reference number not found on this device. Please use the device you used for Phase 1.'; err.style.display='block'; return; }
+      if(ref !== (saved.ref||'').toUpperCase()){ err.textContent='Reference number does not match.'; err.style.display='block'; return; }
+      if(driverID && driverID.toLowerCase() !== (saved.drvId||'').toLowerCase()){ err.textContent='Driver ID does not match.'; err.style.display='block'; return; }
+      if(phone !== (saved.last4||'')){ err.textContent='Phone number does not match.'; err.style.display='block'; return; }
+    } else {
+      // No ref — try to match by Driver ID + last 4 phone
+      if(!saved){ err.textContent='No saved report found on this device. Please use the device you used for Phase 1, or contact CCM for assistance.'; err.style.display='block'; return; }
+      if(driverID && driverID.toLowerCase() !== (saved.drvId||'').toLowerCase()){ err.textContent='Driver ID does not match our records.'; err.style.display='block'; return; }
+      if(phone !== (saved.last4||'')){ err.textContent='Phone number does not match our records.'; err.style.display='block'; return; }
+    }
+
+    // Verified — set up identity and resume Phase 2
+    S.identity.company   = company;
+    S.identity.name      = name;
+    S.identity.driverID  = driverID;
+    S.identity.driverType= driverID ? 'employee' : 'family';
+    S.ans  = saved.ans||{};
+    S.refNum = saved.ref||'';
+    S.phase  = 2;
+    S.idx    = 0;
+    document.getElementById('progBar').classList.add('show');
+    document.getElementById('cbar').classList.add('show');
+    document.getElementById('pauseBtn').classList.remove('hidden');
+    initVoice();
+    speak('Welcome back. Let us complete the remaining details of your accident report.', ()=>{ goToQ(0); });
+
+  }catch(e){
+    err.textContent='An error occurred. Please contact CCM for assistance.';
+    err.style.display='block';
   }
 }
 
