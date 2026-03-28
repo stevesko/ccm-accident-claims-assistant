@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-03-28 02:28 PM ET -->
+<!-- CCM Accident Assistant — Built: 2026-03-28 03:00 PM ET -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-03-28 02:28 PM ET</title>
+<title>CCM Accident Assistant — 2026-03-28 03:00 PM ET</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -567,7 +567,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-28 02:28 PM ET</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-28 03:00 PM ET</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -2658,12 +2658,12 @@ function showResendRefFromScreen2(){
 }
 
 function showPhase2Entry(){
-  document.getElementById('p2Err').style.display='none';
-  document.getElementById('p2Company').value='';
-  document.getElementById('p2DriverID').value='';
-  document.getElementById('p2Name').value='';
-  document.getElementById('p2Phone').value='';
-  document.getElementById('p2Ref').value='';
+  const err=document.getElementById('p2Err');
+  if(err){ err.style.display='none'; err.style.color='var(--red)'; }
+  const cn=document.getElementById('p2ClaimNum');
+  if(cn) cn.value='';
+  const ref=document.getElementById('p2Ref');
+  if(ref) ref.value='';
   show('scrPhase2Entry');
 }
 
