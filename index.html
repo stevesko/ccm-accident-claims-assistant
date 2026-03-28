@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-03-28 11:04 AM ET -->
+<!-- CCM Accident Assistant — Built: 2026-03-28 02:28 PM ET -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-03-28 11:04 AM ET</title>
+<title>CCM Accident Assistant — 2026-03-28 02:28 PM ET</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -567,7 +567,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-28 11:04 AM ET</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-28 02:28 PM ET</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -724,23 +724,19 @@ input[type="datetime-local"].fi{color-scheme:dark}
       <div class="qtext">Enter your details to continue your accident report.</div>
     </div>
     <div style="padding:0 4px">
-      <label class="fl">Company Name</label>
-      <input class="fi" id="p2Company" placeholder="Company name…" type="text" style="margin-bottom:12px">
-      <label class="fl">Driver ID <span style="color:var(--t2);font-weight:400">(employees only)</span></label>
-      <input class="fi" id="p2DriverID" placeholder="e.g. D1234 — leave blank if family member" type="text" style="margin-bottom:12px">
-      <label class="fl">Full Name</label>
-      <input class="fi" id="p2Name" placeholder="First and last name…" type="text" style="margin-bottom:12px">
-      <label class="fl">Last 4 Digits of Phone</label>
-      <input class="fi" id="p2Phone" placeholder="e.g. 4567" type="tel" maxlength="4" style="margin-bottom:12px">
+      <label class="fl">Claim Number</label>
+      <input class="fi" id="p2ClaimNum" placeholder="e.g. 161000" type="tel" style="margin-bottom:12px">
       <label class="fl">Reference Number</label>
       <input class="fi" id="p2Ref" placeholder="e.g. CCM-2026-847291" type="text" style="margin-bottom:8px">
       <p class="field-err" id="p2Err" style="display:none;margin-bottom:10px"></p>
       <button class="btn btn-primary" onclick="submitPhase2Entry()" style="margin-bottom:10px">Continue to Phase 2 →</button>
-      <button class="btn btn-ghost btn-sm" onclick="show('scrID1')">← Back</button>
-      <div style="margin-top:16px;padding:12px;background:var(--bg2);border-radius:var(--r8);font-size:12px;color:var(--t1)">
-        <strong style="color:var(--t0)">Don't have your reference number?</strong><br>
-        Enter your Driver ID and last 4 of your phone — we'll look up your report automatically.
+      <div style="border-top:1px solid var(--bd0);padding-top:14px;margin-top:6px">
+        <p style="font-size:12px;color:var(--t1);margin-bottom:10px">Can't find your numbers?</p>
+        <button class="btn btn-ghost" onclick="showResendNumbers()" style="margin-bottom:10px">
+          📱 Text to my phone number
+        </button>
       </div>
+      <button class="btn btn-ghost btn-sm" onclick="show('scrID1')">← Back</button>
     </div>
   </section>
 
@@ -802,10 +798,18 @@ input[type="datetime-local"].fi{color-scheme:dark}
       <div class="succ-ring">✅</div>
       <h2 class="succ-h">Phase 1 Submitted</h2>
       <p class="succ-p">Your initial accident report has been sent to Corporate Claims Management.</p>
-      <div id="refBlock" style="background:var(--blue-g);border:1px solid rgba(45,140,240,.25);border-radius:var(--r12);padding:16px;margin-bottom:20px;text-align:center">
-        <div style="font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--blue);text-transform:uppercase;margin-bottom:4px">Reference Number</div>
-        <div id="refNum" style="font-size:28px;font-weight:800;color:var(--t0);letter-spacing:.08em"></div>
-        <div style="font-size:11px;color:var(--t1);margin-top:4px">Save this number to complete Phase 2 later</div>
+      <div style="background:var(--blue-g);border:1px solid rgba(45,140,240,.25);border-radius:var(--r12);padding:16px;margin-bottom:20px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div style="text-align:center">
+            <div style="font-size:9px;font-weight:800;letter-spacing:.12em;color:var(--blue);text-transform:uppercase;margin-bottom:4px">Claim Number</div>
+            <div id="claimNum" style="font-size:26px;font-weight:800;color:var(--t0);letter-spacing:.04em"></div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:9px;font-weight:800;letter-spacing:.12em;color:var(--blue);text-transform:uppercase;margin-bottom:4px">Reference Number</div>
+            <div id="refNum" style="font-size:16px;font-weight:800;color:var(--t0)"></div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--t1);margin-top:10px;text-align:center">Save both numbers — you will need them to complete Phase 2</div>
       </div>
       <div style="background:var(--amber-g);border:1px solid rgba(245,166,35,.25);border-radius:var(--r12);padding:14px;margin-bottom:20px;font-size:13px;color:var(--amber);line-height:1.55">
         <strong>Phase 2 is optional but recommended.</strong> It includes vehicle details, insurance information, damage description, police report, and accident narrative. The more detail you provide, the faster your claim can be processed.
@@ -826,7 +830,16 @@ input[type="datetime-local"].fi{color-scheme:dark}
       <p class="succ-p">When you're ready, return to this app and click "Complete Phase 2" on the home screen. You'll need your reference number.</p>
       <div id="refBlock2" style="background:var(--blue-g);border:1px solid rgba(45,140,240,.25);border-radius:var(--r12);padding:16px;margin-bottom:20px;text-align:center">
         <div style="font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--blue);text-transform:uppercase;margin-bottom:4px">Your Reference Number</div>
-        <div id="refNum2" style="font-size:28px;font-weight:800;color:var(--t0);letter-spacing:.08em"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center">
+          <div>
+            <div style="font-size:9px;font-weight:800;letter-spacing:.12em;color:var(--blue);text-transform:uppercase;margin-bottom:4px">Claim Number</div>
+            <div id="claimNum2" style="font-size:24px;font-weight:800;color:var(--t0)"></div>
+          </div>
+          <div>
+            <div style="font-size:9px;font-weight:800;letter-spacing:.12em;color:var(--blue);text-transform:uppercase;margin-bottom:4px">Reference Number</div>
+            <div id="refNum2" style="font-size:15px;font-weight:800;color:var(--t0)"></div>
+          </div>
+        </div>
       </div>
       <div class="btns-col">
         <button class="btn btn-primary" onclick="startPhase2()">Actually — Continue Now</button>
@@ -1103,6 +1116,7 @@ const S={
   photos:[], contactMethod:'', airbags:[], injSel:{},
   phase:1,
   refNum:'',
+  claimNum:'',
   hasPending:false,
   pendingSaved:null,
   identity:{        // collected on ID screens before interview
@@ -2514,19 +2528,32 @@ async function submitReport(){
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({claim: claimPayload})
       }).then(r=>r.json())
-        .then(d=>{ if(d.ref) console.log('Claim stored in DB:',d.ref); })
+        .then(d=>{
+          if(d.claimNumber){
+            S.claimNum=String(d.claimNumber);
+            // Update displayed numbers
+            ['claimNum','claimNum2'].forEach(id=>{
+              const el=document.getElementById(id);
+              if(el) el.textContent=S.claimNum;
+            });
+            console.log('Claim #'+S.claimNum+' stored in DB');
+          }
+        })
         .catch(e=>console.warn('DB submit failed:',e));
     }
     if(S.phase===1){
       S.refNum='CCM-'+new Date().getFullYear()+'-'+String(Date.now()).slice(-6);
+      S.claimNum='Pending...';
       document.getElementById('refNum').textContent=S.refNum;
       document.getElementById('refNum2').textContent=S.refNum;
+      document.getElementById('claimNum').textContent='Pending...';
+      document.getElementById('claimNum2').textContent='Pending...';
       try{
         const phone=String(S.identity.phone||'').replace(/\D/g,'');
         const last4=phone.slice(-4);
         const drvId=S.identity.driverID.toLowerCase();
         const photoMeta=S.photos.map(p=>({name:p.name,category:p.category,isPdf:p.isPdf}));
-        localStorage.setItem('ccm_p1_ans',JSON.stringify({ans:S.ans,ref:S.refNum,last4,drvId,identity:S.identity,photos:photoMeta}));
+        localStorage.setItem('ccm_p1_ans',JSON.stringify({ans:S.ans,ref:S.refNum,claimNum:S.claimNum,last4,drvId,identity:S.identity,photos:photoMeta}));
       }catch(e){}
       // Send confirmation email to driver with reference number
       const driverEmail=S.identity.email||'';
@@ -2539,6 +2566,9 @@ async function submitReport(){
           date:        new Date().toLocaleString(),
           to_email:    driverEmail,
           report:      'Your Phase 1 accident report has been received by Corporate Claims Management.\n\n'
+                      +'Claim Number:     '+S.claimNum+'\n'
+                      +'Reference Number: '+S.refNum+'\n\n'
+                      +'Please save both numbers. You will need them to complete Phase 2.\n\n'
                       +'Reference Number: '+S.refNum+'\n\n'
                       +'Please save this reference number. You will need it to complete Phase 2 of your report.\n\n'
                       +'To complete Phase 2, return to:\n'+appUrl+'\n\n'
@@ -2638,59 +2668,90 @@ function showPhase2Entry(){
 }
 
 function submitPhase2Entry(){
-  const err     = document.getElementById('p2Err');
+  const err      = document.getElementById('p2Err');
   err.style.display='none';
-  const company = document.getElementById('p2Company').value.trim();
-  const driverID= document.getElementById('p2DriverID').value.trim();
-  const name    = document.getElementById('p2Name').value.trim();
-  const phone   = document.getElementById('p2Phone').value.trim();
-  const ref     = document.getElementById('p2Ref').value.trim().toUpperCase();
+  err.style.color='var(--red)';
+  const claimNum = document.getElementById('p2ClaimNum').value.trim();
+  const ref      = document.getElementById('p2Ref').value.trim().toUpperCase();
 
-  if(!company){ err.textContent='Please enter your company name.'; err.style.display='block'; return; }
-  if(!name){ err.textContent='Please enter your full name.'; err.style.display='block'; return; }
-  if(!phone){ err.textContent='Please enter the last 4 digits of your phone number.'; err.style.display='block'; return; }
+  if(!claimNum){ err.textContent='Please enter your Claim Number.'; err.style.display='block'; return; }
+  if(!ref){ err.textContent='Please enter your Reference Number.'; err.style.display='block'; return; }
 
   try{
     const saved=JSON.parse(localStorage.getItem('ccm_p1_ans')||'null');
-
-    // If reference number provided — verify all three fields
-    if(ref){
-      if(!saved){ err.textContent='Reference number not found on this device. Please use the device you used for Phase 1.'; err.style.display='block'; return; }
-      if(ref !== (saved.ref||'').toUpperCase()){ err.textContent='Reference number does not match.'; err.style.display='block'; return; }
-      if(driverID && driverID.toLowerCase() !== (saved.drvId||'').toLowerCase()){ err.textContent='Driver ID does not match.'; err.style.display='block'; return; }
-      if(phone !== (saved.last4||'')){ err.textContent='Phone number does not match.'; err.style.display='block'; return; }
-    } else {
-      // No ref — try to match by Driver ID + last 4 phone
-      if(!saved){ err.textContent='No saved report found on this device. Please use the device you used for Phase 1, or contact CCM for assistance.'; err.style.display='block'; return; }
-      if(driverID && driverID.toLowerCase() !== (saved.drvId||'').toLowerCase()){ err.textContent='Driver ID does not match our records.'; err.style.display='block'; return; }
-      if(phone !== (saved.last4||'')){ err.textContent='Phone number does not match our records.'; err.style.display='block'; return; }
+    if(!saved){
+      err.textContent='No saved report found on this device. Please tap "Text to my phone number" below.';
+      err.style.display='block'; return;
+    }
+    if(ref !== (saved.ref||'').toUpperCase()){
+      err.textContent='Reference Number does not match. Please check and try again.';
+      err.style.display='block'; return;
+    }
+    // Allow claimNum match or if pending
+    const savedClaim=String(saved.claimNum||'').trim();
+    if(savedClaim && savedClaim!=='Pending...' && claimNum!==savedClaim){
+      err.textContent='Claim Number does not match. Please check and try again.';
+      err.style.display='block'; return;
     }
 
-    // Verified — restore full Phase 1 state and resume Phase 2
-    S.identity.company   = company;
-    S.identity.name      = name;
-    S.identity.driverID  = driverID;
-    S.identity.driverType= driverID ? 'employee' : 'family';
-    S.ans    = saved.ans||{};
-    S.photos = saved.photos||[];  // restore Phase 1 photos list
-    S.refNum = saved.ref||'';
-    S.phase  = 2;
-    S.idx    = 0;
-    S.paused = false;
-    S.airbags= [];
-    S.injSel = {};
+    // Verified — restore Phase 1 state
+    S.identity   = {...(saved.identity||{})};
+    S.ans        = saved.ans||{};
+    S.photos     = (saved.photos||[]).map(p=>({...p, url:''}));
+    S.refNum     = saved.ref||'';
+    S.claimNum   = saved.claimNum||claimNum;
+    S.phase      = 2;
+    S.idx        = 0;
+    S.paused     = false;
+    S.airbags    = [];
+    S.injSel     = {};
     S.contactMethod='';
     document.getElementById('progBar').classList.add('show');
     document.getElementById('cbar').classList.add('show');
     document.getElementById('pauseBtn').classList.remove('hidden');
     initVoice();
     speak('Welcome back. Let us complete the remaining details of your accident report.', ()=>{ goToQ(0); });
-
   }catch(e){
     err.textContent='An error occurred. Please contact CCM for assistance.';
     err.style.display='block';
   }
 }
+
+async function showResendNumbers(){
+  const phone=prompt('Enter your mobile phone number:');
+  if(!phone) return;
+  const err=document.getElementById('p2Err');
+  err.style.color='var(--red)';
+  err.style.display='none';
+  try{
+    const r=await fetch('/api/resend-numbers',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({phone})
+    });
+    const d=await r.json();
+    if(!r.ok){ err.textContent=d.error||'No claim found. Please call CCM.'; err.style.display='block'; return; }
+    await emailjs.send('service_lefri76','template_g91f9a7',{
+      driver_name: d.driverName||'Driver',
+      driver_id:'', company:'',
+      date: new Date().toLocaleString(),
+      to_email: d.email,
+      report: 'Your CCM claim numbers have been resent.\n\n'
+             +'Claim Number:     '+d.claimNumber+'\n'
+             +'Reference Number: '+d.refNumber+'\n\n'
+             +'Return to the app and enter both numbers to complete Phase 2.\n\n'
+             +'— Corporate Claims Management'
+    });
+    err.style.color='var(--teal)';
+    err.textContent='\u2713 Claim numbers sent to your email on file. Check your inbox.';
+    err.style.display='block';
+  }catch(e){
+    err.style.color='var(--red)';
+    err.textContent='Failed to resend. Please call CCM for assistance.';
+    err.style.display='block';
+  }
+}
+
 
 function dismissResume(){
   try{localStorage.removeItem('ccm_p1_ans');}catch(e){}
