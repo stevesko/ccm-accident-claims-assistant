@@ -2,6 +2,9 @@
  * CCM Accident Assistant — Submit Claim API
  * POST /api/submit-claim
  * Body: { claim: {...} }
+ *
+ * Stores claim in Turso SQLite database.
+ * Generates sequential claim number starting at 161000.
  */
 
 import { createClient } from '@libsql/client';
@@ -27,9 +30,11 @@ export default async function handler(req, res) {
   const client = getClient();
 
   try {
+    // Create table if it doesn't exist
     await client.execute(`
       CREATE TABLE IF NOT EXISTS claims (
         id            INTEGER PRIMARY KEY AUTOINCREMENT,
+        claim_number  INTEGER UNIQUE,
         ref_number    TEXT NOT NULL,
         phase         INTEGER DEFAULT 1,
         submitted_at  TEXT NOT NULL,
@@ -49,7 +54,14 @@ export default async function handler(req, res) {
       )
     `);
 
-    const ref         = claim.refNumber || ('CCM-'+Date.now());
+    // Get next claim number — start at 161000
+    const maxResult = await client.execute(
+      'SELECT MAX(claim_number) as max_claim FROM claims'
+    );
+    const maxClaim = maxResult.rows[0]?.max_claim;
+    const claimNumber = maxClaim ? Number(maxClaim) + 1 : 161000;
+
+    const ref         = claim.refNumber || ('CCM-' + Date.now());
     const phase       = claim.phase || 1;
     const submittedAt = new Date().toISOString();
     const identity    = claim.identity || {};
@@ -57,12 +69,15 @@ export default async function handler(req, res) {
 
     await client.execute({
       sql: `INSERT INTO claims
-              (ref_number, phase, submitted_at, company, driver_name, driver_id,
-               driver_type, driver_email, driver_phone, accident_type, location,
-               date_time, injured, vehicles, status, payload)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+              (claim_number, ref_number, phase, submitted_at, company, driver_name,
+               driver_id, driver_type, driver_email, driver_phone, accident_type,
+               location, date_time, injured, vehicles, status, payload)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       args: [
-        ref, phase, submittedAt,
+        claimNumber,
+        ref,
+        phase,
+        submittedAt,
         identity.company   || ans[0]  || '',
         identity.name      || '',
         identity.driverID  || '',
@@ -79,7 +94,7 @@ export default async function handler(req, res) {
       ]
     });
 
-    res.status(200).json({ success: true, ref });
+    res.status(200).json({ success: true, ref, claimNumber });
 
   } catch (err) {
     console.error('submit-claim error:', err);
