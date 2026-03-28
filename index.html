@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-03-28 09:38 AM ET -->
+<!-- CCM Accident Assistant — Built: 2026-03-28 11:04 AM ET -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-03-28 09:38 AM ET</title>
+<title>CCM Accident Assistant — 2026-03-28 11:04 AM ET</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -567,7 +567,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-28 09:38 AM ET</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-28 11:04 AM ET</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -974,7 +974,33 @@ const CL   = ['Black','White','Silver','Gray','Red','Blue','Green','Brown','Oran
 const INS  = ['Allstate','Farmers','GEICO','Liberty Mutual','Nationwide','Progressive','State Farm','USAA','Travelers','AAA','Erie Insurance','MetLife','American Family','Chubb','Hartford','Other','Not Known'];
 const WX   = ['Clear / Sunny','Partly Cloudy','Overcast','Rain','Heavy Rain','Drizzle','Fog / Mist','Snow','Sleet / Freezing Rain','Black Ice','Windy','Night / Low Visibility','Unknown'];
 const RD   = ['Dry','Wet','Icy / Black Ice','Snow Covered','Slushy','Flooded','Under Construction','Gravel / Dirt','Potholed','Unknown'];
-const AT   = ['Rear-End — Our Driver','Rear-End — Other Driver','Head-On','Side-Impact (T-bone)','Sideswipe','Lane Change','Failure to Yield','Intersection Collision','Hit While Parked','Parking Lot','Backing','Lost Control','Hit Pedestrian','Hit Animal','Hit Stationary Object','Debris / Pothole Damage','Vandalism','Vehicle Theft','Hit & Run — Moving','Hit & Run — Parked','Act of Nature','Glass / Windshield','Rollover','DWI / DUI Related','Mechanical Failure','Fire','Unsecured Load','Unknown / Other'];
+// Accident types grouped by category — used by selAT() for grouped dropdown
+const AT_GROUPS=[
+  {group:'Collision — Multiple Vehicles', options:[
+    'Rear-End — Our Driver','Rear-End — Other Driver','Head-On',
+    'Side-Impact (T-Bone)','Sideswipe','Lane Change / Merge',
+    'Failure to Yield','Intersection Collision','Left Turn','Right Turn',
+  ]},
+  {group:'Single Vehicle', options:[
+    'Hit Fixed Object','Lost Control','Rollover',
+    'Run Off Road','Backing','Unsecured Load',
+  ]},
+  {group:'Parked / Stationary', options:[
+    'Hit While Parked','Parking Lot','Hit & Run — Parked',
+  ]},
+  {group:'Pedestrian / Animal', options:[
+    'Hit Pedestrian','Hit Cyclist','Hit Animal',
+  ]},
+  {group:'Property / Environmental', options:[
+    'Debris / Pothole Damage','Glass / Windshield',
+    'Act of Nature','Fire','DWI / DUI Related',
+  ]},
+  {group:'Criminal / Other', options:[
+    'Vandalism','Vehicle Theft','Hit & Run — Moving','Unknown / Other',
+  ]},
+];
+// Flat list for skip logic comparisons
+const AT = AT_GROUPS.flatMap(g=>g.options);
 const YRS  = Array.from({length:new Date().getFullYear()-1979},(_,i)=>String(new Date().getFullYear()-i));
 
 /* ─────────────────────────────────
@@ -990,7 +1016,7 @@ const Qs=[
   {id:7,  text:"Were any injuries life-threatening or requiring hospitalization?", type:'yn',      skip:a=>a[4]==='No'},
   {id:8,  text:"Where did the accident occur?",                                   type:'loc'},
   {id:9,  text:"What was the date and time of the accident?",                     type:'dt'},
-  {id:13, text:"What type of accident was this?",                                 type:'dd',opts:AT,ph:'Select accident type…'},
+  {id:13, text:"What type of accident was this?",                                 type:'ddAT',ph:'Select accident type…'},
   {id:50, text:"Please photograph all documents and damage while at the scene.",    type:'photoprompt'},
   {id:14, text:"Was your vehicle moving, parked, or stopped at impact?",          type:'og3',opts:['Moving','Parked','Stopped'],
     skip:a=>{
@@ -1641,7 +1667,7 @@ function renderAns(q){
   ({
     'yn':rYN,'og2':rOg,'og3':rOg,'vehicles':rVeh,'dd':rDD,'dir':rDir,
     'loc':rLoc,'dt':rDt,'txt':rTxt,'ta':rTa,'narr':rNarr,
-    'photoprompt':rFPhotoPrompt,'fdriver':rFDriver,'fvehicle':rFVehicle,'fins':rFIns,
+    'photoprompt':rFPhotoPrompt,'ddAT':rDDAT,'fdriver':rFDriver,'fvehicle':rFVehicle,'fins':rFIns,
     'fotherdrv':rFOtherDrv,'fotherveh':rFOtherVeh,
     'fdmg':rFDmg,'ftow':rFTow,'fpol':rFPol,'fcit':rFCit,
     'fwit':rFWit,'fcontact':rFContact,
@@ -1652,6 +1678,14 @@ function renderAns(q){
 /* helpers */
 function sel(o,id,ph='Select…'){
   return `<select class="fs" id="${id}"><option value="">${ph}</option>${o.map(x=>`<option value="${x}">${x}</option>`).join('')}</select>`;
+}
+function selAT(id,ph='Select accident type…'){
+  const groups=AT_GROUPS.map(g=>
+    `<optgroup label="${g.group}">`
+    +g.options.map(o=>`<option value="${o}">${o}</option>`).join('')
+    +'</optgroup>'
+  ).join('');
+  return `<select class="fs" id="${id}"><option value="">${ph}</option>${groups}</select>`;
 }
 function inp(id,ph='',type='text',extra=''){
   return `<input type="${type}" class="fi" id="${id}" placeholder="${ph}" ${extra}>`;
@@ -1770,6 +1804,18 @@ function rNarr(a,q){
 }
 
 /* ── FORMS ── */
+function rDDAT(a,q){
+  a.innerHTML='<div class="fcard">'
+    +fg('Accident Type',selAT('q13dd',q.ph||'Select accident type…'))
+    +'<button class="btn btn-primary mt14" onclick="submitAT()">Submit</button>'
+    +'</div>';
+}
+function submitAT(){
+  const v=document.getElementById('q13dd').value;
+  if(!v){alert('Please select an accident type.');return;}
+  ans(gQ(13),v);
+}
+
 function rFPhotoPrompt(a,q){
   function uzone(id,lbl,cat){
     return '<div class="fg">'
@@ -1803,8 +1849,8 @@ function photosDone(qid){
   ans(gQ(qid), S.photos.length>0 ? S.photos.length+' photo(s) captured' : 'No photos taken');
 }
 function rFDriver(a,q){
-  // Use name already collected upfront — employee name (id:-2) or family driver name (id:-4)
   const knownName = S.identity.name||'';
+  const licPhotoTaken = S.photos.some(p=>p.category==='Driver License');
   a.innerHTML=`<div class="fcard">
     ${knownName
       ? `<div class="fg"><label class="fl">Driver Name</label>
@@ -1812,8 +1858,14 @@ function rFDriver(a,q){
          <p class="hint">Name collected at start of interview</p></div>`
       : fg('Full Name',inp('dN','Full name'))
     }
+    ${licPhotoTaken
+      ? `<div style="background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.2);border-radius:var(--r8);padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--teal)">
+           ✓ Driver license photographed in Phase 1 — entry below is optional.
+         </div>`
+      : ''
+    }
     <div class="r2">
-      ${fg('Driver License #',inp('dL','License number'))}
+      ${fg('Driver License #',inp('dL',licPhotoTaken?'Optional — already photographed':'License number'))}
       ${fg('State',sel(ST,'dS','State'))}
     </div>
     <div class="fg"><label class="fl">Driver License Photo</label><label class="uzone" for="dlFile" style="flex-direction:row;padding:13px;gap:10px"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg><div><p style="margin:0;font-size:14px;font-weight:700;color:var(--t0)">📷 Photograph Your Driver License</p><p style="margin:2px 0 0;font-size:11px;color:var(--t1)">Photo or PDF accepted</p></div></label><input type="file" id="dlFile" accept="image/*,application/pdf" class="hidden" onchange="addFiles(event,'Driver License')" capture="environment"><p id="dlFileConfirm" style="display:none;color:var(--teal);font-size:12px;margin-top:6px">✓ Photo attached</p></div>
@@ -1854,8 +1906,18 @@ function subVeh(qid){
 }
 function rFIns(a,q){
   const p=q.key||'my';
+  const isOD=p==='od';
+  const insPhotoTaken=isOD
+    ? S.photos.some(ph=>ph.category==='Other Driver Insurance')
+    : S.photos.some(ph=>ph.category==='Insurance Card');
   a.innerHTML=`<div class="fcard">
-    ${fg('Insurance Company',sel(INS,p+'I','Select insurer…'))}
+    ${insPhotoTaken
+      ? `<div style="background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.2);border-radius:var(--r8);padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--teal)">
+           ✓ ${isOD?"Other driver's insurance":"Your insurance"} card photographed in Phase 1 — entry below is optional.
+         </div>`
+      : ''
+    }
+    ${fg('Insurance Company',sel(INS,p+'I',insPhotoTaken?'Optional — already photographed':'Select insurer…'))}
     <div id="${p}OW" class="hidden">${fg('Specify Company',inp(p+'OI','Company name'))}</div>
     <div id="${p}PW">
       <div class="r21">
@@ -2144,15 +2206,26 @@ function subAirbags(qid){
 ───────────────────────────────── */
 function addFiles(e,category){
   category=category||'Accident Scene';
-  Array.from(e.target.files).forEach(f=>{
+  Array.from(e.target.files).forEach((f,i)=>{
     const r=new FileReader();
+    // Build a meaningful filename: Category_RefNumber_timestamp.ext
+    const ext=f.name.includes('.')?f.name.split('.').pop():(f.type.includes('pdf')?'pdf':'jpg');
+    const ref=S.refNum||S.identity.driverID||'CCM';
+    const catSlug=category.replace(/[^a-zA-Z0-9]/g,'_');
+    const ts=Date.now();
+    const meaningfulName=catSlug+'_'+ref+'_'+ts+(i>0?'_'+i:'.')+'.'+ext;
     r.onload=ev=>{
-        S.photos.push({name:f.name,url:ev.target.result,isPdf:f.type==='application/pdf',category:category});
-        redrawPhotos();
-        // Show confirmation message on the upload button if it exists
-        const confirmEl=document.getElementById(e.target.id+'Confirm');
-        if(confirmEl){confirmEl.style.display='block';confirmEl.textContent='✓ '+category+' photo attached';}
-      };
+      S.photos.push({
+        name:meaningfulName,
+        originalName:f.name,
+        url:ev.target.result,
+        isPdf:f.type==='application/pdf',
+        category:category
+      });
+      redrawPhotos();
+      const confirmEl=document.getElementById(e.target.id+'Confirm');
+      if(confirmEl){confirmEl.style.display='block';confirmEl.textContent='✓ '+category+' photo attached';}
+    };
     r.readAsDataURL(f);
   });
   e.target.value='';
@@ -2452,7 +2525,8 @@ async function submitReport(){
         const phone=String(S.identity.phone||'').replace(/\D/g,'');
         const last4=phone.slice(-4);
         const drvId=S.identity.driverID.toLowerCase();
-        localStorage.setItem('ccm_p1_ans',JSON.stringify({ans:S.ans,ref:S.refNum,last4,drvId,identity:S.identity}));
+        const photoMeta=S.photos.map(p=>({name:p.name,category:p.category,isPdf:p.isPdf}));
+        localStorage.setItem('ccm_p1_ans',JSON.stringify({ans:S.ans,ref:S.refNum,last4,drvId,identity:S.identity,photos:photoMeta}));
       }catch(e){}
       // Send confirmation email to driver with reference number
       const driverEmail=S.identity.email||'';
@@ -2592,15 +2666,20 @@ function submitPhase2Entry(){
       if(phone !== (saved.last4||'')){ err.textContent='Phone number does not match our records.'; err.style.display='block'; return; }
     }
 
-    // Verified — set up identity and resume Phase 2
+    // Verified — restore full Phase 1 state and resume Phase 2
     S.identity.company   = company;
     S.identity.name      = name;
     S.identity.driverID  = driverID;
     S.identity.driverType= driverID ? 'employee' : 'family';
-    S.ans  = saved.ans||{};
+    S.ans    = saved.ans||{};
+    S.photos = saved.photos||[];  // restore Phase 1 photos list
     S.refNum = saved.ref||'';
     S.phase  = 2;
     S.idx    = 0;
+    S.paused = false;
+    S.airbags= [];
+    S.injSel = {};
+    S.contactMethod='';
     document.getElementById('progBar').classList.add('show');
     document.getElementById('cbar').classList.add('show');
     document.getElementById('pauseBtn').classList.remove('hidden');
