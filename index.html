@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-03-30 09:26 AM ET -->
+<!-- CCM Accident Assistant — Built: 2026-03-30 10:10 AM ET -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-03-30 09:26 AM ET</title>
+<title>CCM Accident Assistant — 2026-03-30 10:10 AM ET</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -505,6 +505,13 @@ input[type="datetime-local"].fi{color-scheme:dark}
 .tc{text-align:center}
 .sm{font-size:12px;color:var(--t1)}
 .hidden{display:none!important}
+/* ── Speech to Text ── */
+.mic-wrap{position:relative;display:flex;align-items:center;gap:8px}
+.mic-wrap .fi{flex:1}
+.mic-btn{background:rgba(0,212,170,.12);border:1px solid rgba(0,212,170,.2);border-radius:8px;padding:10px 12px;color:#00d4aa;cursor:pointer;font-size:16px;flex-shrink:0;transition:background .2s;line-height:1}
+.mic-btn:hover{background:rgba(0,212,170,.25)}
+.mic-btn.listening{background:rgba(255,79,109,.2);border-color:rgba(255,79,109,.4);color:#ff4f6d;animation:micpulse 1s infinite}
+@keyframes micpulse{0%,100%{opacity:1}50%{opacity:.4}}
 
 @media print{
   .hdr,.cbar,.lpill,.mbg,.sum-actions,.xstrip,.ftp-strip,.hbtn,.pause-wrap{display:none!important}
@@ -567,7 +574,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-30 09:26 AM ET</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-30 10:10 AM ET</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -1124,7 +1131,7 @@ function isSolo(a){
    STATE
 ───────────────────────────────── */
 const S={
-  ans:{}, idx:0, paused:false, hasMic:false,
+  ans:{}, idx:0, paused:false, hasMic:false, sttHintShown:false,
   rec:null,
   photos:[], contactMethod:'', airbags:[], injSel:{},
   phase:1,
@@ -1236,6 +1243,76 @@ function loadModels(make, modelId){
   const sel2 = document.getElementById(modelId);
   sel2.innerHTML='<option value="">Select model…</option>'+
     models.map(m=>`<option value="${m}">${m}</option>`).join('');
+}
+
+// ── Speech to Text ──────────────────────────────────────
+let sttActive = null;  // currently active recognition instance
+
+function showMicHintOnce(){
+  if(sessionStorage.getItem('micHintSeen')) return;
+  sessionStorage.setItem('micHintSeen','1');
+  // Create a dismissable banner
+  const banner = document.createElement('div');
+  banner.id = 'micHint';
+  banner.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1a2535;border:1px solid rgba(0,212,170,.3);border-radius:10px;padding:10px 16px;font-size:13px;color:#eef2fb;z-index:999;display:flex;align-items:center;gap:10px;max-width:320px;box-shadow:0 4px 20px rgba(0,0,0,.4)';
+  banner.innerHTML = '<span style="font-size:20px">🎤</span><span>Tap the mic button to speak, or type your answer</span><button onclick="this.parentNode.remove()" style="background:none;border:none;color:#4a6285;font-size:18px;cursor:pointer;padding:0 0 0 4px">×</button>';
+  document.body.appendChild(banner);
+  // Auto-dismiss after 5 seconds
+  setTimeout(()=>{ if(banner.parentNode) banner.remove(); }, 5000);
+}
+
+function startSTT(fieldId, btn){
+  // Stop any active recognition first
+  if(sttActive){
+    sttActive.stop();
+    sttActive = null;
+  }
+
+  // Check browser support
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){
+    alert('Speech recognition is not supported in this browser. Please type your answer.');
+    return;
+  }
+
+  const field = document.getElementById(fieldId);
+  if(!field) return;
+
+  const rec = new SR();
+  rec.lang = 'en-US';
+  rec.interimResults = false;
+  rec.maxAlternatives = 1;
+  rec.continuous = false;
+
+  sttActive = rec;
+  btn.classList.add('listening');
+  btn.textContent = '⏹';
+  field.placeholder = 'Listening…';
+
+  rec.onresult = function(e){
+    const transcript = e.results[0][0].transcript;
+    field.value = transcript;
+    field.dispatchEvent(new Event('input'));  // trigger any oninput handlers
+  };
+
+  rec.onerror = function(e){
+    console.warn('STT error:', e.error);
+    if(e.error === 'not-allowed'){
+      alert('Microphone access was denied. Please allow microphone access and try again.');
+    }
+  };
+
+  rec.onend = function(){
+    sttActive = null;
+    btn.classList.remove('listening');
+    btn.textContent = '🎤';
+    field.placeholder = field.getAttribute('placeholder') || '';
+    // Restore placeholder from original
+    const ph = field.getAttribute('data-ph');
+    if(ph) field.placeholder = ph;
+  };
+
+  rec.start();
 }
 
 function formatPhone(el){
@@ -1628,6 +1705,17 @@ function _askQuestion(idx){
     if(S.paused)return;
     show('scrQ');
     renderAns(q);
+    // One-time mic hint — shown on first text field only
+    if(S.hasMic && !S.sttHintShown && ['txt','narr','loc','ta','dir'].includes(q.type)){
+      S.sttHintShown = true;
+      const hint = document.createElement('p');
+      hint.style.cssText = 'font-size:12px;color:var(--teal);text-align:center;margin:10px 0 0;opacity:.85';
+      hint.textContent = '💡 Tap 🎤 to speak your answer, or type it in';
+      const ansArea = document.getElementById('ansArea');
+      if(ansArea) ansArea.appendChild(hint);
+      // Fade out after 5 seconds
+      setTimeout(()=>{ hint.style.transition='opacity 1s'; hint.style.opacity='0'; }, 5000);
+    }
     if(S.hasMic&&['yn','txt','narr','loc','ta'].includes(q.type)){
       startListen(t=>handleVoice(q,t));
     }
@@ -1715,7 +1803,13 @@ function selAT(id,ph='Select accident type…'){
   return `<select class="fs" id="${id}"><option value="">${ph}</option>${groups}</select>`;
 }
 function inp(id,ph='',type='text',extra=''){
-  return `<input type="${type}" class="fi" id="${id}" placeholder="${ph}" ${extra}>`;
+  const hasMic = extra && extra.includes('data-v');
+  const inputEl = `<input type="${type}" class="fi" id="${id}" placeholder="${ph}" ${extra}>`;
+  if(hasMic && type!=='tel'){
+    showMicHintOnce();
+    return `<div class="mic-wrap">${inputEl}<button class="mic-btn" onclick="startSTT('${id}',this)" title="Tap to speak">🎤</button></div>`;
+  }
+  return inputEl;
 }
 function fg(lbl,ctrl){return `<div class="fg"><label class="fl">${lbl}</label>${ctrl}</div>`;}
 
@@ -1814,14 +1908,14 @@ function rTxt(a,q){
   setTimeout(()=>document.getElementById('txtI')?.focus(),300);
 }
 function rTa(a,q){
-  a.innerHTML=`<textarea class="ft" id="taI" placeholder="${q.ph||'Your answer…'}" data-v></textarea>
+  a.innerHTML=`<div class="mic-wrap" style="align-items:flex-start"><textarea class="ft" id="taI" placeholder="${q.ph||'Your answer…'}" data-v style="flex:1"></textarea><button class="mic-btn" style="margin-top:2px" onclick="startSTT('taI',this)" title="Tap to speak">🎤</button></div>
   <button class="btn btn-primary mt10" onclick="
     const v=document.getElementById('taI').value.trim();
     if(v)ans(gQ(${q.id}),v);
   ">Submit</button>`;
 }
 function rNarr(a,q){
-  a.innerHTML=`<textarea class="ft" id="narrI" placeholder="Describe what happened in your own words…" rows="5" data-v></textarea>
+  a.innerHTML=`<div class="mic-wrap" style="align-items:flex-start"><textarea class="ft" id="narrI" placeholder="Describe what happened in your own words…" rows="5" data-v style="flex:1"></textarea><button class="mic-btn" style="margin-top:2px" onclick="startSTT('narrI',this)" title="Tap to speak">🎤</button></div>
   <div class="vpreview" id="vhint"></div>
   <button class="btn btn-primary mt10" onclick="
     const v=document.getElementById('narrI').value.trim();
@@ -1883,7 +1977,7 @@ function rFDriver(a,q){
       ? `<div class="fg"><label class="fl">Driver Name</label>
          <div style="background:var(--bg3);border:1px solid var(--bd0);border-radius:var(--r8);padding:12px 13px;font-size:15px;font-weight:600;color:var(--t0)">${knownName}</div>
          <p class="hint">Name collected at start of interview</p></div>`
-      : fg('Full Name',inp('dN','Full name'))
+      : fg('Full Name',inp('dN','Full name','text','data-v'))
     }
     ${licPhotoTaken
       ? `<div style="background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.2);border-radius:var(--r8);padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--teal)">
@@ -1892,7 +1986,7 @@ function rFDriver(a,q){
       : ''
     }
     <div class="r2">
-      ${fg('Driver License #',inp('dL',licPhotoTaken?'Optional — already photographed':'License number'))}
+      ${fg('Driver License #',inp('dL',licPhotoTaken?'Optional — already photographed':'License number','text','data-v'))}
       ${fg('State',sel(ST,'dS','State'))}
     </div>
     <div class="fg"><label class="fl">Driver License Photo</label><label class="uzone" for="dlFile" style="flex-direction:row;padding:13px;gap:10px"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg><div><p style="margin:0;font-size:14px;font-weight:700;color:var(--t0)">📷 Photograph Your Driver License</p><p style="margin:2px 0 0;font-size:11px;color:var(--t1)">Photo or PDF accepted</p></div></label><input type="file" id="dlFile" accept="image/*,application/pdf" class="hidden" onchange="addFiles(event,'Driver License')" capture="environment"><p id="dlFileConfirm" style="display:none;color:var(--teal);font-size:12px;margin-top:6px">✓ Photo attached</p></div>
@@ -1914,10 +2008,10 @@ function rFVehicle(a,q){
     ${fg('Model','<select class="fs" id="vMo"><option value="">Select Make first…</option></select>')}
     ${fg('Color',sel(CL,'vCl','Color'))}
     <div class="r32">
-      ${fg('License Plate',inp('vPl','ABC-1234'))}
+      ${fg('License Plate',inp('vPl','ABC-1234','text','data-v'))}
       ${fg('State',sel(ST,'vPs','ST'))}
     </div>
-    ${isCo?fg('Company Vehicle # (optional)',inp('vFl','Fleet / unit number')):''}
+    ${isCo?fg('Company Vehicle # (optional)',inp('vFl','Fleet / unit number','text','data-v')):''}
     <button class="btn btn-primary" onclick="subVeh(${q.id})">Submit</button>
   </div>`;
 }
@@ -1945,10 +2039,10 @@ function rFIns(a,q){
       : ''
     }
     ${fg('Insurance Company',sel(INS,p+'I',insPhotoTaken?'Optional — already photographed':'Select insurer…'))}
-    <div id="${p}OW" class="hidden">${fg('Specify Company',inp(p+'OI','Company name'))}</div>
+    <div id="${p}OW" class="hidden">${fg('Specify Company',inp(p+'OI','Company name','text','data-v'))}</div>
     <div id="${p}PW">
       <div class="r21">
-        ${fg('Policy Number',inp(p+'P','Policy number'))}
+        ${fg('Policy Number',inp(p+'P','Policy number','text','data-v'))}
         <button class="opt" style="padding:12px 8px;font-size:12px;margin-bottom:0" onclick="document.getElementById('${p}P').value='Unknown'">Unknown</button>
       </div>
     </div>
@@ -1984,10 +2078,10 @@ function subIns(p,qid){
 }
 function rFOtherDrv(a,q){
   a.innerHTML=`<div class="fcard">
-    ${fg('Driver Name',inp('oN','Full name'))}
+    ${fg('Driver Name',inp('oN','Full name','text','data-v'))}
     ${fg('Phone / Contact',inp('oP','(555)-123-4567','tel','oninput="formatPhone(this)"'))}
     <div class="r2">
-      ${fg('License #',inp('oL','License #'))}
+      ${fg('License #',inp('oL','License #','text','data-v'))}
       ${fg('State',sel(ST,'oS','State'))}
     </div>
     <div class="fg"><label class="fl">Other Driver's License Photo</label><label class="uzone" for="odLicFile" style="flex-direction:row;padding:13px;gap:10px"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg><div><p style="margin:0;font-size:14px;font-weight:700;color:var(--t0)">📷 Photograph Other Driver's License</p><p style="margin:2px 0 0;font-size:11px;color:var(--t1)">Photo or PDF accepted</p></div></label><input type="file" id="odLicFile" accept="image/*,application/pdf" class="hidden" onchange="addFiles(event,'Other Driver License')" capture="environment"><p id="odLicFileConfirm" style="display:none;color:var(--teal);font-size:12px;margin-top:6px">✓ Photo attached</p></div>
@@ -2009,7 +2103,7 @@ function rFOtherVeh(a,q){
     ${fg('Model','<select class="fs" id="ovMo"><option value="">Select Make first…</option></select>')}
     ${fg('Color',sel(CL,'ovCl','Color'))}
     <div class="r32">
-      ${fg('License Plate',inp('ovPl','Plate'))}
+      ${fg('License Plate',inp('ovPl','Plate','text','data-v'))}
       ${fg('State',sel(ST,'ovPs','ST'))}
     </div>
     <button class="btn btn-primary" onclick="
@@ -2025,7 +2119,7 @@ function rFOtherVeh(a,q){
 }
 function rFDmg(a,q){
   a.innerHTML=`<div class="fcard">
-    ${fg('Describe Vehicle Damage',`<textarea class="ft" id="dmgD" rows="3" placeholder="Front bumper, hood, driver door…"></textarea>`)}
+    ${fg('Describe Vehicle Damage',`<div class="mic-wrap" style="align-items:flex-start"><textarea class="ft" id="dmgD" rows="3" placeholder="Front bumper, hood, driver door…" style="flex:1"></textarea><button class="mic-btn" style="margin-top:2px" onclick="startSTT('dmgD',this)" title="Tap to speak">🎤</button></div>`)}
     <div class="fg">
       <label class="fl">Is vehicle drivable?</label>
       <div class="radio-row">
@@ -2043,8 +2137,8 @@ function rFDmg(a,q){
 }
 function rFTow(a,q){
   a.innerHTML=`<div class="fcard">
-    ${fg('Tow Company Name',inp('twC','Company name'))}
-    ${fg('Towed To (Location or Shop)',inp('twD','Destination address or shop name'))}
+    ${fg('Tow Company Name',inp('twC','Company name','text','data-v'))}
+    ${fg('Towed To (Location or Shop)',inp('twD','Destination address or shop name','text','data-v'))}
     <button class="btn btn-primary" onclick="
       const c=document.getElementById('twC').value.trim();
       const d=document.getElementById('twD').value.trim();
@@ -2054,9 +2148,9 @@ function rFTow(a,q){
 }
 function rFPol(a,q){
   a.innerHTML=`<div class="fcard">
-    ${fg('Police Department',inp('polD','Department name'))}
-    ${fg('Officer Name / Badge #',inp('polO','Officer or badge number'))}
-    ${fg('Report Number',inp('polR','Report / case number'))}
+    ${fg('Police Department',inp('polD','Department name','text','data-v'))}
+    ${fg('Officer Name / Badge #',inp('polO','Officer or badge number','text','data-v'))}
+    ${fg('Report Number',inp('polR','Report / case number','text','data-v'))}
     <div class="fg">
       <label class="fl">Attach Police Report (PDF or Photo)</label>
       <label class="uzone" for="polFile" style="flex-direction:row;padding:13px;gap:10px">
@@ -2075,7 +2169,7 @@ function rFPol(a,q){
 }
 function rFCit(a,q){
   a.innerHTML=`<div class="fcard">
-    ${fg('Citation Issued To',inp('ctT','Name of person cited'))}
+    ${fg('Citation Issued To',inp('ctT','Name of person cited','text','data-v'))}
     ${fg('Violation',inp('ctV','e.g. Failure to yield, speeding…'))}
     <button class="btn btn-primary" onclick="
       const t=document.getElementById('ctT').value.trim();
@@ -2086,8 +2180,8 @@ function rFCit(a,q){
 }
 function rFWit(a,q){
   a.innerHTML=`<div class="fcard">
-    ${fg('Witness Full Name',inp('wN','Full name'))}
-    ${fg('Phone or Email',inp('wC','Contact information'))}
+    ${fg('Witness Full Name',inp('wN','Full name','text','data-v'))}
+    ${fg('Phone or Email',inp('wC','Contact information','text','data-v'))}
     <button class="btn btn-primary" onclick="
       const n=document.getElementById('wN').value.trim();
       const c=document.getElementById('wC').value.trim();
@@ -2109,7 +2203,7 @@ function rFContact(a,q){
     <div id="ctDet" class="hidden">
       <div class="fg">
         <label class="fl" id="ctLbl">Phone Number</label>
-        <input class="fi" id="ctI" type="text" placeholder="">
+        <div class="mic-wrap"><input class="fi" id="ctI" type="text" placeholder=""><button class="mic-btn" onclick="startSTT('ctI',this)" title="Tap to speak">🎤</button></div>
         <p class="ferr" id="ctErr"></p>
       </div>
       <button class="btn btn-primary" onclick="subContact(${q.id})">Finalize Report</button>
@@ -2186,7 +2280,7 @@ function rInjDet(a,q){
     h+=`<div class="inj-person">
       <div class="inj-p-h">${p.veh} — ${p.r}</div>
       ${fg('Full Name',inp('ijN'+i,'Full name'))}
-      ${fg('Injuries / Symptoms',`<textarea class="ft" id="ijD${i}" rows="2" placeholder="Whiplash, bruising, broken arm…"></textarea>`)}
+      ${fg('Injuries / Symptoms',`<div class="mic-wrap" style="align-items:flex-start"><textarea class="ft" id="ijD${i}" rows="2" placeholder="Whiplash, bruising, broken arm…" style="flex:1"></textarea><button class="mic-btn" style="margin-top:2px" onclick="startSTT('ijD${i}',this)" title="Tap to speak">🎤</button></div>`)}
     </div>`;
   });
   h+=`<button class="btn btn-primary mt10" onclick="subInjDet(${q.id},${persons.length})">Submit Details</button>`;
