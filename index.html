@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-03-30 10:10 AM ET -->
+<!-- CCM Accident Assistant — Built: 2026-03-30 10:46 AM ET -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-03-30 10:10 AM ET</title>
+<title>CCM Accident Assistant — 2026-03-30 10:46 AM ET</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -574,7 +574,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-30 10:10 AM ET</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-30 10:46 AM ET</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -611,7 +611,11 @@ input[type="datetime-local"].fi{color-scheme:dark}
         <span style="color:var(--teal);font-size:18px">→</span>
       </div>
 
-      <input class="fi" id="id1Company" placeholder="Company name…" type="text" style="margin-bottom:20px">
+      <select class="fi" id="id1Company" style="margin-bottom:20px">
+        <option value="">Select your company…</option>
+        <option value="CCM Demo Company" data-num="998">CCM Demo Company</option>
+        <option value="Corporate Claims Management" data-num="999">Corporate Claims Management</option>
+      </select>
 
       <!-- Employee/Family selection — always shown first -->
       <div style="background:var(--bg2);border:1px solid var(--bd1);border-radius:var(--r16);padding:18px;margin-bottom:16px">
@@ -655,14 +659,17 @@ input[type="datetime-local"].fi{color-scheme:dark}
       <div id="id2NewFields">
         <div id="id2EmployeeFields">
           <label class="fl">Driver ID</label>
-          <input class="fi" id="id2DriverID" placeholder="e.g. D1234, EMP-567…" type="text" style="margin-bottom:12px">
+          <div class="mic-wrap"><input class="fi" id="id2DriverID" placeholder="e.g. D1234, EMP-567…" type="text" style="margin-bottom:0"><button class="mic-btn" onclick="startSTT('id2DriverID',this)" title="Tap to speak">🎤</button></div>
+          <div style="margin-bottom:12px"></div>
         </div>
         <label class="fl">Full Name</label>
-        <input class="fi" id="id2Name" placeholder="First and last name…" type="text" style="margin-bottom:12px">
+        <div class="mic-wrap"><input class="fi" id="id2Name" placeholder="First and last name…" type="text" style="margin-bottom:0"><button class="mic-btn" onclick="startSTT('id2Name',this)" title="Tap to speak">🎤</button></div>
+        <div style="margin-bottom:12px"></div>
         <label class="fl">Mobile Phone Number</label>
         <input class="fi" id="id2Phone" placeholder="(555)-123-4567" type="tel" style="margin-bottom:12px" oninput="formatPhone(this)">
         <label class="fl">Email Address</label>
-        <input class="fi" id="id2Email" placeholder="your@email.com" type="email" style="margin-bottom:12px">
+        <div class="mic-wrap"><input class="fi" id="id2Email" placeholder="your@email.com" type="email" style="margin-bottom:0"><button class="mic-btn" onclick="startSTT('id2Email',this)" title="Tap to speak">🎤</button></div>
+        <div style="margin-bottom:12px"></div>
         <!-- Family member additional fields -->
         <div id="id2FamilyFields" style="display:none">
           <label class="fl">Relationship to Assigned Employee</label>
@@ -678,9 +685,11 @@ input[type="datetime-local"].fi{color-scheme:dark}
             <button class="opt-btn" id="btnAuthNo"  onclick="selectAuth('No')"  style="flex:1;padding:12px">No</button>
           </div>
           <label class="fl">Assigned Employee Full Name</label>
-          <input class="fi" id="id2EmployeeName" placeholder="Employee full name…" type="text" style="margin-bottom:12px">
+          <div class="mic-wrap"><input class="fi" id="id2EmployeeName" placeholder="Employee full name…" type="text" style="margin-bottom:0"><button class="mic-btn" onclick="startSTT('id2EmployeeName',this)" title="Tap to speak">🎤</button></div>
+          <div style="margin-bottom:12px"></div>
           <label class="fl">Assigned Employee Driver ID</label>
-          <input class="fi" id="id2EmployeeID" placeholder="e.g. D1234…" type="text" style="margin-bottom:12px">
+          <div class="mic-wrap"><input class="fi" id="id2EmployeeID" placeholder="e.g. D1234…" type="text" style="margin-bottom:0"><button class="mic-btn" onclick="startSTT('id2EmployeeID',this)" title="Tap to speak">🎤</button></div>
+          <div style="margin-bottom:12px"></div>
         </div>
       </div>
 
@@ -1505,7 +1514,7 @@ function selectDriverType(type){
 
 function submitID1(){
   const err=document.getElementById('id1Err');
-  const company=document.getElementById('id1Company').value.trim();
+  const company=document.getElementById('id1Company').value;
   if(!company){ err.textContent='Please enter your company name.'; err.style.display='block'; return; }
   if(!S.identity.driverType){ err.textContent='Please select Employee or Family Member / Authorized Driver.'; err.style.display='block'; return; }
   err.style.display='none';
