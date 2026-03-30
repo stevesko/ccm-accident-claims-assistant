@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-03-30 10:46 AM ET -->
+<!-- CCM Accident Assistant — Built: 2026-03-30 11:15 AM ET -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-03-30 10:46 AM ET</title>
+<title>CCM Accident Assistant — 2026-03-30 11:15 AM ET</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -574,7 +574,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-30 10:46 AM ET</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-30 11:15 AM ET</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -2631,6 +2631,7 @@ async function submitReport(){
       date:        date,
       report:      report,
       to_email:    CLAIMS_EMAIL,
+      subject:     'Accident Claim Phase 1 Complete — '+company+' | '+name,
     });
     // FTP hook for future use
     if(FTP_ENDPOINT){
@@ -2681,6 +2682,7 @@ async function submitReport(){
           company:     company,
           date:        new Date().toLocaleString(),
           to_email:    driverEmail,
+          subject:     'Accident Claim — Return to Accident Claim | Ref: '+S.refNum,
           report:      'Your Phase 1 accident report has been received by Corporate Claims Management.\n\n'
                       +'Claim Number:     '+S.claimNum+'\n'
                       +'Reference Number: '+S.refNum+'\n\n'
@@ -2760,6 +2762,7 @@ function showResendRefFromScreen2(){
       company: S.identity.company||'',
       date: new Date().toLocaleString(),
       to_email: driverEmail,
+      subject:  'Accident Claim — Return to Accident Claim | Ref: '+saved.ref,
       report: 'Your reference number has been resent.\n\nReference Number: '+saved.ref+'\n\nReturn to: '+appUrl+'\n\n— Corporate Claims Management'
     }).then(()=>{
       err.style.color='var(--teal)';
@@ -2870,6 +2873,7 @@ async function showResendNumbers(){
       company:     '',
       date:        new Date().toLocaleString(),
       to_email:    CLAIMS_EMAIL,
+      subject:     'Accident Claim Phase 1 Complete — Claim Number Request',
       report:      'A driver has requested their claim numbers via the app.\n\n'
                   +'Driver Name:      '+(d.driverName||'Unknown')+'\n'
                   +'Phone Entered:    '+phone+'\n'
