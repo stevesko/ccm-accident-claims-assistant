@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-03-30 01:24 PM ET -->
+<!-- CCM Accident Assistant — Built: 2026-03-30 01:47 PM ET -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-03-30 01:24 PM ET</title>
+<title>CCM Accident Assistant — 2026-03-30 01:47 PM ET</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -575,7 +575,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-30 01:24 PM ET</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-30 01:47 PM ET</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -1116,7 +1116,7 @@ const Qs=[
   {id:23, text:"Provide the other driver's insurance information.",               type:'fins',key:'od',skip:isSolo},
   {id:24, text:"Describe the damage to your vehicle. Is it drivable?",           type:'fdmg'},
   {id:25, text:"Was there damage to other vehicles or property?",                 type:'yn'},
-  {id:26, text:"Describe the damage to other vehicles or property.",              type:'ta',ph:'Describe other vehicle or property damage…',skip:a=>a[25]==='No'},
+  {id:26, text:'Describe the damage to the other vehicle(s).', type:'fothdmg', skip:a=>a[25]==='No'},
   {id:27, text:"Did any airbags deploy?",                                         type:'yn'},
   {id:28, text:"Select which vehicles had airbags deploy.",                       type:'airbags',skip:a=>a[27]==='No'},
   {id:29, text:"Does your vehicle need to be towed?",                             type:'yn'},
@@ -1141,7 +1141,7 @@ function isSolo(a){
    STATE
 ───────────────────────────────── */
 const S={
-  ans:{}, idx:0, paused:false, hasMic:false, sttHintShown:false, policeReport:null,
+  ans:{}, idx:0, paused:false, hasMic:false, sttHintShown:false, policeReport:null, prefill:{}, returning:false,
   rec:null,
   photos:[], contactMethod:'', airbags:[], injSel:{},
   phase:1,
@@ -1233,6 +1233,14 @@ function mkSel(mkId, moId){
   return '<select class="fs" id="'+mkId+'" data-target="'+moId+'" onchange="loadModels(this.value,this.dataset.target)">'
     +'<option value="">Make</option>'+opts+'</select>';
 }
+function acceptVehPrefill(qid){
+  const pf = S.prefill.vehicle || {};
+  const label = [pf.year, pf.make, pf.model, pf.color].filter(Boolean).join(' ');
+  const plate = pf.plate ? ' | Plate: '+pf.plate+' ('+( pf.plateState||'')+ ')' : '';
+  const fleet = pf.fleet ? ' | Fleet: '+pf.fleet : '';
+  ans(gQ(qid), label+(plate||' | Plate: N/A')+fleet);
+}
+
 async function decodeVIN(vinId, yearId, makeId, modelId, colorId, statusId){
   const vin = document.getElementById(vinId).value.trim().toUpperCase();
   const status = document.getElementById(statusId);
@@ -1329,6 +1337,11 @@ async function decodeVIN(vinId, yearId, makeId, modelId, colorId, statusId){
       }, 150);
     }
 
+    // Save decoded result for pre-fill next time
+    try{
+      const saveKey = vinId.startsWith('ov') ? 'ccm_vin_v2' : 'ccm_vin_v1';
+      localStorage.setItem(saveKey, JSON.stringify({year,make,model:model+(trim?' '+trim:''),color:null}));
+    }catch(e){}
     // Build success message
     const filled = [year, make, model, trim].filter(Boolean).join(' ');
     status.style.color = 'var(--teal)';
@@ -1741,7 +1754,35 @@ function submitID2(){
     S.identity.employeeID=document.getElementById('id2EmployeeID').value.trim();
   }
 
-  startInterview();
+  // Look up returning driver before starting interview
+  lookupReturningDriver(driverID, name).then(()=> startInterview());
+}
+
+async function lookupReturningDriver(driverID, name){
+  S.prefill = {};
+  S.returning = false;
+  if(!driverID) return;
+  try{
+    const r = await fetch('/api/get-claims?driverID='+encodeURIComponent(driverID)+'&limit=1');
+    const d = await r.json();
+    const claims = d.claims || [];
+    if(!claims.length) return;
+    const last = claims[0];
+    // Parse vehicle info from last claim payload
+    try{
+      const payload = JSON.parse(last.payload || '{}');
+      const veh = payload.vehicle || {};
+      if(veh.year || veh.make || veh.model){
+        S.prefill.vehicle = veh;
+        S.returning = true;
+      }
+      // Pre-fill insurance
+      const ins = payload.insurance || {};
+      if(ins.company) S.prefill.insurance = ins;
+    }catch(e){}
+  }catch(e){
+    console.warn('Returning driver lookup failed:', e);
+  }
 }
 
 function continuePendingReport(){
@@ -1779,7 +1820,10 @@ function startInterview(){
   initVoice();
   show('scrPrep');
   document.getElementById('prepMsg').textContent='Connecting…';
-  const greeting = 'Thank you. I will now guide you through the accident details. Please answer each question as accurately as possible.';
+  const firstName = (S.identity.name||'').split(' ')[0] || '';
+  const greeting = S.returning && firstName
+    ? 'Welcome back, '+firstName+'. I have your vehicle information on file. I will now guide you through the accident details.'
+    : 'Thank you. I will now guide you through the accident details. Please answer each question as accurately as possible.';
   speak(greeting, ()=>{ goToQ(0); });
 }
 
@@ -1812,7 +1856,7 @@ function _askQuestion(idx){
   // dynamic Q3 text
   const qTxt = (q.id===3)
     ? (isSolo(S.ans)?"Were there any passengers in your vehicle?":"Were there any passengers in any of the vehicles?")
-    : q.text;
+    : (typeof q.text === 'function' ? q.text() : q.text);
   document.getElementById('qText').textContent=qTxt;
   document.getElementById('btnBack').disabled=idx===0;
 
@@ -1902,7 +1946,7 @@ function renderAns(q){
     'loc':rLoc,'dt':rDt,'txt':rTxt,'ta':rTa,'narr':rNarr,
     'photoprompt':rFPhotoPrompt,'ddAT':rDDAT,'fdriver':rFDriver,'fvehicle':rFVehicle,'fins':rFIns,
     'fotherdrv':rFOtherDrv,'fotherveh':rFOtherVeh,
-    'fdmg':rFDmg,'ftow':rFTow,'fpol':rFPol,'fcit':rFCit,
+    'fdmg':rFDmg,'fothdmg':rFOthDmg,'ftow':rFTow,'fpol':rFPol,'fcit':rFCit,
     'fwit':rFWit,'fcontact':rFContact,
     'injsel':rInjSel,'injdet':rInjDet,'airbags':rAirbags,
   }[q.type]||rTxt)(area,q);
@@ -2134,7 +2178,25 @@ function rFDriver(a,q){
 }
 function rFVehicle(a,q){
   const isCo=S.identity.driverType==='employee'||S.identity.driverType==='family';
+  const pf = S.prefill.vehicle || {};
+  // Check localStorage for VIN decode result
+  try{
+    const vinSaved = JSON.parse(localStorage.getItem('ccm_vin_v1')||'null');
+    if(vinSaved && !pf.make){ Object.assign(pf, vinSaved); }
+  }catch(e){}
+  const hasPrefill = !!(pf.make || pf.year);
+  const pfLabel = [pf.year, pf.make, pf.model].filter(Boolean).join(' ');
+  const pfPlate = pf.plate ? ' | Plate: '+pf.plate : '';
   a.innerHTML=`<div class="fcard">
+    ${hasPrefill ? `<div id="vehPrefillBanner" style="background:rgba(0,212,170,.08);border:1.5px solid rgba(0,212,170,.3);border-radius:var(--r12);padding:16px;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:800;color:var(--teal);margin-bottom:6px">📋 We have your vehicle on file</div>
+      <div style="font-size:15px;font-weight:700;color:var(--t0);margin-bottom:12px">${pfLabel}${pfPlate}</div>
+      <div style="display:flex;gap:10px">
+        <button onclick="acceptVehPrefill(${q.id})" style="flex:1;background:var(--teal);border:none;border-radius:var(--r8);padding:12px;color:#0a1628;font-size:14px;font-weight:800;cursor:pointer">✓ Yes, this is my vehicle</button>
+        <button onclick="document.getElementById('vehPrefillBanner').style.display='none';document.getElementById('vehManualFields').style.display='block'" style="flex:1;background:var(--bg3);border:1px solid var(--bd1);border-radius:var(--r8);padding:12px;color:var(--t1);font-size:14px;font-weight:600;cursor:pointer">No, enter manually</button>
+      </div>
+    </div>` : ''}
+    <div id="vehManualFields" style="${hasPrefill?'display:none':''}">
     <div class="fg">
       <label class="fl" style="font-weight:800;font-size:13px">Photo Your Vehicle VIN</label>
       <label class="uzone" for="vinFile" style="flex-direction:row;padding:16px;gap:14px;align-items:center">
@@ -2173,7 +2235,8 @@ function rFVehicle(a,q){
       ${fg('State',sel(ST,'vPs','ST'))}
     </div>
     ${isCo?fg('Company Vehicle # (optional)',inp('vFl','Fleet / unit number','text','data-v')):''}
-    <button class="btn btn-primary" onclick="subVeh(${q.id})">Submit</button>
+    </div>
+    <button class="btn btn-primary" id="vehSubmitBtn" onclick="subVeh(${q.id})">Submit</button>
   </div>`;
 }
 function subVeh(qid){
@@ -2238,9 +2301,14 @@ function subIns(p,qid){
   ans(gQ(qid),`Company: ${co} | Policy: ${pol}`);
 }
 function rFOtherDrv(a,q){
+  // Pre-fill from Phase 1 other driver answer (Q20)
+  const p1OD = S.ans[20] || '';
+  const p1Name  = (p1OD.match(/Name:\s*([^|]+)/i)||[])[1]?.trim() || '';
+  const p1Phone = (p1OD.match(/Phone:\s*([^|]+)/i)||[])[1]?.trim() || '';
   a.innerHTML=`<div class="fcard">
-    ${fg('Driver Name',inp('oN','Full name','text','data-v'))}
-    ${fg('Phone / Contact',inp('oP','(555)-123-4567','tel','oninput="formatPhone(this)"'))}
+    ${p1Name ? `<div style="background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.2);border-radius:var(--r8);padding:10px 13px;margin-bottom:12px;font-size:12px;color:var(--teal)">📋 Pre-filled from Phase 1</div>` : ''}
+    ${fg('Driver Name',`<div class="mic-wrap"><input class="fi" id="oN" type="text" placeholder="Full name" value="${p1Name}"><button class="mic-btn" onclick="startSTT('oN',this)" title="Tap to speak">🎤</button></div>`)}
+    ${fg('Phone / Contact',`<div class="mic-wrap"><input class="fi" id="oP" type="tel" placeholder="(555)-123-4567" value="${p1Phone}" oninput="formatPhone(this)"><button class="mic-btn" onclick="startSTT('oP',this)" title="Tap to speak">🎤</button></div>`)}
     <div class="r2">
       ${fg('License #',inp('oL','License #','text','data-v'))}
       ${fg('State',sel(ST,'oS','State'))}
@@ -2323,6 +2391,53 @@ function rFDmg(a,q){
     ">Submit</button>
   </div>`;
 }
+function rFOthDmg(a,q){
+  // Build one damage section per other vehicle based on how many were involved
+  const total = parseInt(S.ans[2]) || 1;
+  const otherCount = Math.max(total - 1, 1);
+  let h = '<div class="fcard">';
+
+  for(let i=0; i<otherCount; i++){
+    const vNum = i + 2; // Vehicle #2, #3, etc.
+    // Try to get vehicle info from answers
+    const vehAns = i===0 ? (S.ans[22]||'') : '';
+    const vehLabel = vehAns ? vehAns.split('|')[0].trim() : 'Vehicle #'+vNum;
+    h += `<div style="background:var(--bg2);border:1px solid var(--bd1);border-radius:var(--r12);padding:16px;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Vehicle #${vNum}</div>
+      ${vehAns?`<div style="font-size:12px;color:var(--t2);margin-bottom:10px">${vehLabel}</div>`:''}
+      <div class="fg" style="margin-bottom:10px">
+        <label class="fl">Damage Description</label>
+        <div class="mic-wrap" style="align-items:flex-start">
+          <textarea class="ft" id="othDmgD${i}" rows="3" placeholder="Front bumper, hood, driver door…" style="flex:1"></textarea>
+          <button class="mic-btn" style="margin-top:2px" onclick="startSTT('othDmgD${i}',this)" title="Tap to speak">🎤</button>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl">Is Vehicle #${vNum} drivable?</label>
+        <div class="radio-row">
+          <label class="rl"><input type="radio" name="othDrv${i}" value="Yes"> Yes</label>
+          <label class="rl"><input type="radio" name="othDrv${i}" value="No"> No</label>
+          <label class="rl"><input type="radio" name="othDrv${i}" value="Unknown" checked> Unknown</label>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  h += `<button class="btn btn-primary" onclick="subOthDmg(${q.id},${otherCount})">Submit</button>`;
+  h += '</div>';
+  a.innerHTML = h;
+}
+function subOthDmg(qid, count){
+  const parts = [];
+  for(let i=0; i<count; i++){
+    const vNum = i + 2;
+    const d = document.getElementById('othDmgD'+i)?.value.trim() || 'Not described';
+    const dr = document.querySelector('input[name="othDrv'+i+'"]:checked')?.value || 'Unknown';
+    parts.push('Vehicle #'+vNum+': '+d+' | Drivable: '+dr);
+  }
+  ans(gQ(qid), parts.join(' || '));
+}
+
 function rFTow(a,q){
   a.innerHTML=`<div class="fcard">
     ${fg('Tow Company Name',inp('twC','Company name','text','data-v'))}
@@ -2423,12 +2538,30 @@ function subPol(qid){
   ans(gQ(qid),'Dept: '+(d||'N/A')+' | Officer: '+(o||'N/A')+' | Report #: '+(r||'N/A'));
 }
 function rFCit(a,q){
+  // Build driver name options from known identity data and other driver data
+  const myName   = S.identity.name || 'Driver 1 (You)';
+  const odName   = (() => {
+    const odAns = S.ans[21] || '';
+    const m = odAns.match(/Name:\s*([^|]+)/i);
+    return m ? m[1].trim() : 'Other Driver';
+  })();
+  const isSoloAcc = isSolo(S.ans);
   a.innerHTML=`<div class="fcard">
-    ${fg('Citation Issued To',inp('ctT','Name of person cited','text','data-v'))}
-    ${fg('Violation',inp('ctV','e.g. Failure to yield, speeding…'))}
+    <div class="fg">
+      <label class="fl" style="font-weight:800">Citation Issued To</label>
+      <select class="fs" id="ctT">
+        <option value="">Select driver…</option>
+        <option value="${myName}">${myName} (Driver 1 — You)</option>
+        ${!isSoloAcc?`<option value="${odName}">${odName} (Driver 2 — Other Vehicle)</option>`:''}
+        <option value="Both Drivers">Both Drivers</option>
+        <option value="Other">Other / Not Listed</option>
+      </select>
+    </div>
+    ${fg('Violation',inp('ctV','e.g. Failure to yield, speeding…','text','data-v'))}
     <button class="btn btn-primary" onclick="
-      const t=document.getElementById('ctT').value.trim();
+      const t=document.getElementById('ctT').value;
       const v=document.getElementById('ctV').value.trim();
+      if(!t){alert('Please select who received the citation.');return;}
       ans(gQ(${q.id}),'Issued to: '+(t||'N/A')+' | Violation: '+(v||'N/A'));
     ">Submit</button>
   </div>`;
@@ -2752,7 +2885,7 @@ function buildJSON(){
   // map raw answers
   Qs.forEach(q=>{
     const a=S.ans[q.id];
-    if(a&&a!=='Skipped') payload.raw['q'+q.id]={question:q.text,answer:a};
+    if(a&&a!=='Skipped') payload.raw['q'+q.id]={question:(typeof q.text==='function'?q.text():q.text),answer:a};
   });
   // structured fields
   const g=id=>S.ans[id]||'';
@@ -2866,7 +2999,7 @@ async function submitReport(){
       const q=Qs.find(x=>x.id===id);
       const a=S.ans[id];
       if(!q||!a||a==='Skipped')return '';
-      return q.text+':\n    '+a;
+      return (typeof q.text==='function'?q.text():q.text)+':\n    '+a;
     }).filter(Boolean);
     if(rows.length) report+='[ '+sec.t.toUpperCase()+' ]\n'+rows.join('\n\n')+'\n\n';
   });
