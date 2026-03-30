@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-03-28 03:10 PM ET -->
+<!-- CCM Accident Assistant — Built: 2026-03-30 09:26 AM ET -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-03-28 03:10 PM ET</title>
+<title>CCM Accident Assistant — 2026-03-30 09:26 AM ET</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -567,7 +567,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-28 03:10 PM ET</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-30 09:26 AM ET</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -732,7 +732,20 @@ input[type="datetime-local"].fi{color-scheme:dark}
       <button class="btn btn-primary" onclick="submitPhase2Entry()" style="margin-bottom:10px">Continue to Phase 2 →</button>
       <div style="border-top:1px solid var(--bd0);padding-top:14px;margin-top:6px">
         <p style="font-size:12px;color:var(--t1);margin-bottom:10px">Can't find your numbers?</p>
-        <button class="btn btn-ghost" onclick="showResendNumbers()" style="margin-bottom:10px">
+        <div id="resendPhoneBlock" style="display:none;margin-bottom:10px">
+          <label class="fl">Your Mobile Phone Number</label>
+          <input class="fi" id="p2ResendPhone" placeholder="(215)-555-1234" type="tel"
+            oninput="formatPhone(this)" style="margin-bottom:8px">
+          <button class="btn btn-primary" onclick="showResendNumbers()" style="margin-bottom:6px">
+            📱 Send my claim numbers
+          </button>
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('resendPhoneBlock').style.display='none'">
+            Cancel
+          </button>
+        </div>
+        <button class="btn btn-ghost" id="resendToggleBtn"
+          onclick="document.getElementById('resendPhoneBlock').style.display='block';this.style.display='none'"
+          style="margin-bottom:10px">
           📱 Text to my phone number
         </button>
       </div>
@@ -2664,6 +2677,13 @@ function showPhase2Entry(){
   if(cn) cn.value='';
   const ref=document.getElementById('p2Ref');
   if(ref) ref.value='';
+  // Reset resend phone block
+  const rb=document.getElementById('resendPhoneBlock');
+  if(rb) rb.style.display='none';
+  const rtb=document.getElementById('resendToggleBtn');
+  if(rtb) rtb.style.display='';
+  const rp=document.getElementById('p2ResendPhone');
+  if(rp) rp.value='';
   show('scrPhase2Entry');
 }
 
@@ -2718,8 +2738,15 @@ function submitPhase2Entry(){
 }
 
 async function showResendNumbers(){
-  const phone=prompt('Enter your mobile phone number:');
-  if(!phone) return;
+  const phoneEl=document.getElementById('p2ResendPhone');
+  const phone=phoneEl?phoneEl.value.trim():'';
+  if(!phone || phone.replace(/\D/g,'').length < 10){
+    const err=document.getElementById('p2Err');
+    err.style.color='var(--red)';
+    err.textContent='Please enter a valid 10-digit phone number e.g. (215)-555-1234.';
+    err.style.display='block';
+    return;
+  }
   const err=document.getElementById('p2Err');
   err.style.color='var(--red)';
   err.style.display='none';
