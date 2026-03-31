@@ -30,11 +30,10 @@ export default async function handler(req, res) {
   const client = getClient();
 
   try {
-    // Create table if it doesn't exist
+    // Create base table if it doesn't exist
     await client.execute(`
       CREATE TABLE IF NOT EXISTS claims (
         id            INTEGER PRIMARY KEY AUTOINCREMENT,
-        claim_number  INTEGER UNIQUE,
         ref_number    TEXT NOT NULL,
         phase         INTEGER DEFAULT 1,
         submitted_at  TEXT NOT NULL,
@@ -53,6 +52,13 @@ export default async function handler(req, res) {
         payload       TEXT
       )
     `);
+
+    // Add claim_number column if it doesn't exist (ALTER TABLE is safe to run repeatedly)
+    try {
+      await client.execute('ALTER TABLE claims ADD COLUMN claim_number INTEGER');
+    } catch(e) {
+      // Column already exists — that's fine
+    }
 
     // Get next claim number — start at 161000
     const maxResult = await client.execute(
