@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-03-31 07:00 AM ET -->
+<!-- CCM Accident Assistant — Built: 2026-03-31 07:18 AM ET -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-03-31 07:00 AM ET</title>
+<title>CCM Accident Assistant — 2026-03-31 07:18 AM ET</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -506,6 +506,21 @@ input[type="datetime-local"].fi{color-scheme:dark}
 .tc{text-align:center}
 .sm{font-size:12px;color:var(--t1)}
 .hidden{display:none!important}
+/* ── Custom Accident Type Dropdown ── */
+.at-wrap{position:relative}
+.at-trigger{display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border:1px solid var(--bd1);border-radius:var(--r8);padding:13px 14px;cursor:pointer;font-size:14px;color:var(--t0);transition:border-color .2s;user-select:none}
+.at-trigger:hover{border-color:var(--blue)}
+.at-trigger.open{border-color:var(--blue);border-bottom-left-radius:0;border-bottom-right-radius:0}
+.at-trigger-val{flex:1}
+.at-trigger-arrow{color:var(--t2);font-size:12px;margin-left:8px;transition:transform .2s}
+.at-trigger.open .at-trigger-arrow{transform:rotate(180deg)}
+.at-list{display:none;position:absolute;left:0;right:0;top:100%;background:var(--bg1);border:1px solid var(--blue);border-top:none;border-bottom-left-radius:var(--r8);border-bottom-right-radius:var(--r8);z-index:100;max-height:340px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.at-list.open{display:block}
+.at-group-hdr{padding:10px 14px 6px;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:#1a2540;border-top:1px solid rgba(255,255,255,.08);position:sticky;top:0;z-index:1}
+.at-group-hdr:first-child{border-top:none}
+.at-opt{padding:11px 14px 11px 22px;font-size:13px;color:var(--t0);cursor:pointer;transition:background .15s}
+.at-opt:hover{background:var(--blue-g);color:var(--blue)}
+.at-opt.selected{background:rgba(45,140,240,.12);color:var(--blue);font-weight:700}
 /* ── Speech to Text ── */
 .mic-wrap{position:relative;display:flex;align-items:center;gap:8px}
 .mic-wrap .fi{flex:1}
@@ -575,7 +590,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-31 07:00 AM ET</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-31 07:18 AM ET</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -1625,7 +1640,7 @@ function beginApp(){
 
   // Defer speak slightly — gives iOS time to fully unlock AudioContext
   setTimeout(()=>{
-    speak('Welcome to the Corporate Claims Management Accident Assistant. Please select your company name, and whether you are an Employee or a Family Member.');
+    speak('Welcome to Corporate Claims Management Accident Assistant. Please select your company, then let us know whether you are an Employee or a Family Member.');
   }, 300);
 }
 
@@ -2096,16 +2111,54 @@ function rNarr(a,q){
 
 /* ── FORMS ── */
 function rDDAT(a,q){
-  a.innerHTML='<div class="fcard">'
-    +fg('Accident Type',selAT('q13dd',q.ph||'Select accident type…'))
-    +'<button class="btn btn-primary mt14" onclick="submitAT()">Submit</button>'
-    +'</div>';
+  let listHTML = '';
+  AT_GROUPS.forEach(g=>{
+    listHTML += `<div class="at-group-hdr">${g.group}</div>`;
+    g.options.forEach(o=>{
+      listHTML += '<div class="at-opt" onclick="selectAT(this,'+JSON.stringify(o)+','+q.id+')">'+o+'</div>';
+    });
+  });
+  a.innerHTML=`<div class="fcard">
+    <div class="fg">
+      <label class="fl" style="font-weight:800">Accident Type</label>
+      <div class="at-wrap">
+        <div class="at-trigger" id="atTrigger" onclick="toggleATList()">
+          <span class="at-trigger-val" id="atVal">Select accident type…</span>
+          <span class="at-trigger-arrow">▼</span>
+        </div>
+        <div class="at-list" id="atList">${listHTML}</div>
+      </div>
+      <input type="hidden" id="q13dd" value="">
+    </div>
+    <button class="btn btn-primary mt14" onclick="submitAT(${q.id})">Submit</button>
+  </div>`;
+  setTimeout(()=>{
+    document.addEventListener('click', function atHandler(e){
+      if(!e.target.closest('.at-wrap')){ closeATList(); document.removeEventListener('click',atHandler); }
+    });
+  },100);
 }
-function submitAT(){
+function toggleATList(){
+  document.getElementById('atTrigger').classList.toggle('open');
+  document.getElementById('atList').classList.toggle('open');
+}
+function closeATList(){
+  const t=document.getElementById('atTrigger'); if(t)t.classList.remove('open');
+  const l=document.getElementById('atList'); if(l)l.classList.remove('open');
+}
+function selectAT(el, val, qid){
+  document.getElementById('q13dd').value=val;
+  document.getElementById('atVal').textContent=val;
+  document.querySelectorAll('.at-opt').forEach(o=>o.classList.toggle('selected',o===el));
+  closeATList();
+  setTimeout(()=>submitAT(qid), 350);
+}
+function submitAT(qid){
   const v=document.getElementById('q13dd').value;
-  if(!v){alert('Please select an accident type.');return;}
-  ans(gQ(13),v);
+  if(!v){ const t=document.getElementById('atTrigger'); if(t)t.style.borderColor='var(--red)'; return; }
+  ans(gQ(qid||13),v);
 }
+
 
 function rFPhotoPrompt(a,q){
   function uzone(id,lbl,cat){
