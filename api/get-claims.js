@@ -52,6 +52,8 @@ export default async function handler(req, res) {
         injured TEXT, vehicles TEXT, status TEXT DEFAULT 'New', payload TEXT
       )
     `);
+    // Ensure claim_number column exists
+    try { await client.execute('ALTER TABLE claims ADD COLUMN claim_number INTEGER'); } catch(e) {}
 
     // Support filtering by driverID for returning driver lookup
     const query    = req.query || {};
