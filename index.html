@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-03-30 02:19 PM ET -->
+<!-- CCM Accident Assistant — Built: 2026-03-31 06:48 AM ET -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-03-30 02:19 PM ET</title>
+<title>CCM Accident Assistant — 2026-03-31 06:48 AM ET</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -575,7 +575,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-30 02:19 PM ET</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-31 06:48 AM ET</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -742,9 +742,9 @@ input[type="datetime-local"].fi{color-scheme:dark}
     </div>
     <div style="padding:0 4px">
       <label class="fl">Claim Number</label>
-      <input class="fi" id="p2ClaimNum" placeholder="e.g. 161000" type="tel" style="margin-bottom:12px">
+      <input class="fi" id="p2ClaimNum" placeholder="e.g. 161000" type="tel" style="margin-bottom:12px" oninput="tryAutoP2()">
       <label class="fl">Reference Number</label>
-      <input class="fi" id="p2Ref" placeholder="e.g. CCM-2026-847291" type="text" style="margin-bottom:8px">
+      <input class="fi" id="p2Ref" placeholder="e.g. CCM-2026-847291" type="text" style="margin-bottom:8px" oninput="tryAutoP2()">
       <p class="field-err" id="p2Err" style="display:none;margin-bottom:10px"></p>
       <button class="btn btn-primary" onclick="submitPhase2Entry()" style="margin-bottom:10px">Continue to Phase 2 →</button>
       <div style="border-top:1px solid var(--bd0);padding-top:14px;margin-top:6px">
@@ -1625,15 +1625,21 @@ function beginApp(){
 
   // Defer speak slightly — gives iOS time to fully unlock AudioContext
   setTimeout(()=>{
-    speak('Welcome to the Corporate Claims Management Accident Assistant. If you have already completed Phase 1 of your accident report, tap Complete Phase 2 of Your Report at the top of the screen. Otherwise, please select your company name and indicate whether you are an Employee of the company, or a Family Member or Authorized Driver.');
+    speak('Welcome to CCM Accident Assistant. Select your company, then indicate if you are an Employee or a Family Member.');
   }, 300);
 }
 
 function selectDriverType(type){
   S.identity.driverType=type;
-  S.identity.purpose='new'; // always new accident — Phase 2 accessed via teal banner
+  S.identity.purpose='new';
   document.querySelectorAll('#btnEmployee,#btnFamily').forEach(b=>b.classList.remove('selected'));
   document.getElementById(type==='employee'?'btnEmployee':'btnFamily').classList.add('selected');
+  // Auto-advance — brief delay so selection highlight is visible
+  setTimeout(()=>{
+    const company=document.getElementById('id1Company').value;
+    if(company) submitID1();
+    // If no company yet, just highlight — they'll still need to pick company first
+  }, 400);
 }
 
 function submitID1(){
@@ -3289,6 +3295,15 @@ function showResendRefFromScreen2(){
     });
   }catch(e){
     err.textContent='An error occurred. Please call Corporate Claims Management.'; err.style.display='block';
+  }
+}
+
+function tryAutoP2(){
+  // Auto-submit Phase 2 entry when both fields have enough characters
+  const cn  = (document.getElementById('p2ClaimNum')?.value||'').trim();
+  const ref = (document.getElementById('p2Ref')?.value||'').trim();
+  if(cn.length >= 6 && ref.length >= 14){
+    submitPhase2Entry();
   }
 }
 
