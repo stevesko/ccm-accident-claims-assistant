@@ -54,8 +54,10 @@ export default async function handler(req, res) {
     `);
 
     // Support filtering by driverID for returning driver lookup
-    const driverID = req.query && req.query.driverID;
-    const limit    = req.query && req.query.limit ? parseInt(req.query.limit) : 500;
+    const query    = req.query || {};
+    const driverID = query.driverID || null;
+    const rawLimit = parseInt(query.limit) || 500;
+    const limit    = isNaN(rawLimit) ? 500 : Math.min(rawLimit, 500);
     let result;
     if(driverID){
       result = await client.execute({
@@ -63,9 +65,10 @@ export default async function handler(req, res) {
         args: [driverID, limit]
       });
     } else {
-      result = await client.execute(
-        'SELECT id, ref_number, phase, submitted_at, company, driver_name, driver_id, driver_email, driver_phone, accident_type, location, date_time, injured, vehicles, status FROM claims ORDER BY submitted_at DESC LIMIT '+limit
-      );
+      result = await client.execute({
+        sql: 'SELECT id, ref_number, phase, submitted_at, company, driver_name, driver_id, driver_email, driver_phone, accident_type, location, date_time, injured, vehicles, status FROM claims ORDER BY submitted_at DESC LIMIT ?',
+        args: [limit]
+      });
     }
 
     res.status(200).json({ claims: result.rows });
