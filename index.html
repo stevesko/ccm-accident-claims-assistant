@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-04-01 07:24 AM ET -->
+<!-- CCM Accident Assistant — Built: 2026-04-01 08:26 AM ET -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-04-01 07:24 AM ET</title>
+<title>CCM Accident Assistant — 2026-04-01 08:26 AM ET</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -590,7 +590,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-04-01 07:24 AM ET</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-04-01 08:26 AM ET</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -1134,6 +1134,8 @@ const Qs=[
   {id:28, text:"Please select which vehicles had airbags deploy.",                       type:'airbags',skip:a=>a[27]==='No'},
   {id:29, text:"Does your vehicle need to be towed from the scene?",                             type:'yn'},
   {id:30, text:"Please provide the tow company name and where your vehicle is being taken.",                   type:'ftow',skip:a=>a[29]==='No'},
+  {id:291,text:()=>{ const n=parseInt(S.ans[2])||1; return n>=3?'Do any of the other vehicles need to be towed?':'Does the other vehicle need to be towed?'; }, type:'yn', skip:a=>isSolo(a)},
+  {id:301,text:"Please provide the tow details for the other vehicle.",                        type:'ftoword',skip:a=>a[291]==='No'||isSolo(a)},
   {id:31, text:"Was a police report filed at the scene?",                                      type:'yn'},
   {id:32, text:"Please provide the police report details.",                                  type:'fpol',skip:a=>a[31]==='No'},
   {id:33, text:"Was a citation or ticket issued at the scene?",                             type:'yn'},
@@ -2033,7 +2035,7 @@ function renderAns(q){
     'loc':rLoc,'dt':rDt,'txt':rTxt,'ta':rTa,'narr':rNarr,
     'photoprompt':rFPhotoPrompt,'ddAT':rDDAT,'fdriver':rFDriver,'fvehicle':rFVehicle,'fins':rFIns,
     'fotherdrv':rFOtherDrv,'fotherveh':rFOtherVeh,
-    'fdmg':rFDmg,'fothdmg':rFOthDmg,'fpropdmg':rFPropDmg,'ftow':rFTow,'fpol':rFPol,'fcit':rFCit,
+    'fdmg':rFDmg,'fothdmg':rFOthDmg,'fpropdmg':rFPropDmg,'ftow':rFTow,'ftoword':rFTowOrd,'fpol':rFPol,'fcit':rFCit,
     'fwit':rFWit,'fcontact':rFContact,
     'injsel':rInjSel,'injdet':rInjDet,'airbags':rAirbags,
   }[q.type]||rTxt)(area,q);
@@ -2617,16 +2619,28 @@ function subPropDmg(qid){
   ans(gQ(qid), parts.length ? parts.join(' || ') : 'No property damage details entered');
 }
 
-function rFTow(a,q){
-  a.innerHTML=`<div class="fcard">
-    ${fg('Tow Company Name',inp('twC','Company name','text','data-v'))}
-    ${fg('Towed To (Location or Shop)',inp('twD','Destination address or shop name','text','data-v'))}
-    <button class="btn btn-primary" onclick="
-      const c=document.getElementById('twC').value.trim();
-      const d=document.getElementById('twD').value.trim();
-      ans(gQ(${q.id}),'Company: '+(c||'N/A')+' | To: '+(d||'N/A'));
-    ">Submit</button>
+function towCard(prefix, qid, label){
+  return `<div class="fcard">
+    <div style="font-size:13px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px">${label}</div>
+    ${fg('Tow Company Name',inp(prefix+'twC','Company name or Unknown','text','data-v'))}
+    ${fg('Towed To (Location or Shop)',inp(prefix+'twD','Destination address or shop name','text','data-v'))}
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-primary" style="flex:1" onclick="
+        const c=document.getElementById('${prefix}twC').value.trim();
+        const d=document.getElementById('${prefix}twD').value.trim();
+        ans(gQ(${qid}),'Company: '+(c||'N/A')+' | To: '+(d||'N/A'));
+      ">Submit</button>
+      <button style="flex:1;background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.3);border-radius:var(--r8);padding:12px;color:var(--amber);font-size:13px;font-weight:700;cursor:pointer" onclick="
+        ans(gQ(${qid}),'Tow details not known at scene');
+      ">⚠️ Unknown</button>
+    </div>
   </div>`;
+}
+function rFTow(a,q){
+  a.innerHTML = towCard('my', q.id, 'Your Vehicle Tow Details');
+}
+function rFTowOrd(a,q){
+  a.innerHTML = towCard('od', q.id, 'Other Vehicle Tow Details');
 }
 function rFPol(a,q){
   a.innerHTML=`<div class="fcard">
@@ -3003,7 +3017,7 @@ const SECS_P2=[
   {t:'Your Information',           ids:[17,16,19,20]},
   {t:'Other Party Details',        ids:[22,23]},
   {t:'Vehicle Damage',             ids:[24,25,26,251,252,27,28]},
-  {t:'Tow / Recovery',             ids:[30]},
+  {t:'Tow / Recovery',             ids:[29,30,291,301]},
   {t:'Law Enforcement',            ids:[32,33,34]},
   {t:'Witnesses',                  ids:[35,36]},
   {t:'Accident Narrative',         ids:[37]},
@@ -3191,47 +3205,79 @@ async function submitReport(){
   const date=S.ans[9]||new Date().toLocaleString();
   const company=S.identity.company||'Unknown Company';
   const driverID=S.identity.driverID||'N/A';
-  const phaseLabel = S.phase===1 ? 'PHASE 1 — SCENE REPORT' : 'PHASE 2 — DETAILED REPORT';
-  let report='ACCIDENT REPORT ('+phaseLabel+') — Corporate Claims Management\n';
-  if(S.refNum) report+='Reference: '+S.refNum+'\n';
-  report+='='.repeat(58)+'\n';
-  report+='Company:   '+company+'\n';
-  report+='Driver:    '+name+'\n';
-  report+='Phone:     '+(S.identity.phone||'N/A')+'\n';
-  report+='Email:     '+(S.identity.email||'N/A')+'\n';
+  const phaseLabel = S.phase===1 ? 'Phase 1 — Scene Report' : 'Phase 2 — Detailed Report';
+  const divider  = '-'.repeat(60);
+  const dividerH = '='.repeat(60);
+  const now = new Date().toLocaleString('en-US',{dateStyle:'full',timeStyle:'short'});
+  let report = '';
+
+  // ── Header ──
+  report += dividerH + '\n';
+  report += 'CORPORATE CLAIMS MANAGEMENT\n';
+  report += 'First Notice of Loss — ' + phaseLabel + '\n';
+  report += dividerH + '\n\n';
+
+  // ── Claim Reference ──
+  report += 'Claim Number:     ' + (S.claimNum||'Pending') + '\n';
+  report += 'Reference Number: ' + (S.refNum||'N/A') + '\n';
+  report += 'Report Generated: ' + now + '\n\n';
+
+  // ── Driver / Claimant ──
+  report += divider + '\n';
+  report += 'DRIVER / CLAIMANT\n';
+  report += divider + '\n';
+  report += 'Name:             ' + name + '\n';
   if(isFamilyDrv){
-    report+='Driver Type: Family Member / Authorized Driver\n';
-    report+='Relationship: '+(S.identity.relationship||'N/A')+'\n';
-    report+='Authorized:  '+(S.identity.authorized||'N/A')+'\n';
-    report+='Employee:    '+(S.identity.employeeName||'N/A')+'\n';
-    report+='Employee ID: '+(S.identity.employeeID||'N/A')+'\n';
+    report += 'Driver Type:      Family Member / Authorized Driver\n';
+    report += 'Relationship:     ' + (S.identity.relationship||'N/A') + '\n';
+    report += 'Authorized:       ' + (S.identity.authorized||'N/A') + '\n';
+    report += 'Assigned Employee:' + (S.identity.employeeName||'N/A') + '\n';
+    report += 'Employee ID:      ' + (S.identity.employeeID||'N/A') + '\n';
   } else {
-    report+='Driver ID: '+(S.identity.driverID||'N/A')+'\n';
+    report += 'Driver ID:        ' + (S.identity.driverID||'N/A') + '\n';
   }
-  report+='Generated: '+new Date().toLocaleString()+'\n';
-  report+='='.repeat(58)+'\n\n';
+  report += 'Company:          ' + company + '\n';
+  report += 'Phone:            ' + (S.identity.phone||'N/A') + '\n';
+  report += 'Email:            ' + (S.identity.email||'N/A') + '\n\n';
+
+  // ── Answers by section ──
   const activeSecs2 = S.phase===1 ? SECS_P1 : SECS_P2;
   activeSecs2.forEach(sec=>{
     const rows=sec.ids.map(id=>{
       const q=Qs.find(x=>x.id===id);
       const a=S.ans[id];
       if(!q||!a||a==='Skipped')return '';
-      return (typeof q.text==='function'?q.text():q.text)+':\n    '+a;
+      const qText = typeof q.text==='function' ? q.text() : q.text;
+      return '  ' + qText + ':\n      ' + a;
     }).filter(Boolean);
-    if(rows.length) report+='[ '+sec.t.toUpperCase()+' ]\n'+rows.join('\n\n')+'\n\n';
+    if(rows.length){
+      report += divider + '\n';
+      report += sec.t.toUpperCase() + '\n';
+      report += divider + '\n';
+      report += rows.join('\n\n') + '\n\n';
+    }
   });
+
+  // ── Attachments ──
   if(S.photos.length){
-    report+='[ ATTACHMENTS ]\n';
-    const cats=['Driver License','Insurance Card','Other Driver License','Police Report','Accident Scene'];
+    report += divider + '\n';
+    report += 'ATTACHMENTS (' + S.photos.length + ' file' + (S.photos.length!==1?'s':'') + ')\n';
+    report += divider + '\n';
+    const cats=['Driver License','Insurance Card','Other Driver License','Other Driver Insurance','Vehicle 1 VIN','Vehicle 2 VIN','Police Report','Vehicle Damage - Yours','Accident Scene'];
     cats.forEach(cat=>{
       const files=S.photos.filter(p=>(p.category||'Accident Scene')===cat);
-      if(files.length) report+='  '+cat+': '+files.map(p=>p.name).join(', ')+'\n';
+      if(files.length) report+='  ' + cat + ': ' + files.map(p=>p.name).join(', ') + '\n';
     });
     const other=S.photos.filter(p=>!cats.includes(p.category||'Accident Scene'));
     if(other.length) report+='  Other: '+other.map(p=>p.name).join(', ')+'\n';
-    report+='\n';
+    report += '\n';
   }
-  report+='='.repeat(58);
+
+  // ── Footer ──
+  report += dividerH + '\n';
+  report += 'This report was submitted via the CCM Accident Assistant mobile app.\n';
+  report += 'For questions contact: sskoletsky@ccmservices.com\n';
+  report += dividerH;
 
   try{
     // ── STEP 1: Get claim number from DB FIRST ──
@@ -3321,6 +3367,24 @@ async function submitReport(){
         speak('Phase 2 is optional but recommended. It includes vehicle details, insurance information, damage description, police report, and accident narrative. The more detail you provide, the faster your claim can be processed.');
       }, 1000);
     } else {
+      // ── Phase 2: Update existing DB record ──
+      if(FTP_ENDPOINT){
+        try{
+          const claimPayload = buildJSON();
+          claimPayload.identity  = S.identity;
+          claimPayload.refNumber = S.refNum;
+          claimPayload.claimNum  = S.claimNum;
+          claimPayload.phase     = 2;
+          claimPayload.ans       = S.ans;
+          await fetch('/api/update-claim',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({claim: claimPayload})
+          });
+        }catch(dbErr){
+          console.warn('Phase 2 DB update failed:',dbErr);
+        }
+      }
       clearDraft();
       try{
         // Store completion record so driver can't accidentally re-submit Phase 2
