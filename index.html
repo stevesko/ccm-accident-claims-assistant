@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-04-01 11:31 AM ET -->
+<!-- CCM Accident Assistant — Built: 2026-04-01 12:19 PM ET -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-04-01 11:31 AM ET</title>
+<title>CCM Accident Assistant — 2026-04-01 12:19 PM ET</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -590,7 +590,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-04-01 11:31 AM ET</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-04-01 12:19 PM ET</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -1062,7 +1062,7 @@ const Qs=[
   {id:4,  text:"Was anyone injured?",                                             type:'yn'},
   {id:5,  text:"Select who was injured in each vehicle.",                         type:'injsel',  skip:a=>a[4]==='No'},
   {id:6,  text:"Please provide the name and injury details for each person who was injured.",         type:'injdet',  skip:a=>a[4]==='No'},
-  {id:7,  text:"Were any of the injuries life-threatening or did anyone require hospitalization?", type:'yn',      skip:a=>a[4]==='No'},
+  // Q7 removed — hospitalization captured in injury detail form (hospital transport radio buttons)
   {id:8,  text:"Where did the accident take place?",                                   type:'loc'},
   {id:9,  text:"What was the date and time of the accident? If it just happened, you can use today's date.",                     type:'dt'},
   {id:13, text:"What type of accident was this?",                                 type:'ddAT',ph:'Select accident type…'},
@@ -2167,7 +2167,8 @@ function rTa(a,q){
   ">Submit</button>`;
 }
 function rNarr(a,q){
-  a.innerHTML=`<div class="mic-wrap" style="align-items:flex-start"><textarea class="ft" id="narrI" placeholder="Describe what happened in your own words…" rows="5" data-v style="flex:1"></textarea><button class="mic-btn" style="margin-top:2px" onclick="startSTT('narrI',this)" title="Tap to speak">🎤</button></div>
+  const accType = S.ans[13] ? '<div style="background:var(--blue-g);border:1px solid rgba(45,140,240,.2);border-radius:var(--r8);padding:10px 13px;margin-bottom:12px;font-size:13px;color:var(--blue)"><strong>Accident Type:</strong> '+S.ans[13]+'</div>' : '';
+  a.innerHTML=accType+`<div class="mic-wrap" style="align-items:flex-start"><textarea class="ft" id="narrI" placeholder="Describe what happened in your own words…" rows="5" data-v style="flex:1"></textarea><button class="mic-btn" style="margin-top:2px" onclick="startSTT('narrI',this)" title="Tap to speak">🎤</button></div>
   <div class="vpreview" id="vhint"></div>
   <button class="btn btn-primary mt10" onclick="
     const v=document.getElementById('narrI').value.trim();
@@ -2377,7 +2378,13 @@ function rFIns(a,q){
         ✓ ${isOD?'Vehicle #2':'Your'} insurance card photo attached
       </p>
     </div>
-    <button class="btn btn-primary" onclick="subIns('${p}',${q.id})">Submit</button>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" style="flex:1" onclick="subIns('${p}',${q.id})">Submit</button>
+      <button style="flex:1;background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.3);border-radius:var(--r8);padding:12px;color:var(--amber);font-size:13px;font-weight:700;cursor:pointer"
+        onclick="ans(gQ(${q.id}),'Insurance: All information unknown at scene')">
+        ⚠️ All Unknown
+      </button>
+    </div>
   </div>`;
   document.getElementById(p+'I').addEventListener('change',function(){
     document.getElementById(p+'OW').classList.toggle('hidden',this.value!=='Other');
@@ -2503,24 +2510,43 @@ function rFDmg(a,q){
   </div>`;
 }
 function rFOthDmg(a,q){
-  // Build one damage section per other vehicle based on how many were involved
   const total = parseInt(S.ans[2]) || 1;
   const otherCount = Math.max(total - 1, 1);
+  // Check if other vehicle damage photos were already taken
+  const odDmgPhotos = S.photos.filter(p=>p.category==='Vehicle Damage - Other'||p.category==='Other Vehicle Damage');
+  const hasOdPhotos = odDmgPhotos.length > 0;
   let h = '<div class="fcard">';
 
+  if(hasOdPhotos){
+    h += `<div style="background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.2);border-radius:var(--r8);padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--teal)">
+      &#10003; ${odDmgPhotos.length} damage photo${odDmgPhotos.length!==1?'s':''} already attached. You can add additional information below.
+    </div>`;
+  }
+
   for(let i=0; i<otherCount; i++){
-    const vNum = i + 2; // Vehicle #2, #3, etc.
-    // Try to get vehicle info from answers
+    const vNum = i + 2;
     const vehAns = i===0 ? (S.ans[22]||'') : '';
     const vehLabel = vehAns ? vehAns.split('|')[0].trim() : 'Vehicle #'+vNum;
     h += `<div style="background:var(--bg2);border:1px solid var(--bd1);border-radius:var(--r12);padding:16px;margin-bottom:14px">
       <div style="font-size:13px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Vehicle #${vNum}</div>
       ${vehAns?`<div style="font-size:12px;color:var(--t2);margin-bottom:10px">${vehLabel}</div>`:''}
+      ${!hasOdPhotos ? `<div class="fg" style="margin-bottom:10px">
+        <label class="fl" style="font-weight:800">Photograph Vehicle #${vNum} Damage</label>
+        <label class="uzone" for="odDmgFile${i}" style="flex-direction:row;padding:14px;gap:12px;align-items:center">
+          <span style="font-size:30px;line-height:1">&#128247;</span>
+          <div style="text-align:left;flex:1">
+            <p style="margin:0;font-size:14px;font-weight:800;color:var(--teal)">Tap to Photograph Damage</p>
+            <p style="margin:3px 0 0;font-size:11px;color:var(--t1)">Vehicle #${vNum} damage — photo accepted</p>
+          </div>
+        </label>
+        <input type="file" id="odDmgFile${i}" accept="image/*" class="hidden" onchange="addFiles(event,'Vehicle Damage - Other')" capture="environment">
+        <p id="odDmgFile${i}Confirm" style="display:none;color:var(--teal);font-size:12px;margin-top:6px">&#10003; Photo attached</p>
+      </div>` : ''}
       <div class="fg" style="margin-bottom:10px">
-        <label class="fl">Damage Description</label>
+        <label class="fl">${hasOdPhotos?'Additional Damage Notes (optional)':'Damage Description'}</label>
         <div class="mic-wrap" style="align-items:flex-start">
-          <textarea class="ft" id="othDmgD${i}" rows="3" placeholder="Front bumper, hood, driver door…" style="flex:1"></textarea>
-          <button class="mic-btn" style="margin-top:2px" onclick="startSTT('othDmgD${i}',this)" title="Tap to speak">🎤</button>
+          <textarea class="ft" id="othDmgD${i}" rows="3" placeholder="${hasOdPhotos?'Any additional details not visible in photos…':'Front bumper, hood, driver door…'}" style="flex:1"></textarea>
+          <button class="mic-btn" style="margin-top:2px" onclick="startSTT('othDmgD${i}',this)" title="Tap to speak">&#127908;</button>
         </div>
       </div>
       <div class="fg">
@@ -2534,7 +2560,13 @@ function rFOthDmg(a,q){
     </div>`;
   }
 
-  h += `<button class="btn btn-primary" onclick="subOthDmg(${q.id},${otherCount})">Submit</button>`;
+  h += `<div style="display:flex;gap:10px">
+    <button class="btn btn-primary" style="flex:1" onclick="subOthDmg(${q.id},${otherCount})">Submit</button>
+    <button style="flex:1;background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.3);border-radius:var(--r8);padding:12px;color:var(--amber);font-size:13px;font-weight:700;cursor:pointer"
+      onclick="ans(gQ(${q.id}),'${hasOdPhotos?'Damage photographed — see attachments':'No additional damage details available'}')">
+      &#9888;&#65039; ${hasOdPhotos?'Photos Only — No Additional Notes':'Skip — Unknown'}
+    </button>
+  </div>`;
   h += '</div>';
   a.innerHTML = h;
 }
@@ -3050,7 +3082,7 @@ const SECS_P1=[
   {t:'Scene Actions',       ids:[29,31]},
 ];
 const SECS_P2=[
-  {t:'Injuries',                   ids:[5,6,7]},
+  {t:'Injuries',                   ids:[5,6]},
   {t:'Conditions',                 ids:[3,10,11,12,14,15]},
   {t:'Your Information',           ids:[17,16,19,20]},
   {t:'Other Party Details',        ids:[22,23]},
@@ -3234,7 +3266,7 @@ function dlCSV(){
 }
 
 function buildHTMLReport(name, company, driverID, isFamilyDrv, phaseLabel, now){
-  const claimNum = S.claimNum || 'Pending';
+  const claimNum = S.claimNum || S.refNum || 'Pending';
   const refNum   = S.refNum   || 'N/A';
 
   // Build sections HTML
@@ -3518,6 +3550,14 @@ async function submitReport(){
 
     // ── STEP 2: Send CCM email WITH claim number ──
     if(btn) btn.textContent='Sending report…';
+    // Restore claimNum for Phase 2 if not already set
+    if(S.phase===2 && !S.claimNum){
+      try{
+        const saved=JSON.parse(localStorage.getItem('ccm_p1_ans')||'null');
+        if(saved&&saved.claimNum) S.claimNum=saved.claimNum;
+        if(saved&&saved.ref) S.refNum=S.refNum||saved.ref;
+      }catch(e){}
+    }
     const claimLine=S.phase===1?'Claim Number: '+S.claimNum+'\n':'';
     report=claimLine+report;
     const htmlReport = buildHTMLReport(name, company, driverID, isFamilyDrv, phaseLabel, now);
@@ -3530,7 +3570,7 @@ async function submitReport(){
       html_body:    htmlReport,
       report:       htmlReport,
       to_email:    CLAIMS_EMAIL,
-      subject:     'Accident Claim Phase 1 Complete | '+company+' | '+name+' | Claim: '+S.claimNum,
+      subject:     (S.phase===1?'Accident Claim Phase 1 Complete':'Accident Claim Phase 2 Complete')+' | '+company+' | '+name+' | Claim: '+S.claimNum,
     });
 
     // ── STEP 3: Send driver confirmation WITH claim number ──
