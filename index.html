@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-03-31 02:06 PM ET -->
+<!-- CCM Accident Assistant — Built: 2026-04-01 07:24 AM ET -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-03-31 02:06 PM ET</title>
+<title>CCM Accident Assistant — 2026-04-01 07:24 AM ET</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -590,7 +590,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-03-31 02:06 PM ET</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-04-01 07:24 AM ET</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -916,11 +916,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
 <!-- CONTROL BAR -->
 <nav class="cbar" id="cbar">
   <div class="cbar-in">
-    <button class="cb c-blue" onclick="openPhotos()">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="3"/></svg>
-      <span id="phlbl">Accident Photos</span>
-      <span class="pbadge" id="pbadge">0</span>
-    </button>
+
     <button class="cb" id="btnBack" onclick="goBack()" disabled>
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
       Back
@@ -2421,13 +2417,18 @@ function rFOtherDrv(a,q){
       ${fg('State',sel(ST,'oS','State'))}
     </div>
     <div class="fg"><label class="fl">Other Driver's License Photo</label><label class="uzone" for="odLicFile" style="flex-direction:row;padding:13px;gap:10px"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg><div><p style="margin:0;font-size:14px;font-weight:700;color:var(--t0)">📷 Photograph Other Driver's License</p><p style="margin:2px 0 0;font-size:11px;color:var(--t1)">Photo or PDF accepted</p></div></label><input type="file" id="odLicFile" accept="image/*,application/pdf" class="hidden" onchange="addFiles(event,'Other Driver License')" capture="environment"><p id="odLicFileConfirm" style="display:none;color:var(--teal);font-size:12px;margin-top:6px">✓ Photo attached</p></div>
-    <button class="btn btn-primary" onclick="
-      const n=document.getElementById('oN').value.trim();
-      const p=document.getElementById('oP').value.trim();
-      const l=document.getElementById('oL').value.trim();
-      const s=document.getElementById('oS').value;
-      ans(gQ(${q.id}),'Name: '+(n||'Unknown')+' | Phone: '+(p||'N/A')+' | License: '+(l||'N/A')+' ('+(s||'N/A')+')');
-    ">Submit</button>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-primary" style="flex:1" onclick="
+        const n=document.getElementById('oN').value.trim();
+        const p=document.getElementById('oP').value.trim();
+        const l=document.getElementById('oL').value.trim();
+        const s=document.getElementById('oS').value;
+        ans(gQ(${q.id}),'Name: '+(n||'Unknown')+' | Phone: '+(p||'N/A')+' | License: '+(l||'N/A')+' ('+(s||'N/A')+')');
+      ">Submit</button>
+      <button style="flex:1;background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.3);border-radius:var(--r8);padding:12px;color:var(--amber);font-size:13px;font-weight:700;cursor:pointer" onclick="
+        ans(gQ(${q.id}),'Other driver information not available at scene');
+      ">⚠️ Information Not Available</button>
+    </div>
   </div>`;
 }
 function rFOtherVeh(a,q){
@@ -3018,6 +3019,10 @@ function buildSummary(){
   document.getElementById('pauseBtn').classList.add('hidden');
   show('scrPrep');
   document.getElementById('prepMsg').textContent='Generating your report…';
+  // Speak review prompt for Phase 1
+  if(S.phase===1){
+    speak('Please review your Phase 1 Scene Report. After submitting, you may continue to Phase 2 now or complete it at a later time.');
+  }
   document.getElementById('sumDt').textContent=new Date().toLocaleString('en-US',{dateStyle:'full',timeStyle:'short'});
   document.querySelector('.sum-title').textContent=S.phase===1?'Phase 1 — Scene Report':'Phase 2 — Detailed Report';
   const sb=document.getElementById('submitBtn');
@@ -3311,6 +3316,10 @@ async function submitReport(){
         }).catch(e=>console.warn('Driver email failed:',e));
       }
       show('scrOK');
+      // Speak the Phase 2 optional text
+      setTimeout(()=>{
+        speak('Phase 2 is optional but recommended. It includes vehicle details, insurance information, damage description, police report, and accident narrative. The more detail you provide, the faster your claim can be processed.');
+      }, 1000);
     } else {
       clearDraft();
       try{
@@ -3429,7 +3438,7 @@ function showPhase2Entry(){
   if(rp) rp.value='';
   show('scrPhase2Entry');
   // Speak welcome back after short delay
-  setTimeout(()=>{ speak('Welcome back. Please enter your Claim Number and Reference Number to continue your report. If you do not have this information tap the text to my phone button.'); }, 350);
+  setTimeout(()=>{ speak('Welcome back. Please enter your Claim Number and Reference Number to continue your report.'); }, 350);
 }
 
 function submitPhase2Entry(){
