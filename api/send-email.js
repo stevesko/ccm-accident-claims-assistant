@@ -1,11 +1,9 @@
 /**
  * CCM Accident Assistant — Send Email API
  * POST /api/send-email
- * Sends HTML formatted email via nodemailer using Gmail SMTP
- * Env vars needed: EMAIL_USER, EMAIL_PASS (Gmail app password)
+ * Sends HTML formatted email via Resend.com
+ * Env var needed: RESEND_API_KEY
  */
-
-import nodemailer from 'nodemailer';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -21,23 +19,29 @@ export default async function handler(req, res) {
   }
 
   try {
-    const transporter = nodemailer.createTransporter({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + process.env.RESEND_API_KEY,
       },
+      body: JSON.stringify({
+        from: 'CCM Accident Assistant <onboarding@resend.dev>',
+        to: [to],
+        subject,
+        html,
+        text: text || 'Please view this email in an HTML-capable email client.',
+      }),
     });
 
-    await transporter.sendMail({
-      from: `"CCM Accident Assistant" <${process.env.EMAIL_USER}>`,
-      to,
-      subject,
-      html,
-      text: text || 'Please view this email in an HTML-capable email client.',
-    });
+    const data = await r.json();
 
-    res.status(200).json({ success: true });
+    if (!r.ok) {
+      console.error('Resend error:', data);
+      return res.status(500).json({ error: 'Email failed', detail: data.message });
+    }
+
+    res.status(200).json({ success: true, id: data.id });
 
   } catch (err) {
     console.error('send-email error:', err);
