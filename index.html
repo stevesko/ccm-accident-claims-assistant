@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-04-01 12:19 PM ET -->
+<!-- CCM Accident Assistant — Built: 2026-04-01 12:51 PM ET -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-04-01 12:19 PM ET</title>
+<title>CCM Accident Assistant — 2026-04-01 12:51 PM ET</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -590,7 +590,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-04-01 12:19 PM ET</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-04-01 12:51 PM ET</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -1131,7 +1131,7 @@ const Qs=[
   {id:30, text:"Please provide the tow company name and where your vehicle is being taken.",                   type:'ftow',skip:a=>a[29]==='No'},
   {id:291,text:()=>{ const n=parseInt(S.ans[2])||1; return n>=3?'Do any of the other vehicles need to be towed?':'Does the other vehicle need to be towed?'; }, type:'yn', skip:a=>isSolo(a)},
   {id:301,text:"Please provide the tow details for the other vehicle.",                        type:'ftoword',skip:a=>a[291]==='No'||isSolo(a)},
-  {id:31, text:"Was a police report filed at the scene?",                                      type:'yn'},
+  {id:31, text:"Was a police report filed at the scene?",                                      type:'fpolcheck'},
   {id:32, text:"Please provide the police report details.",                                  type:'fpol',skip:a=>a[31]==='No'},
   {id:33, text:"Was a citation or ticket issued at the scene?",                             type:'yn'},
   {id:34, text:"Please provide the citation details.",                                       type:'fcit',skip:a=>a[33]==='No'},
@@ -2036,7 +2036,7 @@ function renderAns(q){
     'loc':rLoc,'dt':rDt,'txt':rTxt,'ta':rTa,'narr':rNarr,
     'photoprompt':rFPhotoPrompt,'ddAT':rDDAT,'fdriver':rFDriver,'fvehicle':rFVehicle,'fins':rFIns,
     'fotherdrv':rFOtherDrv,'fotherveh':rFOtherVeh,
-    'fdmg':rFDmg,'fothdmg':rFOthDmg,'fpropdmg':rFPropDmg,'ftow':rFTow,'ftoword':rFTowOrd,'fpol':rFPol,'fcit':rFCit,
+    'fdmg':rFDmg,'fothdmg':rFOthDmg,'fpropdmg':rFPropDmg,'ftow':rFTow,'ftoword':rFTowOrd,'fpol':rFPol,'fpolcheck':rFPolCheck,'fcit':rFCit,
     'fwit':rFWit,'fcontact':rFContact,
     'injsel':rInjSel,'injdet':rInjDet,'airbags':rAirbags,
   }[q.type]||rTxt)(area,q);
@@ -2209,19 +2209,23 @@ function rFPhotoPrompt(a,q){
       +'</div>';
   }
   const qid=q.id;
-  a.innerHTML='<div class="fcard">'
-    +'<div style="background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);border-radius:var(--r8);padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--amber);line-height:1.5">'
-    +'<strong>📸 Do this now while at the scene.</strong> Once you leave, these opportunities are gone.</div>'
-    +uzone('pp_myLic', 'Your Driver License',           'Driver License')
-    +uzone('pp_myIns', 'Your Insurance Card',           'Insurance Card')
-    +uzone('pp_odLic', 'Other Driver License',          'Other Driver License')
-    +uzone('pp_odIns', 'Other Driver Insurance Card',   'Other Driver Insurance')
-    +uzone('pp_myDmg', 'Damage to Your Vehicle',        'Vehicle Damage - Yours')
-    +uzone('pp_odDmg', 'Damage to Other Vehicle',       'Vehicle Damage - Other')
-    +uzone('pp_scene', 'Overall Accident Scene',        'Accident Scene')
-    +'<p style="font-size:12px;color:var(--t2);text-align:center;margin-top:8px">All photos are optional but highly recommended</p>'
-    +'<button class="btn btn-primary mt14" onclick="photosDone('+(qid)+')">Continue →</button>'
-    +'</div>';
+  const solo=isSolo(S.ans);
+  let ph='<div class="fcard">';
+  ph+='<div style="background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);border-radius:var(--r8);padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--amber);line-height:1.5">';
+  ph+='<strong>📸 Do this now while at the scene.</strong> Once you leave, these opportunities are gone.</div>';
+  ph+=uzone('pp_myLic','Your Driver License','Driver License');
+  ph+=uzone('pp_myIns','Your Insurance Card','Insurance Card');
+  if(!solo){
+    ph+=uzone('pp_odLic','Other Driver License','Other Driver License');
+    ph+=uzone('pp_odIns','Other Driver Insurance Card','Other Driver Insurance');
+  }
+  ph+=uzone('pp_myDmg','Damage to Your Vehicle','Vehicle Damage - Yours');
+  if(!solo){ ph+=uzone('pp_odDmg','Damage to Other Vehicle','Vehicle Damage - Other'); }
+  ph+=uzone('pp_scene','Overall Accident Scene','Accident Scene');
+  ph+='<p style="font-size:12px;color:var(--t2);text-align:center;margin-top:8px">All photos are optional but highly recommended</p>';
+  ph+='<button class="btn btn-primary mt14" onclick="photosDone('+(qid)+')">Continue →</button>';
+  ph+='</div>';
+  a.innerHTML=ph;
 }
 
 function photosDone(qid){
@@ -2674,6 +2678,33 @@ function rFTow(a,q){
 }
 function rFTowOrd(a,q){
   a.innerHTML = towCard('od', q.id, 'Other Vehicle Tow Details');
+}
+function rFPolCheck(a,q){
+  var qid=q.id;
+  var html='<div class="fcard">';
+  html+='<div class="fg"><label class="fl" style="font-weight:800">Was a police report filed at the scene?</label>';
+  html+='<div style="display:flex;gap:10px;margin-top:4px">';
+  html+='<button class="opt-btn" id="polYesBtn" onclick="polCheckSel(1,'+qid+',this)" style="flex:1;padding:14px"><div style="font-weight:800;font-size:15px">Yes</div><div style="font-size:12px;color:var(--t1);margin-top:2px">Report was filed</div></button>';
+  html+='<button class="opt-btn" id="polNoBtn" onclick="polCheckSel(0,'+qid+',this)" style="flex:1;padding:14px"><div style="font-weight:800;font-size:15px">No</div><div style="font-size:12px;color:var(--t1);margin-top:2px">No report filed</div></button>';
+  html+='</div></div>';
+  html+='<div id="polUploadSec" style="display:none;margin-top:16px">';
+  html+='<div class="fg"><label class="fl" style="font-weight:800;font-size:13px">Attach Police Report (optional)</label>';
+  html+='<label class="uzone" for="polFileP1" style="flex-direction:row;padding:16px;gap:14px;align-items:center">';
+  html+='<span style="font-size:34px;line-height:1">&#128196;</span>';
+  html+='<div style="text-align:left;flex:1"><p style="margin:0;font-size:15px;font-weight:800;color:var(--teal)">Tap to Attach Report</p>';
+  html+='<p style="margin:4px 0 0;font-size:12px;color:var(--t1)">PDF or photo</p></div>';
+  html+='<span style="font-size:20px;color:var(--teal)">&#8594;</span></label>';
+  html+='<input type="file" id="polFileP1" accept="image/*,application/pdf" class="hidden" onchange="addFiles(event,this.dataset.cat)" data-cat="Police Report" capture="environment">';
+  html+='<p id="polFileP1Confirm" style="display:none;color:var(--teal);font-size:13px;font-weight:700;margin-top:8px">&#10003; Police report attached</p>';
+  html+='</div></div></div>';
+  a.innerHTML=html;
+}
+function polCheckSel(yes,qid,btn){
+  document.querySelectorAll('#polYesBtn,#polNoBtn').forEach(function(b){b.classList.remove('selected');});
+  btn.classList.add('selected');
+  var sec=document.getElementById('polUploadSec');
+  if(sec) sec.style.display=(yes?'block':'none');
+  ans(gQ(qid),yes?'Yes':'No');
 }
 function rFPol(a,q){
   a.innerHTML=`<div class="fcard">
@@ -3561,17 +3592,28 @@ async function submitReport(){
     const claimLine=S.phase===1?'Claim Number: '+S.claimNum+'\n':'';
     report=claimLine+report;
     const htmlReport = buildHTMLReport(name, company, driverID, isFamilyDrv, phaseLabel, now);
-    await emailjs.send('service_lefri76','template_g91f9a7',{
-      driver_name: name,
-      driver_id:   driverID,
-      company:     company,
-      date:        date,
-      message_html: htmlReport,
-      html_body:    htmlReport,
-      report:       htmlReport,
-      to_email:    CLAIMS_EMAIL,
-      subject:     (S.phase===1?'Accident Claim Phase 1 Complete':'Accident Claim Phase 2 Complete')+' | '+company+' | '+name+' | Claim: '+S.claimNum,
-    });
+    // Send formatted HTML email via Vercel API (nodemailer) for proper HTML rendering
+    const emailSubject = (S.phase===1?'Accident Claim Phase 1 Complete':'Accident Claim Phase 2 Complete')+' | '+company+' | '+name+' | Claim: '+S.claimNum;
+    try{
+      await fetch('/api/send-email',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          to: CLAIMS_EMAIL,
+          subject: emailSubject,
+          html: htmlReport,
+          text: 'Accident report for '+name+' | Claim: '+S.claimNum+' | Ref: '+S.refNum
+        })
+      });
+    }catch(emailErr){
+      // Fallback to EmailJS if nodemailer fails
+      console.warn('nodemailer failed, falling back to EmailJS:', emailErr);
+      await emailjs.send('service_lefri76','template_g91f9a7',{
+        driver_name: name, driver_id: driverID, company: company,
+        date: date, report: 'HTML report - see email body', to_email: CLAIMS_EMAIL,
+        subject: emailSubject,
+      });
+    }
 
     // ── STEP 3: Send driver confirmation WITH claim number ──
     if(S.phase===1){
