@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant | Built: 2026-04-02 02:08 PM EDT -->
+<!-- CCM Accident Assistant | Built: 2026-04-02 05:20 PM EDT -->
 <!-- CCM Accident Assistant — Built: 2026-04-01 12:51 PM ET -->
 <!DOCTYPE html>
 <html lang="en">
@@ -3644,20 +3644,29 @@ async function submitReport(){
     const htmlReport = buildHTMLReport(name, company, driverID, isFamilyDrv, phaseLabel, now);
     // Send formatted HTML email via Vercel API (nodemailer) for proper HTML rendering
     const emailSubject = (S.phase===1?'Accident Claim Phase 1 Complete':'Accident Claim Phase 2 Complete')+' | '+company+' | '+name+' | Claim: '+S.claimNum;
-    // ── Send CCM report via EmailJS (reliable) ──
-    // Resend will replace this once ccmservices.com domain is verified in Resend dashboard.
-    // The report text is truncated to fit EmailJS limits — HTML version pending domain verification.
-    const reportSnippet = report.slice(0, 3000);
-    await emailjs.send('service_lefri76','template_g91f9a7',{
-      driver_name: name,
-      driver_id:   driverID,
-      company:     company,
-      date:        date,
-      report:      reportSnippet,
-      to_email:    CLAIMS_EMAIL,
-      subject:     emailSubject,
-    });
-    console.log('CCM email sent via EmailJS to:', CLAIMS_EMAIL);
+    // ── Send CCM report via SendGrid (full HTML) ──
+    try{
+      const emailResp = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          to:      CLAIMS_EMAIL,
+          subject: emailSubject,
+          html:    htmlReport,
+          text:    'Accident report for '+name+' | Claim: '+S.claimNum+' | Ref: '+S.refNum
+        })
+      });
+      const emailData = await emailResp.json();
+      if(!emailResp.ok) throw new Error(emailData.detail||emailData.error||'SendGrid error '+emailResp.status);
+      console.log('CCM email sent via SendGrid to:', CLAIMS_EMAIL);
+    }catch(emailErr){
+      // Fallback to EmailJS if SendGrid fails
+      console.warn('SendGrid failed, falling back to EmailJS:', emailErr.message);
+      await emailjs.send('service_lefri76','template_g91f9a7',{
+        driver_name: name, driver_id: driverID, company: company,
+        date: date, report: report.slice(0,3000), to_email: CLAIMS_EMAIL, subject: emailSubject,
+      });
+    }
 
     // ── STEP 3: Send driver confirmation WITH claim number ──
     if(S.phase===1){
