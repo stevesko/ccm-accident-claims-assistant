@@ -1,5 +1,5 @@
 /**
- * CCM Accident Assistant — Send Email API
+ * CCM Accident Assistant — Send Email APA
  * POST /api/send-email
  * Sends HTML formatted email via Resend.com
  * Env var needed: RESEND_API_KEY
