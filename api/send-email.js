@@ -1,8 +1,8 @@
 /**
- * CCM Accident Assistant — Send Email APA
+ * CCM Accident Assistant — Send Email API
  * POST /api/send-email
- * Sends HTML formatted email via Resend.com
- * Env var needed: RESEND_API_KEY
+ * Sends HTML formatted email via SendGrid
+ * Env var needed: SENDGRID_EMAIL_API
  */
 
 export default async function handler(req, res) {
@@ -18,30 +18,36 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing to, subject, or html' });
   }
 
+  const apiKey = process.env.SENDGRID_EMAIL_API;
+  if (!apiKey) return res.status(500).json({ error: 'SENDGRID_EMAIL_API not configured' });
+
   try {
-    const r = await fetch('https://api.resend.com/emails', {
+    const r = await fetch('https://api.sendgrid.com/v3/mail/send', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + process.env.RESEND_API_KEY,
+        'Authorization': 'Bearer ' + apiKey,
       },
       body: JSON.stringify({
-        from: 'CCM Accident Assistant <onboarding@resend.dev>',
-        to: [to],
+        personalizations: [{ to: [{ email: to }] }],
+        from: { email: 'sskoletsky@gmail.com', name: 'CCM Accident Assistant' },
+        reply_to: { email: 'sskoletsky@ccmservices.com', name: 'CCM Claims' },
         subject,
-        html,
-        text: text || 'Please view this email in an HTML-capable email client.',
+        content: [
+          { type: 'text/plain', value: text || 'Please view this email in an HTML-capable client.' },
+          { type: 'text/html',  value: html },
+        ],
       }),
     });
 
-    const data = await r.json();
-
-    if (!r.ok) {
-      console.error('Resend error:', data);
-      return res.status(500).json({ error: 'Email failed', detail: data.message });
+    // SendGrid returns 202 Accepted on success with no body
+    if (r.status === 202) {
+      return res.status(200).json({ success: true });
     }
 
-    res.status(200).json({ success: true, id: data.id });
+    const data = await r.json().catch(() => ({}));
+    console.error('SendGrid error:', data);
+    return res.status(500).json({ error: 'Email failed', detail: JSON.stringify(data.errors || data) });
 
   } catch (err) {
     console.error('send-email error:', err);
