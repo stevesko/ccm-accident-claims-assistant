@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant — Built: 2026-04-01 12:51 PM ET -->
+<!-- CCM Accident Assistant — Built: 2026-04-01 01:49 PM ET -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -887,6 +887,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
       </div>
       <div class="btns-col">
         <button class="btn btn-primary" onclick="startPhase2()">Actually — Continue Now</button>
+        <button class="btn btn-ghost" onclick="closeScrLater()">&#10003; Done — Close App</button>
       </div>
     </div>
   </section>
@@ -1520,26 +1521,37 @@ function cleanTTSText(t){
 
 async function _fetchAudio(text){
   const cleaned = cleanTTSText(text);
+  // Return cached buffer immediately
   if(S.audioCache[cleaned]) return S.audioCache[cleaned];
-  const r=await fetch('/api/speak',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({text:cleaned.slice(0,5000)})
-  });
-  if(!r.ok){
-    const errBody=await r.json().catch(()=>({}));
-    const msg=errBody.detail||errBody.error||r.status;
-    console.error('TTS proxy error:',JSON.stringify(errBody));
-    throw new Error('TTS '+r.status+': '+msg);
-  }
-  const data=await r.json();
-  if(!data.audioContent) throw new Error('No audio in response');
-  const binary=atob(data.audioContent);
-  const bytes=new Uint8Array(binary.length);
-  for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
-  const buf=bytes.buffer;
-  S.audioCache[cleaned]=buf;
-  return buf;
+  // Return in-flight promise if already fetching (prevents duplicate network requests)
+  if(S.audioCache[cleaned+'__inflight']) return S.audioCache[cleaned+'__inflight'];
+  // Start fetch and store the promise so concurrent callers share it
+  const promise = (async()=>{
+    const r=await fetch('/api/speak',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({text:cleaned.slice(0,5000)})
+    });
+    if(!r.ok){
+      const errBody=await r.json().catch(()=>({}));
+      const msg=errBody.detail||errBody.error||r.status;
+      console.error('TTS proxy error:',JSON.stringify(errBody));
+      throw new Error('TTS '+r.status+': '+msg);
+    }
+    const data=await r.json();
+    if(!data.audioContent) throw new Error('No audio in response');
+    const binary=atob(data.audioContent);
+    const bytes=new Uint8Array(binary.length);
+    for(let i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+    const buf=bytes.buffer;
+    S.audioCache[cleaned]=buf;
+    delete S.audioCache[cleaned+'__inflight'];
+    return buf;
+  })();
+  // If the fetch fails, remove the in-flight entry so the next caller retries fresh
+  promise.catch(()=>{ delete S.audioCache[cleaned+'__inflight']; });
+  S.audioCache[cleaned+'__inflight'] = promise;
+  return promise;
 }
 
 async function speak(text,cb){
@@ -1549,7 +1561,7 @@ async function speak(text,cb){
   for(let attempt=1; attempt<=2; attempt++){
     try{
       // Delete cache entry on retry so we get a fresh fetch
-      if(attempt===2) delete S.audioCache[text];
+      if(attempt===2){ const k=cleanTTSText(text); delete S.audioCache[k]; delete S.audioCache[k+'__inflight']; }
 
       const buf  = await _fetchAudio(text);
       const ctx  = _getCtx();
@@ -2677,14 +2689,26 @@ function rFPolCheck(a,q){
   html+='<button class="opt-btn" id="polNoBtn" onclick="polCheckSel(0,'+qid+',this)" style="flex:1;padding:14px"><div style="font-weight:800;font-size:15px">No</div><div style="font-size:12px;color:var(--t1);margin-top:2px">No report filed</div></button>';
   html+='</div></div>';
   html+='<div id="polUploadSec" style="display:none;margin-top:16px">';
-  html+='<div class="fg"><label class="fl" style="font-weight:800;font-size:13px">Attach Police Report (optional)</label>';
-  html+='<label class="uzone" for="polFileP1" style="flex-direction:row;padding:16px;gap:14px;align-items:center">';
-  html+='<span style="font-size:34px;line-height:1">&#128196;</span>';
-  html+='<div style="text-align:left;flex:1"><p style="margin:0;font-size:15px;font-weight:800;color:var(--teal)">Tap to Attach Report</p>';
-  html+='<p style="margin:4px 0 0;font-size:12px;color:var(--t1)">PDF or photo</p></div>';
-  html+='<span style="font-size:20px;color:var(--teal)">&#8594;</span></label>';
-  html+='<input type="file" id="polFileP1" accept="image/*,application/pdf" class="hidden" onchange="addFiles(event,this.dataset.cat)" data-cat="Police Report" capture="environment">';
-  html+='<p id="polFileP1Confirm" style="display:none;color:var(--teal);font-size:13px;font-weight:700;margin-top:8px">&#10003; Police report attached</p>';
+  html+='<div class="fg">';
+  html+='<label class="fl" style="font-weight:800;font-size:13px">Attach Police Report <span style="font-weight:400;color:var(--t1)">(optional)</span></label>';
+  html+='<p style="margin:0 0 10px;font-size:12px;color:var(--t1)">Take a photo of the report or upload an existing file or PDF.</p>';
+  html+='<div style="display:flex;gap:10px;margin-bottom:8px">';
+  // Camera button
+  html+='<label for="polFileCamera" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:16px 10px;background:var(--bg2);border:2px solid var(--teal);border-radius:var(--r8);cursor:pointer;text-align:center">';
+  html+='<span style="font-size:28px;line-height:1">📷</span>';
+  html+='<span style="font-size:13px;font-weight:700;color:var(--teal)">Take Photo</span>';
+  html+='<span style="font-size:11px;color:var(--t1)">Use camera</span>';
+  html+='</label>';
+  html+='<input type="file" id="polFileCamera" accept="image/*" capture="environment" class="hidden" onchange="polFileSelected(event)">';
+  // File/PDF button
+  html+='<label for="polFileUpload" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:16px 10px;background:var(--bg2);border:2px solid var(--bd);border-radius:var(--r8);cursor:pointer;text-align:center">';
+  html+='<span style="font-size:28px;line-height:1">📁</span>';
+  html+='<span style="font-size:13px;font-weight:700;color:var(--t0)">Choose File</span>';
+  html+='<span style="font-size:11px;color:var(--t1)">Photo or PDF</span>';
+  html+='</label>';
+  html+='<input type="file" id="polFileUpload" accept="image/*,application/pdf" class="hidden" onchange="polFileSelected(event)">';
+  html+='</div>';
+  html+='<p id="polFileP1Confirm" style="display:none;color:var(--teal);font-size:13px;font-weight:700;margin-top:4px">&#10003; Police report attached</p>';
   html+='</div></div></div>';
   a.innerHTML=html;
 }
@@ -2694,6 +2718,15 @@ function polCheckSel(yes,qid,btn){
   var sec=document.getElementById('polUploadSec');
   if(sec) sec.style.display=(yes?'block':'none');
   ans(gQ(qid),yes?'Yes':'No');
+}
+function polFileSelected(e){
+  // Route to shared addFiles handler with Police Report category
+  addFiles(e,'Police Report');
+  var confirm=document.getElementById('polFileP1Confirm');
+  if(confirm && e.target.files && e.target.files.length>0){
+    confirm.style.display='block';
+    confirm.textContent='✓ ' + e.target.files[0].name + ' attached';
+  }
 }
 function rFPol(a,q){
   a.innerHTML=`<div class="fcard">
@@ -3583,29 +3616,20 @@ async function submitReport(){
     const htmlReport = buildHTMLReport(name, company, driverID, isFamilyDrv, phaseLabel, now);
     // Send formatted HTML email via Vercel API (nodemailer) for proper HTML rendering
     const emailSubject = (S.phase===1?'Accident Claim Phase 1 Complete':'Accident Claim Phase 2 Complete')+' | '+company+' | '+name+' | Claim: '+S.claimNum;
-    try{
-      const emailResp = await fetch('/api/send-email',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          to: CLAIMS_EMAIL,
-          subject: emailSubject,
-          html: htmlReport,
-          text: 'Accident report for '+name+' | Claim: '+S.claimNum+' | Ref: '+S.refNum
-        })
-      });
-      const emailData = await emailResp.json();
-      if(!emailResp.ok) throw new Error(emailData.detail||emailData.error||'Resend API error '+emailResp.status);
-      console.log('CCM email sent via Resend, id:', emailData.id);
-    }catch(emailErr){
-      // Fallback to EmailJS if Resend fails
-      console.warn('Resend failed, falling back to EmailJS:', emailErr.message);
-      await emailjs.send('service_lefri76','template_g91f9a7',{
-        driver_name: name, driver_id: driverID, company: company,
-        date: date, report: 'HTML report - see email body', to_email: CLAIMS_EMAIL,
-        subject: emailSubject,
-      });
-    }
+    // ── Send CCM report via EmailJS (reliable) ──
+    // Resend will replace this once ccmservices.com domain is verified in Resend dashboard.
+    // The report text is truncated to fit EmailJS limits — HTML version pending domain verification.
+    const reportSnippet = report.slice(0, 3000);
+    await emailjs.send('service_lefri76','template_g91f9a7',{
+      driver_name: name,
+      driver_id:   driverID,
+      company:     company,
+      date:        date,
+      report:      reportSnippet,
+      to_email:    CLAIMS_EMAIL,
+      subject:     emailSubject,
+    });
+    console.log('CCM email sent via EmailJS to:', CLAIMS_EMAIL);
 
     // ── STEP 3: Send driver confirmation WITH claim number ──
     if(S.phase===1){
@@ -3691,6 +3715,14 @@ function startPhase2(){
   speak('Thank you. We will now complete the detailed portion of your report. Take your time with each question and answer as accurately as you can.', ()=>{ goToQ(0); });
 }
 
+function closeScrLater(){
+  // Try to close the window/tab — works if opened by another page or as PWA
+  try{ window.close(); }catch(e){}
+  // Fallback: return to welcome screen so driver isn't stranded
+  setTimeout(()=>{
+    show('scrWelcome');
+  }, 150);
+}
 function showPhase2Later(){
   show('scrLater');
 }
@@ -3969,11 +4001,15 @@ window.addEventListener('load',()=>{
   checkDraftPill();
   // Pending report check happens during identification flow — no banner needed on load
 
-  // Pre-fetch welcome audio while user reads the welcome screen — plays instantly on tap
-  setTimeout(()=>{
-    _fetchAudio('Welcome to the Corporate Claims Management Accident Assistant. If you have already completed Phase 1 of your accident report, tap Complete Phase 2 of Your Report at the top of the screen. Otherwise, please select your company and let us know whether you are an Employee or a Family Member.')
-      .catch(()=>{}); // Silently ignore — if it fails, speak() will retry normally
-  }, 1000);
+  // Pre-fetch welcome audio immediately — cached buffer plays with no delay on tap
+  // async IIFE with try/catch fully suppresses any rejection — no browser error overlay
+  (async()=>{
+    try{
+      await _fetchAudio('Welcome to the Corporate Claims Management Accident Assistant. If you have already completed Phase 1 of your accident report, tap Complete Phase 2 of Your Report at the top of the screen. Otherwise, please select your company and let us know whether you are an Employee or a Family Member.');
+    }catch(e){
+      console.warn('TTS prefetch failed (will retry on tap):', e.message);
+    }
+  })();
 });
 </script>
 </body>
