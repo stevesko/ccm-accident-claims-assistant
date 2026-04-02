@@ -1,4 +1,5 @@
-<!-- CCM Accident Assistant — Built: 2026-04-01 01:49 PM ET -->
+<!-- CCM Accident Assistant | Built: 2026-04-02 02:08 PM EDT -->
+<!-- CCM Accident Assistant — Built: 2026-04-01 12:51 PM ET -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2398,8 +2399,12 @@ function rFIns(a,q){
 }
 function subIns(p,qid){
   const ins=document.getElementById(p+'I').value;
-  if(!ins){
-    // Show inline error instead of alert
+  const isOD = p==='od';
+  const photoTaken = isOD
+    ? S.photos.some(ph=>ph.category==='Other Driver Insurance')
+    : S.photos.some(ph=>ph.category==='Insurance Card');
+  // If photo was taken, company selection is optional — allow advance without it
+  if(!ins && !photoTaken){
     let errEl=document.getElementById(p+'InsErr');
     if(!errEl){
       errEl=document.createElement('p');
@@ -2407,16 +2412,16 @@ function subIns(p,qid){
       errEl.style.cssText='color:var(--red);font-size:12px;margin:6px 0 0';
       document.getElementById(p+'I').parentNode.appendChild(errEl);
     }
-    errEl.textContent='Please select an insurance company.';
+    errEl.textContent='Please select an insurance company, or photograph the insurance card above.';
     return;
   }
   // Clear any error
   const errEl=document.getElementById(p+'InsErr');
   if(errEl) errEl.textContent='';
-  if(ins==='Not Known'){ans(gQ(qid),'Insurance: Not Known');return;}
+  if(!ins || ins==='Not Known'){ans(gQ(qid),'Insurance: '+(photoTaken?'Card Photographed':'Not Known'));return;}
   const co=ins==='Other'?(document.getElementById(p+'OI')?.value.trim()||'Other'):ins;
   const pol=document.getElementById(p+'P')?.value.trim()||'Not Provided';
-  ans(gQ(qid),`Company: ${co} | Policy: ${pol}`);
+  ans(gQ(qid),`Company: ${co} | Policy: ${pol}${photoTaken?' | Card Photographed':''}`);
 }
 function rFOtherDrv(a,q){
   // Pre-fill from Phase 1 other driver answer (Q20)
@@ -2500,16 +2505,28 @@ function rFDmg(a,q){
   a.innerHTML=`<div class="fcard">
     ${fg('Describe Vehicle Damage',`<div class="mic-wrap" style="align-items:flex-start"><textarea class="ft" id="dmgD" rows="3" placeholder="Front bumper, hood, driver door…" style="flex:1"></textarea><button class="mic-btn" style="margin-top:2px" onclick="startSTT('dmgD',this)" title="Tap to speak">🎤</button></div>`)}
     <div class="fg">
-      <label class="fl">Is vehicle drivable?</label>
-      <div class="radio-row">
-        <label class="rl"><input type="radio" name="drv" value="Yes"> Yes</label>
-        <label class="rl"><input type="radio" name="drv" value="No"> No</label>
-        <label class="rl"><input type="radio" name="drv" value="Unknown" checked> Unknown</label>
+      <label class="fl" style="font-weight:800">Is vehicle drivable?</label>
+      <div style="display:flex;gap:10px;margin-top:6px">
+        <button class="opt-btn" id="drvYes" onclick="drvSel('Yes',this)" style="flex:1;padding:14px">
+          <div style="font-size:22px;margin-bottom:4px">✅</div>
+          <div style="font-weight:800;font-size:14px">Yes</div>
+          <div style="font-size:11px;color:var(--t1);margin-top:2px">Can be driven</div>
+        </button>
+        <button class="opt-btn" id="drvNo" onclick="drvSel('No',this)" style="flex:1;padding:14px">
+          <div style="font-size:22px;margin-bottom:4px">🚫</div>
+          <div style="font-weight:800;font-size:14px">No</div>
+          <div style="font-size:11px;color:var(--t1);margin-top:2px">Not drivable / towed</div>
+        </button>
+        <button class="opt-btn selected" id="drvUnk" onclick="drvSel('Unknown',this)" style="flex:1;padding:14px">
+          <div style="font-size:22px;margin-bottom:4px">❓</div>
+          <div style="font-weight:800;font-size:14px">Unknown</div>
+          <div style="font-size:11px;color:var(--t1);margin-top:2px">Not sure yet</div>
+        </button>
       </div>
     </div>
     <button class="btn btn-primary" onclick="
       const d=document.getElementById('dmgD').value.trim();
-      const dr=document.querySelector('input[name=drv]:checked')?.value||'Unknown';
+      const dr=window._drvSel||'Unknown';
       ans(gQ(${q.id}),(d||'Not described')+' | Drivable: '+dr);
     ">Submit</button>
   </div>`;
@@ -2810,6 +2827,11 @@ async function handlePoliceReport(e, qid){
   }
 }
 
+function drvSel(val, btn){
+  window._drvSel = val;
+  document.querySelectorAll('#drvYes,#drvNo,#drvUnk').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
 function subPol(qid){
   const d=document.getElementById('polD').value.trim();
   const o=document.getElementById('polO').value.trim();
@@ -3186,6 +3208,7 @@ function buildSummary(){
      </div>`;
 
   setTimeout(()=>{
+    try{
     const activeSecs = S.phase===1 ? SECS_P1 : SECS_P2;
     let html='';
     activeSecs.forEach(sec=>{
@@ -3193,7 +3216,7 @@ function buildSummary(){
         const q=Qs.find(x=>x.id===id);
         const a=S.ans[id];
         if(!q||!a||a==='Skipped')return '';
-        const lbl=q.text.replace(/Please provide |Please describe |Provide |Describe /gi,'').replace(/[?]$/,'');
+        const lbl=(typeof q.text==='function'?q.text():q.text).replace(/Please provide |Please describe |Provide |Describe /gi,'').replace(/[?]$/,'');
         return `<div class="srow"><span class="slbl">${lbl}</span><span class="sval">${a}</span></div>`;
       }).filter(Boolean).join('');
       if(rows)html+=`<div class="scard"><div class="scard-hd">${sec.t}</div>${rows}</div>`;
@@ -3209,8 +3232,13 @@ function buildSummary(){
       if(other.length) attachRows+=`<div class="srow"><span class="slbl">Other</span><span class="sval">${other.map(p=>p.name).join(', ')}</span></div>`;
       if(attachRows) html+=`<div class="scard"><div class="scard-hd">Attachments</div>${attachRows}</div>`;
     }
-    document.getElementById('sumBody').innerHTML=html;
+    document.getElementById('sumBody').innerHTML=html||'<p style="color:var(--t1);font-size:13px;padding:12px">Report ready — tap Submit below.</p>';
     show('scrSum');
+    }catch(e){
+      console.error('buildSummary error:',e);
+      document.getElementById('sumBody').innerHTML='<p style="color:var(--t1);font-size:13px;padding:12px">Report ready — tap Submit to continue.</p>';
+      show('scrSum');
+    }
   },900);
 }
 
