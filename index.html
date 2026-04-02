@@ -1686,11 +1686,12 @@ function beginApp(){
 
   // Defer speak slightly — gives iOS time to fully unlock AudioContext
   S._phase2Tapped = false;
+  // Audio is pre-fetched on page load — delay is just for iOS AudioContext unlock
   setTimeout(()=>{
     if(!S._phase2Tapped){
       speak('Welcome to the Corporate Claims Management Accident Assistant. If you have already completed Phase 1 of your accident report, tap Complete Phase 2 of Your Report at the top of the screen. Otherwise, please select your company and let us know whether you are an Employee or a Family Member.');
     }
-  }, 300);
+  }, 50);
 }
 
 function selectDriverType(type){
@@ -3967,6 +3968,12 @@ window.addEventListener('load',()=>{
     document.getElementById('shareBtn').classList.remove('hidden');
   checkDraftPill();
   // Pending report check happens during identification flow — no banner needed on load
+
+  // Pre-fetch welcome audio while user reads the welcome screen — plays instantly on tap
+  setTimeout(()=>{
+    _fetchAudio('Welcome to the Corporate Claims Management Accident Assistant. If you have already completed Phase 1 of your accident report, tap Complete Phase 2 of Your Report at the top of the screen. Otherwise, please select your company and let us know whether you are an Employee or a Family Member.')
+      .catch(()=>{}); // Silently ignore — if it fails, speak() will retry normally
+  }, 1000);
 });
 </script>
 </body>
