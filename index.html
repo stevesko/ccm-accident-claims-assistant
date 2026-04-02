@@ -1479,7 +1479,7 @@ function initVoice(){
             NO robot voice. Ever.
 ─────────────────────────────────────────────────────────── */
 
-const GOOGLE_TTS_KEY = 'AIzaSyAU6v-W8MFjoRid8Qi7Kasu-s7OywFbB1Q';
+// Google TTS key is kept server-side in GOOGLE_API_KEY env var — see /api/speak.js
 
 S.audioCache  = {};
 S.audioCtx    = null;
@@ -1521,28 +1521,16 @@ function cleanTTSText(t){
 async function _fetchAudio(text){
   const cleaned = cleanTTSText(text);
   if(S.audioCache[cleaned]) return S.audioCache[cleaned];
-  const r=await fetch(
-    'https://texttospeech.googleapis.com/v1beta1/text:synthesize?key='+GOOGLE_TTS_KEY,
-    {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        input:{text:cleaned.slice(0,5000)},
-        voice:{
-          languageCode:'en-US',
-          name:'en-US-chirp3-hd-leda'
-        },
-        audioConfig:{
-          audioEncoding:'MP3'
-        }
-      })
-    }
-  );
+  const r=await fetch('/api/speak',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({text:cleaned.slice(0,5000)})
+  });
   if(!r.ok){
     const errBody=await r.json().catch(()=>({}));
-    const msg=(errBody.error&&errBody.error.message)||r.status;
-    console.error('Google TTS error detail:',JSON.stringify(errBody));
-    throw new Error('Google TTS '+r.status+': '+msg);
+    const msg=errBody.detail||errBody.error||r.status;
+    console.error('TTS proxy error:',JSON.stringify(errBody));
+    throw new Error('TTS '+r.status+': '+msg);
   }
   const data=await r.json();
   if(!data.audioContent) throw new Error('No audio in response');
@@ -3595,7 +3583,7 @@ async function submitReport(){
     // Send formatted HTML email via Vercel API (nodemailer) for proper HTML rendering
     const emailSubject = (S.phase===1?'Accident Claim Phase 1 Complete':'Accident Claim Phase 2 Complete')+' | '+company+' | '+name+' | Claim: '+S.claimNum;
     try{
-      await fetch('/api/send-email',{
+      const emailResp = await fetch('/api/send-email',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({
@@ -3605,9 +3593,12 @@ async function submitReport(){
           text: 'Accident report for '+name+' | Claim: '+S.claimNum+' | Ref: '+S.refNum
         })
       });
+      const emailData = await emailResp.json();
+      if(!emailResp.ok) throw new Error(emailData.detail||emailData.error||'Resend API error '+emailResp.status);
+      console.log('CCM email sent via Resend, id:', emailData.id);
     }catch(emailErr){
-      // Fallback to EmailJS if nodemailer fails
-      console.warn('nodemailer failed, falling back to EmailJS:', emailErr);
+      // Fallback to EmailJS if Resend fails
+      console.warn('Resend failed, falling back to EmailJS:', emailErr.message);
       await emailjs.send('service_lefri76','template_g91f9a7',{
         driver_name: name, driver_id: driverID, company: company,
         date: date, report: 'HTML report - see email body', to_email: CLAIMS_EMAIL,
