@@ -68,7 +68,7 @@ export default async function handler(req, res) {
       });
     } else {
       result = await client.execute({
-        sql: 'SELECT id, ref_number, phase, submitted_at, company, driver_name, driver_id, driver_email, driver_phone, accident_type, location, date_time, injured, vehicles, status FROM claims ORDER BY submitted_at DESC LIMIT ?',
+        sql: 'SELECT id, claim_number, ref_number, phase, submitted_at, company, driver_name, driver_id, driver_email, driver_phone, accident_type, location, date_time, injured, vehicles, status FROM claims ORDER BY submitted_at DESC LIMIT ?',
         args: [limit]
       });
     }
