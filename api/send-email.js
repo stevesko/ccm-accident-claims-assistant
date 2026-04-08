@@ -2,7 +2,7 @@
  * CCM Accident Assistant — Send Email API
  * POST /api/send-email
  * Sends HTML formatted email via SendGrid
- * Env var needed: SENDGRID_EMAIL_API
+ * Env vars needed: SENDGRID_EMAIL_API, SENDGRID_FROM_EMAIL
  */
 
 export default async function handler(req, res) {
@@ -18,8 +18,11 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing to, subject, or html' });
   }
 
-  const apiKey = process.env.SENDGRID_EMAIL_API;
-  if (!apiKey) return res.status(500).json({ error: 'SENDGRID_EMAIL_API not configured' });
+  const apiKey   = process.env.SENDGRID_EMAIL_API;
+  const fromEmail = process.env.SENDGRID_FROM_EMAIL; // the Gmail you verified in SendGrid
+
+  if (!apiKey)    return res.status(500).json({ error: 'SENDGRID_EMAIL_API not configured' });
+  if (!fromEmail) return res.status(500).json({ error: 'SENDGRID_FROM_EMAIL not configured' });
 
   try {
     const r = await fetch('https://api.sendgrid.com/v3/mail/send', {
@@ -30,7 +33,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         personalizations: [{ to: [{ email: to }] }],
-        from: { email: 'sskoletsky@gmail.com', name: 'CCM Accident Assistant' },
+        from:     { email: fromEmail, name: 'CCM Accident Assistant' },
         reply_to: { email: 'sskoletsky@ccmservices.com', name: 'CCM Claims' },
         subject,
         content: [
@@ -46,7 +49,7 @@ export default async function handler(req, res) {
     }
 
     const data = await r.json().catch(() => ({}));
-    console.error('SendGrid error:', data);
+    console.error('SendGrid error:', r.status, data);
     return res.status(500).json({ error: 'Email failed', detail: JSON.stringify(data.errors || data) });
 
   } catch (err) {
