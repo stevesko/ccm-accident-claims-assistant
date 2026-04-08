@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant | Built: 2026-04-02 05:20 PM EDT -->
+<!-- CCM Accident Assistant | Built: 2026-04-02 07:59 PM EDT -->
 <!-- CCM Accident Assistant — Built: 2026-04-01 12:51 PM ET -->
 <!DOCTYPE html>
 <html lang="en">
@@ -899,6 +899,9 @@ input[type="datetime-local"].fi{color-scheme:dark}
       <div class="succ-ring">✅</div>
       <h2 class="succ-h">Phase 2 Submitted</h2>
       <p class="succ-p">Thank you. Your complete accident report has been submitted to Corporate Claims Management. A claims representative will be in touch with you shortly.</p>
+      <div class="btns-col" style="margin-top:20px">
+        <button class="btn btn-ghost" onclick="closeScrLater()">&#10003; Done — Close App</button>
+      </div>
     </div>
   </section>
 
@@ -3001,6 +3004,12 @@ function rInjDet(a,q){
   // Resolve names from known identity data
   function resolveName(veh,role){
     if(veh==='Your Vehicle'&&role==='Driver') return S.identity.name||null;
+    // Other driver name from Q21 answer (format: "Name: John Smith | ...")
+    if(veh==='Other Vehicle'&&role==='Driver'){
+      const q21=S.ans[21]||'';
+      const m=q21.match(/Name:\s*([^|]+)/i);
+      if(m&&m[1].trim()&&m[1].trim()!=='N/A') return m[1].trim();
+    }
     return null; // other roles need name entered
   }
   let h='';
