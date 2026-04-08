@@ -97,6 +97,7 @@ tr:hover td{background:rgba(45,140,240,.04)}
     <table>
       <thead>
         <tr>
+          <th>Claim #</th>
           <th>Reference</th>
           <th>Submitted</th>
           <th>Phase</th>
@@ -156,7 +157,7 @@ function filterTable(){
   const phase  = document.getElementById('filterPhase').value;
 
   const filtered = allClaims.filter(c=>{
-    const txt = [c.ref_number,c.company,c.driver_name,c.driver_id,c.accident_type,c.location].join(' ').toLowerCase();
+    const txt = [c.claim_number,c.ref_number,c.company,c.driver_name,c.driver_id,c.accident_type,c.location].join(' ').toLowerCase();
     if(q && !txt.includes(q)) return false;
     if(status && c.status!==status) return false;
     if(phase  && String(c.phase)!==phase) return false;
@@ -177,6 +178,7 @@ function renderTable(claims){
     const inj = (c.injured||'').toLowerCase()==='yes';
     const statusClass = 'status-'+(c.status||'New').replace(' ','.');
     return `<tr>
+      <td><div style="font-weight:800;color:#eef2fb;font-size:14px">${c.claim_number||'—'}</div></td>
       <td><div class="ref">${c.ref_number||'—'}</div></td>
       <td style="color:#8aa0bf;font-size:12px">${dt}</td>
       <td><span class="phase phase${c.phase||1}">Phase ${c.phase||1}</span></td>
@@ -216,8 +218,9 @@ function showDetail(id){
   const c=allClaims.find(x=>x.id===id);
   if(!c) return;
   const dt=c.submitted_at?new Date(c.submitted_at).toLocaleString('en-US',{dateStyle:'full',timeStyle:'short'}):'—';
-  document.getElementById('modalTitle').textContent='Claim '+c.ref_number;
+  document.getElementById('modalTitle').textContent='Claim #'+(c.claim_number||c.ref_number);
   const rows=[
+    ['Claim Number',  c.claim_number||'—'],
     ['Reference',    c.ref_number||'—'],
     ['Submitted',    dt],
     ['Phase',        'Phase '+(c.phase||1)],
