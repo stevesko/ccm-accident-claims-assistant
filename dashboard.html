@@ -110,7 +110,7 @@ tr:hover td{background:rgba(45,140,240,.04)}
         </tr>
       </thead>
       <tbody id="tbody">
-        <tr><td colspan="9" class="loading">Loading claims…</td></tr>
+        <tr><td colspan="10" class="loading">Loading claims…</td></tr>
       </tbody>
     </table>
   </div>
@@ -131,7 +131,7 @@ tr:hover td{background:rgba(45,140,240,.04)}
 let allClaims = [];
 
 async function loadClaims(){
-  document.getElementById('tbody').innerHTML='<tr><td colspan="9" class="loading">Loading…</td></tr>';
+  document.getElementById('tbody').innerHTML='<tr><td colspan="10" class="loading">Loading…</td></tr>';
   try{
     const r = await fetch('/api/get-claims');
     const d = await r.json();
@@ -139,7 +139,8 @@ async function loadClaims(){
     updateStats();
     filterTable();
   }catch(e){
-    document.getElementById('tbody').innerHTML='<tr><td colspan="9" class="empty"><div class="empty-ic">⚠️</div><div>Failed to load claims.<br>Check API connection.</div></td></tr>';
+    console.error('loadClaims error:', e);
+    document.getElementById('tbody').innerHTML=`<tr><td colspan="10" class="empty"><div class="empty-ic">⚠️</div><div>Failed to load claims.<br><span style="font-size:11px;color:#4a6285">${e.message}</span></div></td></tr>`;
   }
 }
 
@@ -169,7 +170,7 @@ function filterTable(){
 
 function renderTable(claims){
   if(claims.length===0){
-    document.getElementById('tbody').innerHTML='<tr><td colspan="9" class="empty"><div class="empty-ic">📋</div><div>No claims found</div></td></tr>';
+    document.getElementById('tbody').innerHTML='<tr><td colspan="10" class="empty"><div class="empty-ic">📋</div><div>No claims found</div></td></tr>';
     return;
   }
 
