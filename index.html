@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant | Built: 2026-04-02 07:59 PM EDT -->
+<!-- CCM Accident Assistant | Built: 2026-04-08 10:56 AM EDT -->
 <!-- CCM Accident Assistant — Built: 2026-04-01 12:51 PM ET -->
 <!DOCTYPE html>
 <html lang="en">
@@ -1126,8 +1126,8 @@ const Qs=[
   {id:22, text:"Now let us get the details of the other vehicle involved.",                        type:'fotherveh',skip:isSolo},
   {id:23, text:"Please provide the other driver's insurance information.",               type:'fins',key:'od',skip:isSolo},
   {id:24, text:"Please describe the damage to your vehicle, and let us know whether it is still drivable.",           type:'fdmg'},
-  {id:25, text:"Was there visible damage to any of the other vehicles involved?",               type:'yn'},
-  {id:26, text:'Please describe the damage you observed on the other vehicle or vehicles.', type:'fothdmg', skip:a=>a[25]==='No'},
+  {id:25, text:"Was there visible damage to any of the other vehicles involved?",               type:'yn', skip:a=>isSolo(a)},
+  {id:26, text:'Please describe the damage you observed on the other vehicle or vehicles.', type:'fothdmg', skip:a=>a[25]==='No'||isSolo(a)},
   {id:251, text:"Was there any damage to property — such as a fence, guardrail, building, or parked car?", type:'yn'},
   {id:252, text:'Please describe the property that was damaged and the extent of the damage.', type:'fpropdmg', skip:a=>a[251]==='No'},
   {id:27, text:"Did any airbags deploy during the accident?",                                         type:'yn'},
@@ -1929,7 +1929,11 @@ function goToQ(idx){
   S.idx=idx;
   const q=vis[idx];
 
-  // Pending report check handled on ID screens before interview starts
+  // Auto-answer Q25 (other vehicle damage?) if photos already taken at scene
+  if(q.id===25 && !S.ans[25]){
+    const hasOdPhotos = S.photos.some(p=>p.category==='Vehicle Damage - Other');
+    if(hasOdPhotos){ ans(q,'Yes'); return; }
+  }
 
   // Accident questions begin directly after greeting in startInterview
   _askQuestion(idx);
@@ -2173,13 +2177,90 @@ function rTa(a,q){
 }
 function rNarr(a,q){
   const accType = S.ans[13] ? '<div style="background:var(--blue-g);border:1px solid rgba(45,140,240,.2);border-radius:var(--r8);padding:10px 13px;margin-bottom:12px;font-size:13px;color:var(--blue)"><strong>Accident Type:</strong> '+S.ans[13]+'</div>' : '';
-  a.innerHTML=accType+`<div class="mic-wrap" style="align-items:flex-start"><textarea class="ft" id="narrI" placeholder="Describe what happened in your own words…" rows="5" data-v style="flex:1"></textarea><button class="mic-btn" style="margin-top:2px" onclick="startSTT('narrI',this)" title="Tap to speak">🎤</button></div>
-  <div class="vpreview" id="vhint"></div>
-  <button class="btn btn-primary mt10" onclick="
+  a.innerHTML=accType+`
+  <div style="margin-bottom:10px">
+    <textarea class="ft" id="narrI" placeholder="Describe what happened in your own words — take your time…" rows="6" data-v style="width:100%;resize:vertical"></textarea>
+  </div>
+  <button class="btn btn-ghost" id="narrMicBtn" onclick="startNarrSTT(this)" style="width:100%;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px">
+    <span style="font-size:18px">🎤</span> <span id="narrMicLabel">Tap to Dictate — speaks until you stop</span>
+  </button>
+  <p style="font-size:11px;color:var(--t2);text-align:center;margin-bottom:12px">Your words are added to the description above. Tap again to stop.</p>
+  <button class="btn btn-primary" onclick="
     const v=document.getElementById('narrI').value.trim();
     if(v)ans(gQ(${q.id}),v);
   ">Submit Description</button>`;
   setTimeout(()=>document.getElementById('narrI')?.focus(),300);
+}
+
+let _narrRec = null;
+function startNarrSTT(btn){
+  // If already listening — stop
+  if(_narrRec){
+    try{ _narrRec.stop(); }catch(e){}
+    _narrRec = null;
+    btn.classList.remove('listening');
+    document.getElementById('narrMicLabel').textContent = 'Tap to Dictate — speaks until you stop';
+    return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ alert('Speech recognition not supported. Please type your description.'); return; }
+
+  const field = document.getElementById('narrI');
+  const rec = new SR();
+  rec.lang = 'en-US';
+  rec.continuous = true;       // keeps listening through pauses
+  rec.interimResults = true;   // shows words as you speak
+  rec.maxAlternatives = 1;
+  _narrRec = rec;
+
+  btn.classList.add('listening');
+  document.getElementById('narrMicLabel').textContent = '⏹ Tap to Stop Dictating';
+
+  // Snapshot of existing text before we started — we append to this
+  let baseText = field.value.trim();
+
+  rec.onresult = function(e){
+    let interim = '';
+    let final = '';
+    for(let i = e.resultIndex; i < e.results.length; i++){
+      const t = e.results[i][0].transcript;
+      if(e.results[i].isFinal){ final += t + ' '; }
+      else { interim += t; }
+    }
+    // Append finalised words to the field, show interim in preview
+    if(final){
+      field.value = (baseText + (baseText ? ' ' : '') + final).trimEnd();
+      // Update base so next final chunk appends correctly
+      baseText = field.value.trim();
+    }
+    // Show interim preview below textarea
+    const hint = document.getElementById('vhint');
+    if(hint) hint.textContent = interim ? '…' + interim : '';
+  };
+
+  rec.onerror = function(e){
+    console.warn('Narr STT error:', e.error);
+    if(e.error === 'no-speech') return; // just silence — keep going
+    if(e.error === 'not-allowed') alert('Microphone access denied.');
+    _narrRec = null;
+    btn.classList.remove('listening');
+    document.getElementById('narrMicLabel').textContent = 'Tap to Dictate — speaks until you stop';
+  };
+
+  rec.onend = function(){
+    // If still supposed to be listening (browser cut it off) — restart
+    if(_narrRec){
+      try{ rec.start(); }catch(e){
+        _narrRec = null;
+        btn.classList.remove('listening');
+        document.getElementById('narrMicLabel').textContent = 'Tap to Dictate — speaks until you stop';
+      }
+    }
+    const hint = document.getElementById('vhint');
+    if(hint) hint.textContent = '';
+  };
+
+  rec.start();
 }
 
 /* ── FORMS ── */
@@ -2505,7 +2586,10 @@ function rFOtherVeh(a,q){
   </div>`;
 }
 function rFDmg(a,q){
+  const myDmgPhotos = S.photos.filter(p=>p.category==='Vehicle Damage - Yours'||p.category==='Vehicle Damage');
+  const hasDmgPhotos = myDmgPhotos.length > 0;
   a.innerHTML=`<div class="fcard">
+    ${hasDmgPhotos ? `<div style="background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.2);border-radius:var(--r8);padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--teal)">&#10003; ${myDmgPhotos.length} damage photo${myDmgPhotos.length!==1?'s':''} already captured at scene. Describe damage below (optional).</div>` : ''}
     ${fg('Describe Vehicle Damage',`<div class="mic-wrap" style="align-items:flex-start"><textarea class="ft" id="dmgD" rows="3" placeholder="Front bumper, hood, driver door…" style="flex:1"></textarea><button class="mic-btn" style="margin-top:2px" onclick="startSTT('dmgD',this)" title="Tap to speak">🎤</button></div>`)}
     <div class="fg">
       <label class="fl" style="font-weight:800">Is vehicle drivable?</label>
@@ -2965,16 +3049,30 @@ function subContact(qid){
 function rInjSel(a,q){
   S.injSel={};
   const solo=isSolo(S.ans);
+  const hasPassengers = (S.ans[3]||'').toLowerCase()!=='no';
+  // Your vehicle — only show passengers if Q3 confirmed passengers present
   let h=`<div class="inj-grp"><div class="inj-grp-h">Your Vehicle</div>`;
-  ['Driver','Front Passenger','Rear Left','Rear Right','Rear Middle'].forEach(r=>{
+  const v1Roles = hasPassengers
+    ? ['Driver','Front Passenger','Rear Left','Rear Right','Rear Middle']
+    : ['Driver'];
+  v1Roles.forEach(r=>{
     h+=`<label class="cc" id="iv1${r.replace(/\s/g,'_')}"><input type="checkbox" onchange="togInj('v1','${r}',this.checked,this)"> ${r}</label>`;
   });
+  if(!hasPassengers){
+    h+=`<p style="font-size:12px;color:var(--t1);margin:4px 0 0">No passengers reported — driver only</p>`;
+  }
   h+=`</div>`;
   if(!solo){
     h+=`<div class="inj-grp"><div class="inj-grp-h">Other Vehicle</div>`;
-    ['Driver','Front Passenger','Other Passenger'].forEach(r=>{
+    const v2Roles = hasPassengers
+      ? ['Driver','Front Passenger','Other Passenger']
+      : ['Driver'];
+    v2Roles.forEach(r=>{
       h+=`<label class="cc" id="iv2${r.replace(/\s/g,'_')}"><input type="checkbox" onchange="togInj('v2','${r}',this.checked,this)"> ${r}</label>`;
     });
+    if(!hasPassengers){
+      h+=`<p style="font-size:12px;color:var(--t1);margin:4px 0 0">No passengers reported — driver only</p>`;
+    }
     h+=`</div>`;
   }
   h+=`<button class="btn btn-primary mt10" onclick="subInjSel(${q.id})">Confirm Selections</button>`;
