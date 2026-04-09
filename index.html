@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant | Built: 2026-04-08 10:56 AM EDT -->
+<!-- CCM Accident Assistant | Built: 2026-04-08 12:30 PM EDT -->
 <!-- CCM Accident Assistant — Built: 2026-04-01 12:51 PM ET -->
 <!DOCTYPE html>
 <html lang="en">
@@ -1060,10 +1060,19 @@ const YRS  = Array.from({length:new Date().getFullYear()-1979},(_,i)=>String(new
 /* ─────────────────────────────────
    QUESTIONS
 ───────────────────────────────── */
+// Accident type helpers — used for context-aware question skipping
+function accIs(a){ return (a[13]||'').trim(); }
+function accIn(a,...types){ const t=accIs(a); return types.some(x=>t===x); }
+function isParkedType(a){ return accIn(a,'Hit While Parked','Parking Lot','Hit & Run — Parked'); }
+function isCriminalType(a){ return accIn(a,'Vandalism','Vehicle Theft'); }
+function isBackingType(a){ return accIn(a,'Backing'); }
+function isNoImpactType(a){ return accIn(a,'Vandalism','Vehicle Theft','Glass / Windshield','Debris / Pothole Damage'); }
+function isEnvironmentalType(a){ return accIn(a,'Act of Nature','Fire','Glass / Windshield','Debris / Pothole Damage'); }
+
 const Qs=[
   // Identification collected on scrID1/scrID2 screens before interview begins
   {id:2,  text:"How many vehicles were involved?",                type:'vehicles'},
-  {id:3,  text:"Were there any passengers in any of the vehicles?",                      type:'yn'},
+  {id:3,  text:"Were there any passengers in any of the vehicles?",                      type:'yn', skip:a=>isCriminalType(a)},
   {id:4,  text:"Was anyone injured?",                                             type:'yn'},
   {id:5,  text:"Select who was injured in each vehicle.",                         type:'injsel',  skip:a=>a[4]==='No'},
   {id:6,  text:"Please provide the name and injury details for each person who was injured.",         type:'injdet',  skip:a=>a[4]==='No'},
@@ -1073,46 +1082,23 @@ const Qs=[
   {id:13, text:"What type of accident was this?",                                 type:'ddAT',ph:'Select accident type…'},
   {id:50, text:"While you are still at the scene, please take photos of all licenses, insurance cards, and vehicle damage.",    type:'photoprompt'},
   {id:14, text:"At the moment of impact, was your vehicle moving, parked, or stopped?",          type:'og3',opts:['Moving','Parked','Stopped'],
-    skip:a=>{
-      const parkedTypes=['Hit While Parked','Parking Lot','Vandalism','Vehicle Theft','Hit & Run — Parked'];
-      return parkedTypes.some(t=>(a[13]||'').includes(t));
-    }
+    skip:a=>isCriminalType(a)||isParkedType(a)
   },
   {id:10, text:"What were the weather conditions at the time of the accident?",                               type:'dd',opts:WX,ph:'Select weather…',
-    skip:a=>{
-      const noWeatherTypes=['Vandalism','Vehicle Theft','Mechanical Failure','Fire'];
-      return noWeatherTypes.some(t=>(a[13]||'').includes(t));
-    }
+    skip:a=>isCriminalType(a)||accIn(a,'Fire','Backing','Parking Lot','Hit While Parked','Hit & Run — Parked')
   },
   {id:11, text:"How would you describe the road conditions?",                                  type:'dd',opts:RD,ph:'Select road conditions…',
-    skip:a=>{
-      const noRoadTypes=[
-        'Parking Lot','Hit Animal','Vandalism','Vehicle Theft',
-        'Glass / Windshield','Act of Nature','Fire','Mechanical Failure'
-      ];
-      return noRoadTypes.some(t=>(a[13]||'').includes(t));
-    }
+    skip:a=>isCriminalType(a)||isParkedType(a)||isEnvironmentalType(a)||isBackingType(a)
   },
   {id:12, text:"How was the traffic at the time of the accident?",                                    type:'og3',opts:['Light','Moderate','Heavy'],
-    skip:a=>{
-      const noTrafficTypes=[
-        'Parking Lot','Hit While Parked','Hit Animal','Debris / Pothole Damage',
-        'Vandalism','Vehicle Theft','Glass / Windshield','Act of Nature','Fire',
-        'Mechanical Failure','Hit & Run — Parked','Rollover'
-      ];
-      return noTrafficTypes.some(t=>(a[13]||'').includes(t));
-    }
+    skip:a=>isCriminalType(a)||isParkedType(a)||isBackingType(a)||isEnvironmentalType(a)||
+            accIn(a,'Hit Animal','Rollover','Lost Control','Run Off Road','Hit Fixed Object')
   },
   {id:15, text:"Which direction were you traveling when the accident occurred?",                             type:'dir',
     skip:a=>{
-      const noDirectionTypes=[
-        'Parking Lot','Hit While Parked','Vandalism','Vehicle Theft',
-        'Glass / Windshield','Act of Nature','Fire','Mechanical Failure',
-        'Hit & Run — Parked','Hit Animal','Debris / Pothole Damage'
-      ];
-      // Also skip if vehicle was parked or stopped
-      const parked = (a[14]||'').toLowerCase().includes('parked');
-      return parked || noDirectionTypes.some(t=>(a[13]||'').includes(t));
+      const parked=(a[14]||'').toLowerCase().includes('parked');
+      return parked||isCriminalType(a)||isParkedType(a)||isBackingType(a)||isEnvironmentalType(a)||
+             accIn(a,'Hit Animal','Debris / Pothole Damage');
     }
   },
   {id:17, text:"Is the vehicle you were driving a company vehicle or your personal vehicle?",                          type:'og2',opts:['Company Vehicle','Personal Vehicle']},
@@ -1128,9 +1114,9 @@ const Qs=[
   {id:24, text:"Please describe the damage to your vehicle, and let us know whether it is still drivable.",           type:'fdmg'},
   {id:25, text:"Was there visible damage to any of the other vehicles involved?",               type:'yn', skip:a=>isSolo(a)},
   {id:26, text:'Please describe the damage you observed on the other vehicle or vehicles.', type:'fothdmg', skip:a=>a[25]==='No'||isSolo(a)},
-  {id:251, text:"Was there any damage to property — such as a fence, guardrail, building, or parked car?", type:'yn'},
+  {id:251, text:"Was there any damage to property — such as a fence, guardrail, or building?", type:'yn', skip:a=>isCriminalType(a)||!isSolo(a)},
   {id:252, text:'Please describe the property that was damaged and the extent of the damage.', type:'fpropdmg', skip:a=>a[251]==='No'},
-  {id:27, text:"Did any airbags deploy during the accident?",                                         type:'yn'},
+  {id:27, text:"Did any airbags deploy during the accident?",                                         type:'yn', skip:a=>isNoImpactType(a)||isEnvironmentalType(a)},
   {id:28, text:"Please select which vehicles had airbags deploy.",                       type:'airbags',skip:a=>a[27]==='No'},
   {id:29, text:"Does your vehicle need to be towed from the scene?",                             type:'yn'},
   {id:30, text:"Please provide the tow company name and where your vehicle is being taken.",                   type:'ftow',skip:a=>a[29]==='No'},
@@ -1138,7 +1124,7 @@ const Qs=[
   {id:301,text:"Please provide the tow details for the other vehicle.",                        type:'ftoword',skip:a=>a[291]==='No'||isSolo(a)},
   {id:31, text:"Was a police report filed at the scene?",                                      type:'fpolcheck'},
   {id:32, text:"Please provide the police report details.",                                  type:'fpol',skip:a=>a[31]==='No'},
-  {id:33, text:"Was a citation or ticket issued at the scene?",                             type:'yn'},
+  {id:33, text:"Was a citation or ticket issued at the scene?",                             type:'yn', skip:a=>isCriminalType(a)||isEnvironmentalType(a)},
   {id:34, text:"Please provide the citation details.",                                       type:'fcit',skip:a=>a[33]==='No'},
   {id:35, text:"Were there any witnesses to the accident?",                                       type:'yn'},
   {id:36, text:"Please provide the witness name and their contact information.",                   type:'fwit',skip:a=>a[35]==='No'},
@@ -3801,6 +3787,34 @@ async function submitReport(){
       setTimeout(()=>{
         speak('Phase 2 is optional but recommended. It includes vehicle details, insurance information, damage description, police report, and accident narrative. The more detail you provide, the faster your claim can be processed.');
       }, 1000);
+      // ── Send training assignment email (fire and forget) ──
+      const _driverEmail = S.identity.email||'';
+      const _accType = S.ans[13]||'Unknown';
+      if(_driverEmail && _driverEmail.includes('@')){
+        const _trainingUrl = window.location.origin+'/training?claim='+S.claimNum
+          +'&type='+encodeURIComponent(_accType)
+          +'&driver='+encodeURIComponent(S.identity.name||'')
+          +'&id='+encodeURIComponent(S.identity.driverID||'')
+          +'&company='+encodeURIComponent(S.identity.company||'')
+          +'&ref='+encodeURIComponent(S.refNum||'');
+        fetch('/api/send-training',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({
+            driverEmail: _driverEmail,
+            driverName:  S.identity.name||'Driver',
+            driverID:    S.identity.driverID||'',
+            company:     S.identity.company||'',
+            accidentType:_accType,
+            claimNum:    S.claimNum,
+            refNum:      S.refNum||'',
+            trainingUrl: _trainingUrl
+          })
+        }).then(r=>r.json()).then(d=>{
+          if(d.success) console.log('Training assignment email sent to',_driverEmail);
+          else console.warn('Training email failed:',d);
+        }).catch(e=>console.warn('Training email error:',e));
+      }
     } else {
       // ── Phase 2: Update existing DB record ──
       if(FTP_ENDPOINT){
