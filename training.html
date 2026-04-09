@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>CCM SafeDriver Training</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --navy:#2F3744;--gold:#C4A77D;--teal:#00d4aa;--blue:#2d8cf0;
+  --bg:#07090f;--bg2:#0c1018;--bg3:#111827;
+  --t0:#eef2fb;--t1:#8aa0bf;--t2:#4a6285;
+  --r8:8px;--r12:12px;--r16:16px;
+  --red:#ff4f6d;--amber:#f5a623;--green:#7edb6a;
+}
+html,body{height:100%;background:var(--bg);color:var(--t0);font-family:'Inter',sans-serif}
+body{display:flex;flex-direction:column;min-height:100vh}
+
+/* HEADER */
+.hdr{background:var(--navy);padding:14px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;border-bottom:1px solid rgba(196,167,125,.2)}
+.hdr-logo{font-size:10px;font-weight:800;letter-spacing:.14em;color:var(--gold);text-transform:uppercase}
+.hdr-title{font-size:14px;font-weight:700;color:var(--t0);flex:1}
+.hdr-badge{font-size:10px;font-weight:700;padding:4px 10px;border-radius:99px;background:rgba(196,167,125,.15);color:var(--gold);border:1px solid rgba(196,167,125,.3)}
+
+/* PROGRESS */
+.prog-wrap{background:var(--bg2);padding:14px 20px;border-bottom:1px solid rgba(99,155,230,.08)}
+.prog-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.prog-label span{font-size:12px;color:var(--t1)}
+.prog-bar{height:4px;background:var(--bg3);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;background:var(--teal);border-radius:99px;transition:width .5s ease}
+.step-dots{display:flex;gap:6px;margin-top:10px}
+.step-dot{flex:1;height:3px;border-radius:99px;background:var(--bg3);transition:background .3s}
+.step-dot.done{background:var(--teal)}
+.step-dot.active{background:var(--blue)}
+
+/* MAIN */
+main{flex:1;padding:16px;max-width:640px;width:100%;margin:0 auto}
+
+/* SCREENS */
+.scr{display:none}.scr.on{display:block}
+
+/* WELCOME */
+.welcome-hero{background:var(--navy);border-radius:var(--r16);padding:24px;margin-bottom:16px;border:1px solid rgba(196,167,125,.2)}
+.welcome-tag{font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--gold);text-transform:uppercase;margin-bottom:8px}
+.welcome-h{font-size:22px;font-weight:800;color:var(--t0);margin-bottom:6px;line-height:1.25}
+.welcome-sub{font-size:13px;color:var(--t1);line-height:1.6}
+
+.claim-strip{background:var(--bg2);border:1px solid rgba(99,155,230,.12);border-radius:var(--r12);padding:14px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;text-align:center}
+.claim-strip-lbl{font-size:9px;font-weight:800;letter-spacing:.1em;color:var(--t2);text-transform:uppercase;margin-bottom:4px}
+.claim-strip-val{font-size:15px;font-weight:800;color:var(--t0)}
+
+.module-list{margin-bottom:16px}
+.module-item{background:var(--bg2);border:1px solid rgba(99,155,230,.1);border-radius:var(--r12);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .2s}
+.module-item:hover{border-color:rgba(99,155,230,.25)}
+.module-item.done{border-color:rgba(0,212,170,.3)}
+.mod-icon{width:40px;height:40px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.mod-icon.done{background:rgba(0,212,170,.12)}
+.mod-info{flex:1}
+.mod-title{font-size:14px;font-weight:700;color:var(--t0);margin-bottom:2px}
+.mod-meta{font-size:12px;color:var(--t1)}
+.mod-status{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px}
+.mod-status.done{background:rgba(0,212,170,.12);color:var(--teal)}
+.mod-status.req{background:rgba(245,166,35,.1);color:var(--amber)}
+.mod-status.lock{background:var(--bg3);color:var(--t2)}
+
+/* LESSON */
+.lesson-card{background:var(--bg2);border:1px solid rgba(99,155,230,.1);border-radius:var(--r16);overflow:hidden;margin-bottom:16px}
+.lesson-hdr{padding:16px;border-bottom:1px solid rgba(99,155,230,.08);display:flex;align-items:center;gap:12px}
+.lesson-icon{width:44px;height:44px;border-radius:50%;background:rgba(45,140,240,.12);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.lesson-title{font-size:16px;font-weight:800;color:var(--t0)}
+.lesson-sub{font-size:12px;color:var(--t1);margin-top:2px}
+.lesson-body{padding:16px}
+
+.ai-tag{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:3px 10px;border-radius:99px;background:rgba(45,140,240,.1);color:var(--blue);border:1px solid rgba(45,140,240,.2);margin-bottom:12px;letter-spacing:.04em}
+.content-block{font-size:14px;color:var(--t1);line-height:1.75;margin-bottom:14px}
+.content-block strong{color:var(--t0);font-weight:700}
+.highlight{background:rgba(245,166,35,.08);border-left:3px solid var(--amber);border-radius:0 var(--r8) var(--r8) 0;padding:12px 14px;font-size:13px;color:var(--amber);line-height:1.6;margin-bottom:14px}
+.key-point{background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.15);border-radius:var(--r8);padding:12px 14px;font-size:13px;color:var(--teal);line-height:1.6;margin-bottom:14px}
+
+/* QUIZ */
+.quiz-wrap{margin-top:4px}
+.quiz-label{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--t2);text-transform:uppercase;margin-bottom:10px}
+.quiz-q{font-size:15px;font-weight:700;color:var(--t0);margin-bottom:12px;line-height:1.4}
+.quiz-opts{display:flex;flex-direction:column;gap:8px}
+.quiz-opt{background:var(--bg3);border:1px solid rgba(99,155,230,.12);border-radius:var(--r12);padding:14px 16px;font-size:14px;color:var(--t0);cursor:pointer;text-align:left;transition:border-color .15s,background .15s;line-height:1.4}
+.quiz-opt:hover{border-color:rgba(99,155,230,.3);background:rgba(99,155,230,.05)}
+.quiz-opt.correct{background:rgba(0,212,170,.08);border-color:rgba(0,212,170,.4);color:var(--teal)}
+.quiz-opt.wrong{background:rgba(255,79,109,.08);border-color:rgba(255,79,109,.4);color:var(--red)}
+.quiz-fb{font-size:13px;margin-top:10px;padding:10px 14px;border-radius:var(--r8);display:none}
+.quiz-fb.show{display:block}
+.quiz-fb.ok{background:rgba(0,212,170,.08);color:var(--teal);border:1px solid rgba(0,212,170,.2)}
+.quiz-fb.no{background:rgba(255,79,109,.08);color:var(--red);border:1px solid rgba(255,79,109,.2)}
+
+/* BUTTONS */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 20px;border-radius:var(--r12);font-size:15px;font-weight:700;cursor:pointer;border:none;transition:opacity .15s,transform .1s}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--teal);color:#0a1628;width:100%}
+.btn-primary:disabled{opacity:.35;cursor:not-allowed}
+.btn-ghost{background:var(--bg2);color:var(--t1);border:1px solid rgba(99,155,230,.15);width:100%}
+.btn-navy{background:var(--navy);color:var(--t0);width:100%;border:1px solid rgba(196,167,125,.2)}
+
+/* CERT */
+.cert-wrap{background:var(--navy);border:1px solid rgba(196,167,125,.3);border-radius:var(--r16);padding:28px 20px;text-align:center;margin-bottom:16px}
+.cert-check{width:64px;height:64px;border-radius:50%;background:rgba(0,212,170,.12);border:2px solid var(--teal);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px}
+.cert-title{font-size:20px;font-weight:800;color:var(--t0);margin-bottom:6px}
+.cert-sub{font-size:13px;color:var(--gold);margin-bottom:20px}
+.cert-divider{height:1px;background:rgba(196,167,125,.2);margin:16px 0}
+.cert-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;text-align:left}
+.cert-row-lbl{font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--t2);text-transform:uppercase;margin-bottom:3px}
+.cert-row-val{font-size:13px;font-weight:700;color:var(--t0)}
+.cert-score{font-size:36px;font-weight:800;color:var(--teal);margin:12px 0 4px}
+
+/* SCORE BAR */
+.score-bar-wrap{margin:12px 0}
+.score-bar{height:8px;background:var(--bg3);border-radius:99px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:99px;background:var(--teal);transition:width 1s ease}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div style="flex:1">
+    <div class="hdr-logo">CCM SafeDriver</div>
+    <div class="hdr-title" id="hdrTitle">Safety Training</div>
+  </div>
+  <div class="hdr-badge" id="hdrBadge">Due in 7 days</div>
+</div>
+
+<!-- PROGRESS -->
+<div class="prog-wrap" id="progWrap" style="display:none">
+  <div class="prog-label">
+    <span id="progLabel">Module 1 of 4</span>
+    <span id="progPct">0% complete</span>
+  </div>
+  <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+  <div class="step-dots" id="stepDots"></div>
+</div>
+
+<main>
+
+<!-- WELCOME SCREEN -->
+<div class="scr on" id="scrWelcome">
+  <div class="welcome-hero">
+    <div class="welcome-tag">Required Training</div>
+    <div class="welcome-h" id="wHero">Safety Training Assigned</div>
+    <div class="welcome-sub" id="wSub">Complete all modules to receive your certificate.</div>
+  </div>
+
+  <div class="claim-strip">
+    <div><div class="claim-strip-lbl">Claim #</div><div class="claim-strip-val" id="wClaim">—</div></div>
+    <div><div class="claim-strip-lbl">Accident Type</div><div class="claim-strip-val" id="wType" style="font-size:11px;padding-top:3px">—</div></div>
+    <div><div class="claim-strip-lbl">Duration</div><div class="claim-strip-val" id="wDur">—</div></div>
+  </div>
+
+  <div class="module-list" id="moduleList"></div>
+
+  <button class="btn btn-primary" id="startBtn" onclick="startTraining()">
+    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    Begin Training
+  </button>
+</div>
+
+<!-- LESSON SCREEN -->
+<div class="scr" id="scrLesson">
+  <div class="lesson-card">
+    <div class="lesson-hdr">
+      <div class="lesson-icon" id="lessonIcon">📋</div>
+      <div>
+        <div class="lesson-title" id="lessonTitle">Loading...</div>
+        <div class="lesson-sub" id="lessonSub">Module 1</div>
+      </div>
+    </div>
+    <div class="lesson-body" id="lessonBody"></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <button class="btn btn-primary" id="nextBtn" onclick="nextLesson()" disabled>Continue</button>
+    <button class="btn btn-ghost" onclick="saveExit()">Save &amp; finish later</button>
+  </div>
+</div>
+
+<!-- CERT SCREEN -->
+<div class="scr" id="scrCert">
+  <div class="cert-wrap">
+    <div class="cert-check">✓</div>
+    <div class="cert-title">Training Complete</div>
+    <div class="cert-sub" id="certCurr">Backing Safety Remediation</div>
+    <div class="cert-divider"></div>
+    <div style="text-align:center;margin-bottom:12px">
+      <div style="font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--t2);text-transform:uppercase;margin-bottom:6px">Your Score</div>
+      <div class="cert-score" id="certScore">—%</div>
+      <div class="score-bar-wrap"><div class="score-bar"><div class="score-bar-fill" id="scoreFill" style="width:0%"></div></div></div>
+    </div>
+    <div class="cert-grid" id="certGrid"></div>
+    <div class="cert-divider"></div>
+    <div style="font-size:12px;color:var(--t1);line-height:1.7">
+      This certificate has been recorded against your claim.<br>
+      A copy has been sent to CCM Safety Team.
+    </div>
+  </div>
+  <button class="btn btn-navy" onclick="window.close();location.href='/'">Done — Close Training</button>
+</div>
+
+</main>
+
+<script>
+// ── URL PARAMS ──
+const params = new URLSearchParams(location.search);
+const P = {
+  claim:   params.get('claim')  || '161007',
+  type:    params.get('type')   || 'Backing',
+  driver:  params.get('driver') || 'Driver',
+  id:      params.get('id')     || '',
+  company: params.get('company')|| 'Your Company',
+  ref:     params.get('ref')    || '',
+};
+
+// ── CURRICULUM MAP ──
+const CURRICULA = {
+  'Backing':               { label:'Backing Safety Remediation', dur:'26 min', modules:[
+    {icon:'🎯', title:'Why backing accidents happen', req:true, body:`
+      <div class="ai-tag">✦ AI-personalized · Backing accident · Claim #${P.claim}</div>
+      <div class="content-block"><strong>The backing blind spot problem.</strong> Backing accidents account for roughly 25% of all fleet incidents — the majority at speeds under 5 mph. That's not a speed problem. It's a visibility problem. When seated behind the wheel, drivers cannot see a zone approximately 6 feet deep and the full width of the vehicle directly behind them.</div>
+      <div class="highlight">Over 500 fatalities and 15,000 injuries occur annually from backing accidents. Fleet drivers are 3x more likely to be involved than the general public due to the frequency of backing maneuvers throughout a shift.</div>
+      <div class="content-block">The top three contributing factors in fleet backing accidents are: (1) <strong>failure to physically check</strong> behind the vehicle before backing, (2) <strong>over-reliance on cameras and mirrors</strong> without a physical walkround, and (3) <strong>time pressure</strong> — rushing the maneuver to save 30 seconds.</div>
+      <div class="key-point">✓ The good news: backing accidents are among the most preventable in fleet safety. A single habit change eliminates the majority of them.</div>`,
+      quiz:{q:'What percentage of fleet accidents involve backing maneuvers?', opts:['About 10%','About 25%','About 50%','About 75%'], correct:1}
+    },
+    {icon:'📐', title:'The G.O.A.L. method', req:true, body:`
+      <div class="ai-tag">✦ AI-personalized · Based on your accident narrative</div>
+      <div class="content-block"><strong>Get Out And Look.</strong> G.O.A.L. is the single most effective habit in fleet safety. Before any backing maneuver, exit the vehicle, walk a complete circle around it, confirm clearances, then return and back immediately — within 30 seconds while the picture is fresh.</div>
+      <div class="key-point">CCM policy: G.O.A.L. is required for any backing maneuver longer than 15 feet, in any parking lot, or any time the area behind the vehicle is not <em>fully</em> visible from the driver's seat.</div>
+      <div class="content-block">The walkround takes 15–20 seconds. A backing accident involving a pedestrian can cost your employer $500,000 or more and end your driving career. The math is straightforward.</div>
+      <div class="highlight">If you stop during a backing maneuver for more than 30 seconds — to answer a call, wait for traffic — conditions have changed. Exit and re-check before continuing.</div>`,
+      quiz:{q:'G.O.A.L. stands for:', opts:['Guide Officers At Location','Get Out And Look','General Operations Alert Level','Go On Assess Later'], correct:1}
+    },
+    {icon:'🔍', title:'Mirrors, cameras & blind zones', req:true, body:`
+      <div class="ai-tag">✦ AI-personalized · Vehicle type: Fleet van/SUV</div>
+      <div class="content-block"><strong>Cameras show 130 degrees. Your vehicle is 180 degrees wide.</strong> That's a 25-degree blind zone on each side that no camera captures — exactly where children crouch and cyclists pass. Cameras are a tool, not a substitute for physical checking.</div>
+      <div class="content-block">Side mirrors should be set so you can <em>just barely</em> see the rear corner of your vehicle in the innermost sliver of the mirror. If you're seeing the full side of your vehicle, you've lost coverage of the zone beside you. Adjust before every trip.</div>
+      <div class="key-point">✓ Scanning sequence: left mirror → center camera → right mirror → repeat. Do this every 3 seconds during any backing maneuver, not just at the start.</div>`,
+      quiz:{q:'A backup camera\'s field of view is approximately:', opts:['90 degrees','130 degrees','180 degrees','270 degrees'], correct:1}
+    },
+    {icon:'✅', title:'Final assessment', req:true, body:`
+      <div class="content-block">You've completed all three learning modules on backing safety. Answer the final question to receive your completion certificate. A score of 80% or higher is required — you have two attempts.</div>`,
+      quiz:{q:'Which single practice most effectively prevents backing accidents?', opts:['Installing an additional camera system','Honking before reversing','Physically walking around the vehicle before every backing maneuver (G.O.A.L.)','Backing more slowly'], correct:2}
+    },
+  ]},
+  'Rear-End — Our Driver':  { label:'Following Distance Remediation', dur:'30 min', modules:[
+    {icon:'📏', title:'Space management fundamentals', req:true, body:`<div class="ai-tag">✦ AI-personalized · Rear-end accident · Claim #${P.claim}</div><div class="content-block"><strong>The 4-second rule.</strong> At highway speeds, maintain at least 4 seconds of following distance. Count from when the vehicle ahead passes a fixed object to when you reach the same object. In rain or reduced visibility, double it to 8 seconds.</div><div class="highlight">In rear-end accidents where our driver is at fault, 94% involve following distance of under 2 seconds. At 60 mph, 2 seconds is only 176 feet — less than the stopping distance on dry pavement, before reaction time is even added.</div><div class="key-point">✓ If you can't see the bottom of the tires of the vehicle ahead, you're too close.</div>`, quiz:{q:'At highway speeds, the minimum recommended following distance is:',opts:['1 second','2 seconds','4 seconds','6 seconds'],correct:2}},
+    {icon:'⚠️', title:'Hazard perception and scanning', req:true, body:`<div class="content-block"><strong>Look 12–15 seconds ahead.</strong> At city speeds that's about one block. At highway speeds it's about a quarter mile. Drivers who scan far ahead have 3–5 seconds of additional reaction time compared to drivers who focus only on the vehicle immediately ahead.</div><div class="key-point">✓ When the vehicle two cars ahead brakes, you should already be covering the brake — not waiting for the car directly in front to respond first.</div>`, quiz:{q:'How far ahead should a driver\'s eyes scan at highway speeds?',opts:['The car directly ahead','50–100 feet','12–15 seconds ahead','The horizon'],correct:2}},
+    {icon:'🧠', title:'Reaction time and distraction', req:true, body:`<div class="content-block"><strong>The 1.5-second gap.</strong> Average driver reaction time is 1.5 seconds. At 60 mph that's 132 feet before braking even begins. Distracted drivers — including those who "just glanced" at a text — take 3–4 seconds to react. That's the length of a football field before brakes engage.</div><div class="highlight">Looking at a phone for just 2 seconds at 60 mph means traveling the length of two basketball courts completely blind.</div>`, quiz:{q:'Average driver reaction time before braking is:',opts:['0.5 seconds','1.5 seconds','3 seconds','5 seconds'],correct:1}},
+    {icon:'✅', title:'Final assessment', req:true, body:`<div class="content-block">You've completed all three modules. Answer the final question to receive your certificate.</div>`, quiz:{q:'The most effective way to prevent rear-end accidents is:',opts:['Watching brake lights only','Maintaining 4 seconds following distance and scanning 12–15 seconds ahead','Staying in the right lane','Slowing below the speed limit'],correct:1}},
+  ]},
+  'Hit Fixed Object':       { label:'Spatial Awareness Remediation', dur:'24 min', modules:[
+    {icon:'📦', title:'Understanding your vehicle dimensions', req:true, body:`<div class="ai-tag">✦ AI-personalized · Fixed object accident · Claim #${P.claim}</div><div class="content-block"><strong>Most drivers underestimate their vehicle by 15–20%.</strong> This gap between perceived and actual size is the leading cause of fixed object strikes. Your vehicle's width at the mirrors is 6–8 inches wider than the body. Your turning radius swings the rear in the opposite direction of the turn.</div><div class="highlight">Before driving any unfamiliar vehicle, walk it. Know the exact dimensions before you encounter the first tight situation, not during it.</div>`, quiz:{q:'Vehicle rear swing during a turn goes:',opts:['In the same direction as the turn','In the opposite direction of the turn','Straight back','It depends on the vehicle'],correct:1}},
+    {icon:'🅿️', title:'Parking and tight maneuvering', req:true, body:`<div class="content-block"><strong>Reference points.</strong> Every vehicle has external reference points visible from the driver's seat — spots where the edge of a mirror, the end of the hood, or a pillar aligns with a known external marker. Learning your vehicle's reference points eliminates guesswork in tight situations.</div><div class="key-point">✓ When in doubt, get out and look. The 30 seconds it takes to check is always faster than the time and cost of a claim.</div>`, quiz:{q:'The most reliable tool for navigating tight spaces is:',opts:['Going faster to clear quickly','Reference points and getting out to check','Using only the backup camera','Guessing based on experience'],correct:1}},
+    {icon:'✅', title:'Final assessment', req:true, body:`<div class="content-block">Answer the final question to complete your training.</div>`, quiz:{q:'What should a driver do when unsure if they have clearance?',opts:['Proceed slowly','Honk to warn others','Get out and physically verify clearance','Use the camera only'],correct:2}},
+  ]},
+};
+
+const DEFAULT_CURR = { label:'Defensive Driving Remediation', dur:'24 min', modules:[
+  {icon:'🛡️', title:'Defensive driving principles', req:true, body:`<div class="ai-tag">✦ AI-generated · Claim #${P.claim}</div><div class="content-block"><strong>Defensive driving means expecting the unexpected.</strong> The defensive driver assumes other road users will make mistakes and maintains the space and time to respond safely when they do.</div><div class="key-point">✓ The three core habits: scan far ahead, maintain space cushion, communicate your intentions early.</div>`, quiz:{q:'Defensive driving primarily means:',opts:['Driving slowly at all times','Anticipating others\' mistakes and maintaining response options','Staying in the right lane','Following GPS routes exactly'],correct:1}},
+  {icon:'✅', title:'Final assessment', req:true, body:`<div class="content-block">Answer the final question to complete your training.</div>`, quiz:{q:'The most important element of defensive driving is:',opts:['Speed control','Maintaining a space cushion and scanning ahead','Signaling early','Using mirrors frequently'],correct:1}},
+]};
+
+const curr = CURRICULA[P.type] || DEFAULT_CURR;
+const modules = curr.modules;
+let modIdx = 0;
+let totalCorrect = 0;
+let quizDone = false;
+const completed = new Set();
+
+// Load saved progress
+try{
+  const saved = JSON.parse(localStorage.getItem('ccm_training_'+P.claim)||'null');
+  if(saved){
+    saved.completed?.forEach(i=>completed.add(i));
+    modIdx = saved.modIdx||0;
+    totalCorrect = saved.correct||0;
+  }
+}catch(e){}
+
+function saveProgress(){
+  try{
+    localStorage.setItem('ccm_training_'+P.claim, JSON.stringify({
+      completed:[...completed], modIdx, correct:totalCorrect
+    }));
+  }catch(e){}
+}
+
+// ── INIT ──
+function init(){
+  document.getElementById('hdrTitle').textContent = curr.label;
+  document.getElementById('wHero').textContent = curr.label;
+  document.getElementById('wSub').textContent = 'Complete all '+ modules.length +' modules to receive your safety certificate. You can pause and resume anytime.';
+  document.getElementById('wClaim').textContent = '#'+P.claim;
+  document.getElementById('wType').textContent = P.type;
+  document.getElementById('wDur').textContent = curr.dur;
+
+  // Days remaining badge
+  const days = 7 - (Math.floor((Date.now() - (parseInt(P.issued)||Date.now()))/86400000));
+  document.getElementById('hdrBadge').textContent = days > 0 ? 'Due in '+days+' days' : 'Due today';
+
+  renderModuleList();
+  if(completed.size === modules.length){ showCert(); return; }
+  if(modIdx > 0 && completed.size > 0){
+    document.getElementById('startBtn').textContent = 'Resume Training →';
+  }
+}
+
+function renderModuleList(){
+  const list = document.getElementById('moduleList');
+  list.innerHTML = modules.map((m,i)=>`
+    <div class="module-item ${completed.has(i)?'done':''}" onclick="${completed.has(i)||i<=modIdx?'jumpTo('+i+')':''}">
+      <div class="mod-icon ${completed.has(i)?'done':(i===modIdx?'':'')}">
+        ${completed.has(i)?'✓':m.icon}
+      </div>
+      <div class="mod-info">
+        <div class="mod-title">${m.title}</div>
+        <div class="mod-meta">~8 min · ${m.req?'Required':'Optional'}</div>
+      </div>
+      <div class="mod-status ${completed.has(i)?'done':(i<=modIdx?'req':'lock')}">
+        ${completed.has(i)?'Done':(i===modIdx?'Start':'Locked')}
+      </div>
+    </div>`).join('');
+}
+
+function jumpTo(i){ modIdx=i; startTraining(); }
+
+function startTraining(){
+  show('scrLesson');
+  document.getElementById('progWrap').style.display='block';
+  renderLesson();
+}
+
+function renderLesson(){
+  const m = modules[modIdx];
+  quizDone = false;
+  document.getElementById('lessonIcon').textContent = m.icon;
+  document.getElementById('lessonTitle').textContent = m.title;
+  document.getElementById('lessonSub').textContent = `Module ${modIdx+1} of ${modules.length} · ${curr.label}`;
+  document.getElementById('lessonBody').innerHTML = m.body + buildQuiz(m.quiz, modIdx);
+
+  // Progress
+  const pct = Math.round((modIdx/modules.length)*100);
+  document.getElementById('progFill').style.width = pct+'%';
+  document.getElementById('progLabel').textContent = `Module ${modIdx+1} of ${modules.length}`;
+  document.getElementById('progPct').textContent = pct+'% complete';
+
+  // Step dots
+  document.getElementById('stepDots').innerHTML = modules.map((_,i)=>
+    `<div class="step-dot ${completed.has(i)?'done':i===modIdx?'active':''}"></div>`).join('');
+
+  const nb = document.getElementById('nextBtn');
+  nb.disabled = true;
+  nb.textContent = modIdx===modules.length-1 ? 'Complete Training' : 'Continue →';
+}
+
+function buildQuiz(q, idx){
+  return `<div class="quiz-wrap">
+    <div class="quiz-label">Knowledge check</div>
+    <div class="quiz-q">${q.q}</div>
+    <div class="quiz-opts">
+      ${q.opts.map((o,i)=>`<button class="quiz-opt" id="qo_${idx}_${i}" onclick="answerQuiz(${idx},${i},${q.correct})">${o}</button>`).join('')}
+    </div>
+    <div class="quiz-fb" id="qfb_${idx}"></div>
+  </div>`;
+}
+
+function answerQuiz(modI, sel, correct){
+  if(quizDone) return;
+  quizDone = true;
+  const isCorrect = sel === correct;
+  if(isCorrect) totalCorrect++;
+
+  modules[modI].quiz.opts.forEach((_,i)=>{
+    const btn = document.getElementById(`qo_${modI}_${i}`);
+    if(!btn) return;
+    if(i===correct) btn.classList.add('correct');
+    else if(i===sel && !isCorrect) btn.classList.add('wrong');
+    btn.disabled = true;
+  });
+
+  const fb = document.getElementById('qfb_'+modI);
+  if(fb){
+    fb.className = 'quiz-fb show '+(isCorrect?'ok':'no');
+    fb.textContent = isCorrect
+      ? '✓ Correct. Well done.'
+      : `✗ The correct answer is "${modules[modI].quiz.opts[correct]}". Review the content above before continuing.`;
+  }
+  completed.add(modI);
+  saveProgress();
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function nextLesson(){
+  modIdx++;
+  if(modIdx >= modules.length){ showCert(); return; }
+  renderLesson();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function showCert(){
+  show('scrCert');
+  document.getElementById('progWrap').style.display='block';
+  document.getElementById('progFill').style.width='100%';
+  document.getElementById('progLabel').textContent='Training complete';
+  document.getElementById('progPct').textContent='100%';
+
+  const score = modules.length > 0 ? Math.round((totalCorrect/modules.length)*100) : 0;
+  document.getElementById('certCurr').textContent = curr.label;
+  document.getElementById('certScore').textContent = score+'%';
+  setTimeout(()=>{ document.getElementById('scoreFill').style.width=score+'%'; }, 300);
+
+  const now = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('certGrid').innerHTML = [
+    ['Driver', P.driver||'—'],
+    ['Driver ID', P.id||'—'],
+    ['Company', P.company||'—'],
+    ['Claim #', '#'+P.claim],
+    ['Accident type', P.type],
+    ['Completed', now],
+    ['Assigned by', 'CCM Safety Team'],
+    ['Reference', P.ref||'—'],
+  ].map(([l,v])=>`<div><div class="cert-row-lbl">${l}</div><div class="cert-row-val">${v}</div></div>`).join('');
+
+  // Clear localStorage on completion
+  try{ localStorage.removeItem('ccm_training_'+P.claim); }catch(e){}
+
+  // Notify completion to CCM (fire and forget)
+  fetch('/api/complete-training', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ claimNum:P.claim, driverID:P.id, driverName:P.driver, score, accidentType:P.type, completedAt:new Date().toISOString() })
+  }).catch(()=>{});
+}
+
+function saveExit(){
+  saveProgress();
+  show('scrWelcome');
+  renderModuleList();
+  document.getElementById('progWrap').style.display='none';
+  document.getElementById('startBtn').textContent = 'Resume Training →';
+}
+
+function show(id){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+}
+
+init();
+</script>
+</body>
+</html>
