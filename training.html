@@ -8,118 +8,161 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --navy:#2F3744;--gold:#C4A77D;--teal:#00d4aa;--blue:#2d8cf0;
-  --bg:#07090f;--bg2:#0c1018;--bg3:#111827;
-  --t0:#eef2fb;--t1:#8aa0bf;--t2:#4a6285;
+  /* AvatarFleet-inspired palette */
+  --navy:#1a2333;        /* dark charcoal — headings, header bg */
+  --accent:#e8472a;      /* orange-red — buttons, highlights, badges */
+  --accent2:#c73d23;     /* darker accent for hover */
+  --bg:#f5f6f8;          /* very light gray page bg */
+  --bg2:#ffffff;         /* white cards */
+  --bg3:#eef0f3;         /* light gray inset areas */
+  --t0:#1a2333;          /* primary text — near black */
+  --t1:#3d4a5c;          /* secondary text — dark blue-gray */
+  --t2:#7a8499;          /* muted text */
+  --border:#dde1e8;      /* subtle border */
+  --green:#1e7e3e;       --green-bg:#eaf6ee;
+  --red:#c0392b;         --red-bg:#fdf2f1;
+  --warn:#b45309;        --warn-bg:#fef9ec;
   --r8:8px;--r12:12px;--r16:16px;
-  --red:#ff4f6d;--amber:#f5a623;--green:#7edb6a;
 }
 html,body{height:100%;background:var(--bg);color:var(--t0);font-family:'Inter',sans-serif}
 body{display:flex;flex-direction:column;min-height:100vh}
 
-/* HEADER */
-.hdr{background:var(--navy);padding:14px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;border-bottom:1px solid rgba(196,167,125,.2)}
-.hdr-logo{font-size:10px;font-weight:800;letter-spacing:.14em;color:var(--gold);text-transform:uppercase}
-.hdr-title{font-size:14px;font-weight:700;color:var(--t0);flex:1}
-.hdr-badge{font-size:10px;font-weight:700;padding:4px 10px;border-radius:99px;background:rgba(196,167,125,.15);color:var(--gold);border:1px solid rgba(196,167,125,.3)}
+/* HEADER — navy with orange-red accent line */
+.hdr{background:var(--navy);padding:16px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;border-bottom:3px solid var(--accent)}
+.hdr-logo{font-size:10px;font-weight:800;letter-spacing:.14em;color:rgba(255,255,255,.55);text-transform:uppercase}
+.hdr-title{font-size:15px;font-weight:700;color:#ffffff;flex:1}
+.hdr-badge{font-size:11px;font-weight:700;padding:5px 12px;border-radius:4px;background:var(--accent);color:#ffffff}
 
 /* PROGRESS */
-.prog-wrap{background:var(--bg2);padding:14px 20px;border-bottom:1px solid rgba(99,155,230,.08)}
+.prog-wrap{background:#ffffff;padding:14px 20px;border-bottom:1px solid var(--border)}
 .prog-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.prog-label span{font-size:12px;color:var(--t1)}
-.prog-bar{height:4px;background:var(--bg3);border-radius:99px;overflow:hidden}
-.prog-fill{height:100%;background:var(--teal);border-radius:99px;transition:width .5s ease}
+.prog-label span{font-size:13px;color:var(--t1);font-weight:600}
+.prog-bar{height:6px;background:#dde1e8;border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .5s ease}
 .step-dots{display:flex;gap:6px;margin-top:10px}
-.step-dot{flex:1;height:3px;border-radius:99px;background:var(--bg3);transition:background .3s}
-.step-dot.done{background:var(--teal)}
-.step-dot.active{background:var(--blue)}
+.step-dot{flex:1;height:4px;border-radius:99px;background:#dde1e8;transition:background .3s}
+.step-dot.done{background:var(--accent)}
+.step-dot.active{background:var(--navy)}
 
 /* MAIN */
 main{flex:1;padding:16px;max-width:640px;width:100%;margin:0 auto}
-
-/* SCREENS */
 .scr{display:none}.scr.on{display:block}
 
-/* WELCOME */
-.welcome-hero{background:var(--navy);border-radius:var(--r16);padding:24px;margin-bottom:16px;border:1px solid rgba(196,167,125,.2)}
-.welcome-tag{font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--gold);text-transform:uppercase;margin-bottom:8px}
-.welcome-h{font-size:22px;font-weight:800;color:var(--t0);margin-bottom:6px;line-height:1.25}
-.welcome-sub{font-size:13px;color:var(--t1);line-height:1.6}
+/* WELCOME HERO */
+.welcome-hero{background:var(--navy);border-radius:var(--r12);padding:24px;margin-bottom:16px;border-bottom:4px solid var(--accent)}
+.welcome-tag{font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--accent);text-transform:uppercase;margin-bottom:8px}
+.welcome-h{font-size:22px;font-weight:800;color:#ffffff;margin-bottom:6px;line-height:1.3}
+.welcome-sub{font-size:14px;color:rgba(255,255,255,.65);line-height:1.65}
 
-.claim-strip{background:var(--bg2);border:1px solid rgba(99,155,230,.12);border-radius:var(--r12);padding:14px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;text-align:center}
-.claim-strip-lbl{font-size:9px;font-weight:800;letter-spacing:.1em;color:var(--t2);text-transform:uppercase;margin-bottom:4px}
+/* CLAIM STRIP */
+.claim-strip{background:#ffffff;border:1px solid var(--border);border-radius:var(--r12);padding:14px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;text-align:center}
+.claim-strip-lbl{font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--t2);text-transform:uppercase;margin-bottom:4px}
 .claim-strip-val{font-size:15px;font-weight:800;color:var(--t0)}
 
+/* MODULE LIST */
 .module-list{margin-bottom:16px}
-.module-item{background:var(--bg2);border:1px solid rgba(99,155,230,.1);border-radius:var(--r12);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .2s}
-.module-item:hover{border-color:rgba(99,155,230,.25)}
-.module-item.done{border-color:rgba(0,212,170,.3)}
-.mod-icon{width:40px;height:40px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.mod-icon.done{background:rgba(0,212,170,.12)}
+.module-item{background:#ffffff;border:1px solid var(--border);border-radius:var(--r12);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .2s,box-shadow .2s}
+.module-item:hover{border-color:var(--accent);box-shadow:0 2px 8px rgba(232,71,42,.1)}
+.module-item.done{border-left:4px solid var(--green);background:#f9fdfb}
+.mod-icon{width:44px;height:44px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:1px solid var(--border)}
+.mod-icon.done{background:var(--green-bg);border-color:var(--green)}
 .mod-info{flex:1}
-.mod-title{font-size:14px;font-weight:700;color:var(--t0);margin-bottom:2px}
-.mod-meta{font-size:12px;color:var(--t1)}
-.mod-status{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px}
-.mod-status.done{background:rgba(0,212,170,.12);color:var(--teal)}
-.mod-status.req{background:rgba(245,166,35,.1);color:var(--amber)}
-.mod-status.lock{background:var(--bg3);color:var(--t2)}
+.mod-title{font-size:15px;font-weight:700;color:var(--t0);margin-bottom:2px}
+.mod-meta{font-size:13px;color:var(--t2)}
+.mod-status{font-size:11px;font-weight:700;padding:4px 12px;border-radius:4px}
+.mod-status.done{background:var(--green-bg);color:var(--green);border:1px solid #86efac}
+.mod-status.req{background:#fff4f2;color:var(--accent);border:1px solid #fca99a}
+.mod-status.lock{background:#f3f4f6;color:#999;border:1px solid #e5e7eb}
 
-/* LESSON */
-.lesson-card{background:var(--bg2);border:1px solid rgba(99,155,230,.1);border-radius:var(--r16);overflow:hidden;margin-bottom:16px}
-.lesson-hdr{padding:16px;border-bottom:1px solid rgba(99,155,230,.08);display:flex;align-items:center;gap:12px}
-.lesson-icon{width:44px;height:44px;border-radius:50%;background:rgba(45,140,240,.12);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-.lesson-title{font-size:16px;font-weight:800;color:var(--t0)}
-.lesson-sub{font-size:12px;color:var(--t1);margin-top:2px}
-.lesson-body{padding:16px}
+/* VIDEO PLAYER */
+.video-player{background:var(--navy);border-radius:var(--r12);overflow:hidden;margin-bottom:16px}
+.video-screen{position:relative;width:100%;padding-bottom:56.25%;background:#0d1520;overflow:hidden}
+.video-screen canvas{position:absolute;top:0;left:0;width:100%;height:100%}
+.video-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.38);cursor:pointer;transition:opacity .2s}
+.video-overlay.hidden{opacity:0;pointer-events:none}
+.play-btn-big{width:68px;height:68px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:26px;color:#fff;box-shadow:0 4px 20px rgba(232,71,42,.5)}
+.video-controls{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(0,0,0,.55)}
+.vc-play{width:34px;height:34px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;flex-shrink:0}
+.vc-play:hover{background:var(--accent2)}
+.vc-timeline{flex:1;height:4px;background:rgba(255,255,255,.2);border-radius:99px;cursor:pointer;position:relative}
+.vc-progress{height:100%;background:var(--accent);border-radius:99px;transition:width .3s linear;pointer-events:none}
+.vc-time{font-size:11px;color:rgba(255,255,255,.75);flex-shrink:0;font-weight:600}
+.vc-slide-label{font-size:11px;color:rgba(255,255,255,.5);font-weight:600;letter-spacing:.04em;flex-shrink:0}
+.slide-dots{display:flex;gap:5px;justify-content:center;padding:8px 0 4px}
+.slide-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2);transition:background .2s}
+.slide-dot.on{background:var(--accent)}
 
-.ai-tag{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:3px 10px;border-radius:99px;background:rgba(45,140,240,.1);color:var(--blue);border:1px solid rgba(45,140,240,.2);margin-bottom:12px;letter-spacing:.04em}
-.content-block{font-size:14px;color:var(--t1);line-height:1.75;margin-bottom:14px}
+/* VOICE BAR */
+.voice-bar{background:#ffffff;border:1px solid var(--border);border-radius:var(--r12);padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
+.voice-wave{display:flex;gap:3px;align-items:center;flex-shrink:0}
+.voice-wave span{display:block;width:3px;background:var(--accent);border-radius:99px;animation:vwave 1.1s ease infinite}
+.voice-wave span:nth-child(1){height:6px;animation-delay:0s}
+.voice-wave span:nth-child(2){height:14px;animation-delay:.1s}
+.voice-wave span:nth-child(3){height:20px;animation-delay:.2s}
+.voice-wave span:nth-child(4){height:14px;animation-delay:.3s}
+.voice-wave span:nth-child(5){height:6px;animation-delay:.4s}
+.voice-wave.paused span{animation-play-state:paused;height:4px!important}
+@keyframes vwave{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1)}}
+.voice-status{flex:1;font-size:13px;color:var(--t1);font-weight:500}
+.voice-btn{background:var(--navy);color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap}
+.voice-btn:hover{background:#2d3d54}
+
+/* LESSON CARD */
+.lesson-card{background:#ffffff;border:1px solid var(--border);border-radius:var(--r16);overflow:hidden;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.lesson-hdr{padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--bg3)}
+.lesson-icon{width:46px;height:46px;border-radius:8px;background:#ffffff;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.lesson-title{font-size:17px;font-weight:800;color:var(--t0)}
+.lesson-sub{font-size:13px;color:var(--t2);margin-top:2px}
+.lesson-body{padding:18px}
+
+.ai-tag{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:4px 10px;border-radius:4px;background:#fff4f2;color:var(--accent);border:1px solid #fca99a;margin-bottom:14px;letter-spacing:.04em}
+.content-block{font-size:15px;color:var(--t1);line-height:1.8;margin-bottom:16px}
 .content-block strong{color:var(--t0);font-weight:700}
-.highlight{background:rgba(245,166,35,.08);border-left:3px solid var(--amber);border-radius:0 var(--r8) var(--r8) 0;padding:12px 14px;font-size:13px;color:var(--amber);line-height:1.6;margin-bottom:14px}
-.key-point{background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.15);border-radius:var(--r8);padding:12px 14px;font-size:13px;color:var(--teal);line-height:1.6;margin-bottom:14px}
+.highlight{background:var(--warn-bg);border-left:4px solid #d97706;border-radius:0 var(--r8) var(--r8) 0;padding:14px 16px;font-size:14px;color:var(--warn);line-height:1.7;margin-bottom:16px}
+.key-point{background:var(--green-bg);border:1px solid #86efac;border-radius:var(--r8);padding:14px 16px;font-size:14px;color:var(--green);line-height:1.7;margin-bottom:16px}
 
 /* QUIZ */
-.quiz-wrap{margin-top:4px}
-.quiz-label{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--t2);text-transform:uppercase;margin-bottom:10px}
-.quiz-q{font-size:15px;font-weight:700;color:var(--t0);margin-bottom:12px;line-height:1.4}
-.quiz-opts{display:flex;flex-direction:column;gap:8px}
-.quiz-opt{background:var(--bg3);border:1px solid rgba(99,155,230,.12);border-radius:var(--r12);padding:14px 16px;font-size:14px;color:var(--t0);cursor:pointer;text-align:left;transition:border-color .15s,background .15s;line-height:1.4}
-.quiz-opt:hover{border-color:rgba(99,155,230,.3);background:rgba(99,155,230,.05)}
-.quiz-opt.correct{background:rgba(0,212,170,.08);border-color:rgba(0,212,170,.4);color:var(--teal)}
-.quiz-opt.wrong{background:rgba(255,79,109,.08);border-color:rgba(255,79,109,.4);color:var(--red)}
-.quiz-fb{font-size:13px;margin-top:10px;padding:10px 14px;border-radius:var(--r8);display:none}
+.quiz-wrap{margin-top:8px;padding-top:16px;border-top:2px solid var(--bg3)}
+.quiz-label{font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--accent);text-transform:uppercase;margin-bottom:10px}
+.quiz-q{font-size:16px;font-weight:700;color:var(--t0);margin-bottom:14px;line-height:1.5}
+.quiz-opts{display:flex;flex-direction:column;gap:10px}
+.quiz-opt{background:#ffffff;border:2px solid var(--border);border-radius:var(--r8);padding:15px 18px;font-size:15px;color:var(--t0);cursor:pointer;text-align:left;transition:border-color .15s,background .15s;line-height:1.45;font-family:'Inter',sans-serif}
+.quiz-opt:hover{border-color:var(--accent);background:#fff4f2}
+.quiz-opt.correct{background:var(--green-bg);border-color:var(--green);color:var(--green);font-weight:600}
+.quiz-opt.wrong{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+.quiz-fb{font-size:14px;margin-top:12px;padding:12px 16px;border-radius:var(--r8);display:none;font-weight:600}
 .quiz-fb.show{display:block}
-.quiz-fb.ok{background:rgba(0,212,170,.08);color:var(--teal);border:1px solid rgba(0,212,170,.2)}
-.quiz-fb.no{background:rgba(255,79,109,.08);color:var(--red);border:1px solid rgba(255,79,109,.2)}
+.quiz-fb.ok{background:var(--green-bg);color:var(--green);border:1px solid #86efac}
+.quiz-fb.no{background:var(--red-bg);color:var(--red);border:1px solid #fecaca}
 
 /* BUTTONS */
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 20px;border-radius:var(--r12);font-size:15px;font-weight:700;cursor:pointer;border:none;transition:opacity .15s,transform .1s}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:16px 20px;border-radius:var(--r8);font-size:16px;font-weight:700;cursor:pointer;border:none;transition:background .15s,transform .1s;font-family:'Inter',sans-serif}
 .btn:active{transform:scale(.98)}
-.btn-primary{background:var(--teal);color:#0a1628;width:100%}
-.btn-primary:disabled{opacity:.35;cursor:not-allowed}
-.btn-ghost{background:var(--bg2);color:var(--t1);border:1px solid rgba(99,155,230,.15);width:100%}
-.btn-navy{background:var(--navy);color:var(--t0);width:100%;border:1px solid rgba(196,167,125,.2)}
+.btn-primary{background:var(--accent);color:#ffffff;width:100%}
+.btn-primary:hover{background:var(--accent2)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-ghost{background:#ffffff;color:var(--t1);border:2px solid var(--border);width:100%}
+.btn-ghost:hover{border-color:var(--navy);color:var(--t0)}
+.btn-navy{background:var(--navy);color:#ffffff;width:100%}
+.btn-navy:hover{background:#2d3d54}
 
 /* CERT */
-.cert-wrap{background:var(--navy);border:1px solid rgba(196,167,125,.3);border-radius:var(--r16);padding:28px 20px;text-align:center;margin-bottom:16px}
-.cert-check{width:64px;height:64px;border-radius:50%;background:rgba(0,212,170,.12);border:2px solid var(--teal);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px}
-.cert-title{font-size:20px;font-weight:800;color:var(--t0);margin-bottom:6px}
-.cert-sub{font-size:13px;color:var(--gold);margin-bottom:20px}
-.cert-divider{height:1px;background:rgba(196,167,125,.2);margin:16px 0}
-.cert-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;text-align:left}
+.cert-wrap{background:#ffffff;border:1px solid var(--border);border-radius:var(--r16);padding:28px 20px;text-align:center;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.cert-check{width:72px;height:72px;border-radius:50%;background:var(--green-bg);border:3px solid var(--green);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px}
+.cert-title{font-size:22px;font-weight:800;color:var(--t0);margin-bottom:6px}
+.cert-sub{font-size:14px;color:var(--t2);margin-bottom:20px}
+.cert-divider{height:1px;background:var(--border);margin:16px 0}
+.cert-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;text-align:left}
 .cert-row-lbl{font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--t2);text-transform:uppercase;margin-bottom:3px}
-.cert-row-val{font-size:13px;font-weight:700;color:var(--t0)}
-.cert-score{font-size:36px;font-weight:800;color:var(--teal);margin:12px 0 4px}
-
-/* SCORE BAR */
+.cert-row-val{font-size:14px;font-weight:700;color:var(--t0)}
+.cert-score{font-size:40px;font-weight:800;color:var(--accent);margin:12px 0 4px}
 .score-bar-wrap{margin:12px 0}
-.score-bar{height:8px;background:var(--bg3);border-radius:99px;overflow:hidden}
-.score-bar-fill{height:100%;border-radius:99px;background:var(--teal);transition:width 1s ease}
+.score-bar{height:10px;background:#e5e7eb;border-radius:99px;overflow:hidden}
+.score-bar-fill{height:100%;border-radius:99px;background:var(--accent);transition:width 1s ease}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <div class="hdr">
   <div style="flex:1">
     <div class="hdr-logo">CCM SafeDriver</div>
@@ -128,7 +171,6 @@ main{flex:1;padding:16px;max-width:640px;width:100%;margin:0 auto}
   <div class="hdr-badge" id="hdrBadge">Due in 7 days</div>
 </div>
 
-<!-- PROGRESS -->
 <div class="prog-wrap" id="progWrap" style="display:none">
   <div class="prog-label">
     <span id="progLabel">Module 1 of 4</span>
@@ -140,52 +182,80 @@ main{flex:1;padding:16px;max-width:640px;width:100%;margin:0 auto}
 
 <main>
 
-<!-- WELCOME SCREEN -->
+<!-- WELCOME -->
 <div class="scr on" id="scrWelcome">
   <div class="welcome-hero">
     <div class="welcome-tag">Required Training</div>
     <div class="welcome-h" id="wHero">Safety Training Assigned</div>
     <div class="welcome-sub" id="wSub">Complete all modules to receive your certificate.</div>
   </div>
-
   <div class="claim-strip">
     <div><div class="claim-strip-lbl">Claim #</div><div class="claim-strip-val" id="wClaim">—</div></div>
     <div><div class="claim-strip-lbl">Accident Type</div><div class="claim-strip-val" id="wType" style="font-size:11px;padding-top:3px">—</div></div>
     <div><div class="claim-strip-lbl">Duration</div><div class="claim-strip-val" id="wDur">—</div></div>
   </div>
-
   <div class="module-list" id="moduleList"></div>
-
   <button class="btn btn-primary" id="startBtn" onclick="startTraining()">
     <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
     Begin Training
   </button>
 </div>
 
-<!-- LESSON SCREEN -->
+<!-- LESSON -->
 <div class="scr" id="scrLesson">
+
+  <!-- Video player -->
+  <div class="video-player" id="videoPlayer">
+    <div class="video-screen">
+      <canvas id="slideCanvas"></canvas>
+      <div class="video-overlay" id="videoOverlay" onclick="toggleVideo()">
+        <div class="play-btn-big">▶</div>
+      </div>
+    </div>
+    <div class="slide-dots" id="slideDots"></div>
+    <div class="video-controls">
+      <button class="vc-play" id="vcPlayBtn" onclick="toggleVideo()">▶</button>
+      <div class="vc-timeline" id="vcTimeline" onclick="seekVideo(event)">
+        <div class="vc-progress" id="vcProgress" style="width:0%"></div>
+      </div>
+      <span class="vc-time" id="vcTime">0:00</span>
+      <span class="vc-slide-label" id="vcSlideLabel">Slide 1</span>
+    </div>
+  </div>
+
+  <!-- Voice bar -->
+  <div class="voice-bar" id="voiceBar">
+    <div class="voice-wave" id="voiceWave">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <div class="voice-status" id="voiceStatus">Reading lesson aloud…</div>
+    <button class="voice-btn" id="voiceToggleBtn" onclick="toggleVoice()">⏸ Pause</button>
+  </div>
+
+  <!-- Lesson content -->
   <div class="lesson-card">
     <div class="lesson-hdr">
       <div class="lesson-icon" id="lessonIcon">📋</div>
       <div>
-        <div class="lesson-title" id="lessonTitle">Loading...</div>
+        <div class="lesson-title" id="lessonTitle">Loading…</div>
         <div class="lesson-sub" id="lessonSub">Module 1</div>
       </div>
     </div>
     <div class="lesson-body" id="lessonBody"></div>
   </div>
+
   <div style="display:flex;flex-direction:column;gap:10px">
     <button class="btn btn-primary" id="nextBtn" onclick="nextLesson()" disabled>Continue</button>
     <button class="btn btn-ghost" onclick="saveExit()">Save &amp; finish later</button>
   </div>
 </div>
 
-<!-- CERT SCREEN -->
+<!-- CERT -->
 <div class="scr" id="scrCert">
   <div class="cert-wrap">
     <div class="cert-check">✓</div>
     <div class="cert-title">Training Complete</div>
-    <div class="cert-sub" id="certCurr">Backing Safety Remediation</div>
+    <div class="cert-sub" id="certCurr">Remediation</div>
     <div class="cert-divider"></div>
     <div style="text-align:center;margin-bottom:12px">
       <div style="font-size:11px;font-weight:800;letter-spacing:.1em;color:var(--t2);text-transform:uppercase;margin-bottom:6px">Your Score</div>
@@ -194,9 +264,8 @@ main{flex:1;padding:16px;max-width:640px;width:100%;margin:0 auto}
     </div>
     <div class="cert-grid" id="certGrid"></div>
     <div class="cert-divider"></div>
-    <div style="font-size:12px;color:var(--t1);line-height:1.7">
-      This certificate has been recorded against your claim.<br>
-      A copy has been sent to CCM Safety Team.
+    <div style="font-size:13px;color:var(--t1);line-height:1.7;text-align:center">
+      This certificate has been recorded against your claim.<br>A copy has been sent to CCM Safety Team.
     </div>
   </div>
   <button class="btn btn-navy" onclick="window.close();location.href='/'">Done — Close Training</button>
@@ -205,129 +274,468 @@ main{flex:1;padding:16px;max-width:640px;width:100%;margin:0 auto}
 </main>
 
 <script>
-// ── URL PARAMS ──
+// ── URL PARAMS ────────────────────────────────────────────────
 const params = new URLSearchParams(location.search);
 const P = {
   claim:   params.get('claim')  || '161007',
-  type:    params.get('type')   || 'Backing',
+  type:    params.get('type')   || 'Lost Control',
   driver:  params.get('driver') || 'Driver',
   id:      params.get('id')     || '',
   company: params.get('company')|| 'Your Company',
   ref:     params.get('ref')    || '',
 };
 
-// ── CURRICULUM MAP ──
+// ── AUDIO ENGINE (same as main app) ──────────────────────────
+const AC = { cache:{}, ctx:null, src:null, paused:false, inflight:{} };
+
+function _getCtx(){
+  if(!AC.ctx||AC.ctx.state==='closed') AC.ctx=new(window.AudioContext||window.webkitAudioContext)();
+  if(AC.ctx.state==='suspended') AC.ctx.resume();
+  return AC.ctx;
+}
+function stopAudio(){
+  if(AC.src){ try{AC.src.onended=null;AC.src.stop();}catch(e){} AC.src=null; }
+  AC.paused=false;
+  setVoiceUI(false);
+}
+async function _fetchAudio(text){
+  if(AC.cache[text]) return AC.cache[text];
+  if(AC.inflight[text]) return AC.inflight[text];
+  AC.inflight[text] = fetch('/api/speak',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})})
+    .then(r=>{ if(!r.ok) throw new Error('TTS '+r.status); return r.arrayBuffer(); })
+    .then(buf=>{ AC.cache[text]=buf; delete AC.inflight[text]; return buf; })
+    .catch(e=>{ delete AC.inflight[text]; throw e; });
+  return AC.inflight[text];
+}
+async function speakText(text, onDone){
+  stopAudio();
+  setVoiceUI(true);
+  for(let attempt=1;attempt<=2;attempt++){
+    try{
+      if(attempt===2) delete AC.cache[text];
+      const buf = await _fetchAudio(text);
+      const ctx = _getCtx();
+      const audio = await ctx.decodeAudioData(buf.slice(0));
+      const src = ctx.createBufferSource();
+      AC.src = src;
+      src.buffer = audio;
+      src.connect(ctx.destination);
+      const safety = setTimeout(()=>{ AC.src=null; setVoiceUI(false); if(onDone) onDone(); }, Math.max(4000,audio.duration*1000+2000));
+      src.onended = ()=>{ clearTimeout(safety); AC.src=null; setVoiceUI(false); if(onDone) onDone(); };
+      src.start();
+      return;
+    }catch(err){
+      console.warn('TTS attempt',attempt,'failed:',err);
+      if(attempt===2){ setVoiceUI(false); if(onDone) onDone(); }
+    }
+  }
+}
+function toggleVoice(){
+  if(!AC.ctx && !AC.src){ return; }
+  if(AC.src){
+    if(AC.paused){
+      AC.ctx.resume();
+      AC.paused=false;
+      setVoiceUI(true);
+      document.getElementById('voiceToggleBtn').textContent='⏸ Pause';
+    } else {
+      AC.ctx.suspend();
+      AC.paused=true;
+      setVoiceUI(false,'paused');
+      document.getElementById('voiceToggleBtn').textContent='▶ Resume';
+    }
+  } else {
+    // Re-read current lesson
+    document.getElementById('voiceToggleBtn').textContent='⏸ Pause';
+    speakLessonContent();
+  }
+}
+function setVoiceUI(active, state=''){
+  const wave = document.getElementById('voiceWave');
+  const status = document.getElementById('voiceStatus');
+  if(!wave||!status) return;
+  if(active){
+    wave.classList.remove('paused');
+    status.textContent = 'Reading lesson aloud…';
+  } else if(state==='paused'){
+    wave.classList.add('paused');
+    status.textContent = 'Paused — tap Resume to continue';
+  } else {
+    wave.classList.add('paused');
+    status.textContent = 'Tap to hear this lesson again';
+    if(document.getElementById('voiceToggleBtn'))
+      document.getElementById('voiceToggleBtn').textContent='▶ Read Aloud';
+  }
+}
+
+// ── ANIMATED SLIDE ENGINE ─────────────────────────────────────
+let slideTimer=null, slideIdx=0, slidePlaying=false, slideTotal=0;
+const SLIDE_DUR = 5; // seconds per slide
+
+function buildSlides(modIndex){
+  const m = modules[modIndex];
+  return m.slides || generateSlides(m);
+}
+
+// Generates slide content from module data
+function generateSlides(m){
+  return m.slideData || [
+    { bg:'#2F3744', title:'CCM SafeDriver Training', sub: m.title, icon: m.icon, body:'' },
+  ];
+}
+
+function startVideoPlayer(modIndex){
+  const slides = buildSlides(modIndex);
+  slideTotal = slides.length;
+  slideIdx = 0;
+  slidePlaying = false;
+
+  // Build dots
+  const dotsEl = document.getElementById('slideDots');
+  dotsEl.innerHTML = slides.map((_,i)=>`<div class="slide-dot${i===0?' on':''}"></div>`).join('');
+
+  drawSlide(slides[0]);
+  document.getElementById('vcProgress').style.width='0%';
+  document.getElementById('vcTime').textContent='0:00';
+  document.getElementById('vcSlideLabel').textContent='Slide 1 / '+slides.length;
+  document.getElementById('videoOverlay').classList.remove('hidden');
+  document.getElementById('vcPlayBtn').textContent='▶';
+
+  // Auto-start after 800ms
+  setTimeout(()=>playVideo(slides), 800);
+}
+
+function drawSlide(slide){
+  const canvas = document.getElementById('slideCanvas');
+  if(!canvas) return;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const W = rect.width || 360;
+  const H = Math.round(W * 9/16);
+  canvas.width  = W * window.devicePixelRatio;
+  canvas.height = H * window.devicePixelRatio;
+  canvas.style.width  = W+'px';
+  canvas.style.height = H+'px';
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio;
+  ctx.scale(dpr, dpr);
+
+  // Background gradient
+  const grad = ctx.createLinearGradient(0,0,W,H);
+  grad.addColorStop(0, slide.bg || '#2F3744');
+  grad.addColorStop(1, slide.bg2 || shadeColor(slide.bg||'#2F3744',-30));
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,W,H);
+
+  // Subtle grid pattern
+  ctx.strokeStyle='rgba(255,255,255,.04)';
+  ctx.lineWidth=1;
+  for(let x=0;x<W;x+=40){ ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke(); }
+  for(let y=0;y<H;y+=40){ ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke(); }
+
+  // Accent bar top
+  ctx.fillStyle='#e8472a';
+  ctx.fillRect(0,0,W,4);
+
+  const pad = W*0.08;
+  let y = H*0.16;
+
+  // Icon
+  if(slide.icon){
+    ctx.font = `${Math.round(W*0.1)}px serif`;
+    ctx.textAlign='left';
+    ctx.fillText(slide.icon, pad, y+Math.round(W*0.08));
+    y += Math.round(W*0.14);
+  }
+
+  // Tag line
+  if(slide.tag){
+    ctx.font = `700 ${Math.round(W*0.028)}px Inter,Arial,sans-serif`;
+    ctx.fillStyle='#e8472a';
+    ctx.textAlign='left';
+    ctx.letterSpacing='0.1em';
+    ctx.fillText(slide.tag.toUpperCase(), pad, y);
+    y += Math.round(W*0.048);
+    ctx.letterSpacing='0';
+  }
+
+  // Title
+  if(slide.title){
+    ctx.fillStyle='#ffffff';
+    ctx.textAlign='left';
+    const titleSize = Math.round(W * (slide.title.length>28 ? 0.042 : 0.052));
+    ctx.font = `800 ${titleSize}px Inter,Arial,sans-serif`;
+    const words = slide.title.split(' ');
+    let line='', lineY=y;
+    const maxW = W - pad*2;
+    for(const word of words){
+      const test = line ? line+' '+word : word;
+      if(ctx.measureText(test).width > maxW && line){
+        ctx.fillText(line, pad, lineY);
+        line = word;
+        lineY += titleSize*1.3;
+      } else { line=test; }
+    }
+    ctx.fillText(line, pad, lineY);
+    y = lineY + titleSize*1.5;
+  }
+
+  // Body text
+  if(slide.body){
+    ctx.fillStyle='rgba(255,255,255,.82)';
+    const bodySize = Math.round(W*0.032);
+    ctx.font = `${bodySize}px Inter,Arial,sans-serif`;
+    ctx.textAlign='left';
+    const words = slide.body.split(' ');
+    let line='', lineY=y;
+    const maxW = W - pad*2;
+    for(const word of words){
+      const test = line ? line+' '+word : word;
+      if(ctx.measureText(test).width > maxW && line){
+        ctx.fillText(line, pad, lineY);
+        line = word;
+        lineY += bodySize*1.6;
+        if(lineY > H*0.88) break;
+      } else { line=test; }
+    }
+    if(line && lineY <= H*0.88) ctx.fillText(line, pad, lineY);
+  }
+
+  // Stat highlight box
+  if(slide.stat){
+    const bx=pad, by=H*0.62, bw=W-pad*2, bh=H*0.28;
+    ctx.fillStyle='rgba(232,71,42,.12)';
+    roundRect(ctx,bx,by,bw,bh,8); ctx.fill();
+    ctx.strokeStyle='rgba(232,71,42,.4)';ctx.lineWidth=1.5;
+    roundRect(ctx,bx,by,bw,bh,8); ctx.stroke();
+    const numSize=Math.round(W*0.1);
+    ctx.font=`800 ${numSize}px Inter,Arial,sans-serif`;
+    ctx.fillStyle='#e8472a';ctx.textAlign='center';
+    ctx.fillText(slide.stat, W/2, by+bh*0.5+numSize*0.35);
+    if(slide.statLabel){
+      ctx.font=`600 ${Math.round(W*0.028)}px Inter,Arial,sans-serif`;
+      ctx.fillStyle='rgba(255,255,255,.75)';
+      ctx.fillText(slide.statLabel, W/2, by+bh*0.82);
+    }
+  }
+
+  // Slide number badge bottom-right
+  ctx.font=`600 ${Math.round(W*0.025)}px Inter,Arial,sans-serif`;
+  ctx.fillStyle='rgba(255,255,255,.4)';ctx.textAlign='right';
+  ctx.fillText(`${slideIdx+1} / ${slideTotal}`, W-pad, H-Math.round(H*0.05));
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();
+}
+function shadeColor(hex,pct){
+  const n=parseInt(hex.replace('#',''),16),r=Math.min(255,Math.max(0,(n>>16)+pct)),
+        g=Math.min(255,Math.max(0,((n>>8)&0xff)+pct)),b=Math.min(255,Math.max(0,(n&0xff)+pct));
+  return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+
+let videoSlides=[], videoElapsed=0, videoLastTick=0;
+
+function playVideo(slides){
+  videoSlides = slides;
+  slidePlaying = true;
+  document.getElementById('videoOverlay').classList.add('hidden');
+  document.getElementById('vcPlayBtn').textContent='⏸';
+  videoLastTick = performance.now();
+  requestAnimationFrame(videoTick);
+}
+
+function videoTick(now){
+  if(!slidePlaying) return;
+  const dt = (now - videoLastTick)/1000;
+  videoLastTick = now;
+  videoElapsed += dt;
+  const totalDur = videoSlides.length * SLIDE_DUR;
+  const pct = Math.min(100, (videoElapsed/totalDur)*100);
+  document.getElementById('vcProgress').style.width = pct+'%';
+  const secs = Math.round(videoElapsed);
+  const mm = Math.floor(secs/60), ss = secs%60;
+  document.getElementById('vcTime').textContent = mm+':'+(ss<10?'0':'')+ss;
+  const newIdx = Math.min(videoSlides.length-1, Math.floor(videoElapsed/SLIDE_DUR));
+  if(newIdx !== slideIdx){
+    slideIdx = newIdx;
+    drawSlide(videoSlides[slideIdx]);
+    document.getElementById('vcSlideLabel').textContent='Slide '+(slideIdx+1)+' / '+videoSlides.length;
+    document.querySelectorAll('.slide-dot').forEach((d,i)=>d.classList.toggle('on',i===slideIdx));
+  }
+  if(videoElapsed >= totalDur){
+    slidePlaying=false;
+    document.getElementById('vcPlayBtn').textContent='↩';
+    document.getElementById('vcProgress').style.width='100%';
+    return;
+  }
+  requestAnimationFrame(videoTick);
+}
+
+function toggleVideo(){
+  if(!videoSlides.length) return;
+  if(slidePlaying){
+    slidePlaying=false;
+    document.getElementById('vcPlayBtn').textContent='▶';
+    document.getElementById('videoOverlay').classList.remove('hidden');
+  } else {
+    if(videoElapsed >= videoSlides.length*SLIDE_DUR) videoElapsed=0;
+    playVideo(videoSlides);
+    document.getElementById('videoOverlay').classList.add('hidden');
+  }
+}
+
+function seekVideo(e){
+  if(!videoSlides.length) return;
+  const bar=document.getElementById('vcTimeline');
+  const pct=e.offsetX/bar.offsetWidth;
+  videoElapsed = pct * videoSlides.length * SLIDE_DUR;
+  slideIdx=Math.min(videoSlides.length-1,Math.floor(videoElapsed/SLIDE_DUR));
+  drawSlide(videoSlides[slideIdx]);
+}
+
+// ── SLIDE LIBRARIES PER ACCIDENT TYPE ────────────────────────
+const SLIDE_LIBS = {
+  'Lost Control': [
+    {bg:'#2F3744', tag:'Vehicle Control', icon:'⚠️', title:'Loss of Control: Why It Happens', body:'Speed + sudden input + no hazard anticipation = loss of control. It happens on dry pavement every day.'},
+    {bg:'#1a3a5c', tag:'Key Statistic', title:'Fleet Lost-Control Accidents', stat:'94%', statLabel:'involve an abrupt steering or braking input'},
+    {bg:'#2a3d2a', tag:'Traction Budget', icon:'🛞', title:'Every tire has a finite grip limit', body:'Braking uses it. Cornering uses it. Exceed the budget and the tire slides — steering stops working.'},
+    {bg:'#3d2a1a', tag:'Rule #1', icon:'🐢', title:'Slow Down Before the Hazard — Not During', body:'Speed choices made 3–5 seconds before the event determine the outcome. There is no recovery from too much speed.'},
+    {bg:'#1a2a3d', tag:'Wet Roads', icon:'🌧️', title:'Stopping Distance Changes Dramatically', stat:'2×', statLabel:'longer stopping distance in rain'},
+    {bg:'#2F3744', tag:'ESC Technology', icon:'🔄', title:'Your Vehicle Has Electronic Stability Control', body:'ESC cuts power and brakes individual wheels automatically. Your job: ease off the gas and steer smoothly. Do not fight it.'},
+  ],
+  'Backing': [
+    {bg:'#2F3744', tag:'Backing Safety', icon:'🎯', title:'25% of Fleet Accidents Happen While Backing', body:'Most at under 5 mph. This is a visibility problem, not a speed problem.'},
+    {bg:'#1a3a5c', tag:'The Solution', icon:'📐', title:'G.O.A.L. — Get Out And Look', body:'Exit the vehicle. Walk a complete circle. Confirm clearances. Then back — within 30 seconds.'},
+    {bg:'#2a3d2a', tag:'Camera Limits', icon:'🔍', title:'Your Backup Camera Has Blind Spots', stat:'130°', statLabel:'camera field of view — vehicle is 180° wide'},
+    {bg:'#3d2a1a', tag:'CCM Policy', title:'G.O.A.L. Is Required When…', body:'• Backing longer than 15 feet\n• Any parking lot\n• Area behind vehicle not fully visible'},
+  ],
+  'Rear-End — Our Driver': [
+    {bg:'#2F3744', tag:'Following Distance', icon:'📏', title:'The 4-Second Rule', body:'Count from when the car ahead passes a fixed point to when you reach it. Under 4 seconds = too close.'},
+    {bg:'#1a3a5c', tag:'Key Statistic', title:'Rear-End Accidents', stat:'94%', statLabel:'involve following distance under 2 seconds'},
+    {bg:'#2a3d2a', tag:'Scan Ahead', icon:'👁️', title:'Look 12–15 Seconds Ahead', body:'At highway speeds that\'s a quarter mile. See the hazard before the car in front even reacts.'},
+    {bg:'#3d2a1a', tag:'Reaction Time', icon:'🧠', title:'Your Brain Needs 1.5 Seconds to React', stat:'132 ft', statLabel:'traveled at 60 mph before braking begins'},
+  ],
+  'Rollover': [
+    {bg:'#2F3744', tag:'Rollover Risk', icon:'⚡', title:'3% of Crashes — 30% of Fatalities', body:'Fleet vans and SUVs have higher centers of gravity. The physics are predictable and preventable.'},
+    {bg:'#1a3a5c', tag:'Key Statistic', title:'How Rollovers Start', stat:'95%', statLabel:'are "tripped" — curb, ditch, or soft shoulder'},
+    {bg:'#2a3d2a', tag:'Cargo Safety', icon:'📦', title:'Load Heavy Items Low and Centered', body:'High cargo raises your center of gravity. Load the floor first. Secure everything before moving.'},
+    {bg:'#b91c1c', tag:'Non-Negotiable', icon:'🔴', title:'Seatbelts Cut Rollover Fatality Risk by 75%', body:'All occupants buckled before the vehicle moves. No exceptions.'},
+  ],
+};
+
+// Default slides for accident types without a specific library
+function getSlides(type, modIndex, modTitle, modIcon){
+  const lib = SLIDE_LIBS[type];
+  if(lib){
+    // Distribute slides across modules
+    const perMod = Math.ceil(lib.length / modules.length);
+    const start = modIndex * perMod;
+    const end = Math.min(start+perMod, lib.length);
+    const s = lib.slice(start,end);
+    return s.length ? s : lib.slice(0,2);
+  }
+  return [
+    {bg:'#2F3744', tag:'CCM SafeDriver', icon: modIcon, title: modTitle, body:'Watch this overview, then read the lesson below.'},
+    {bg:'#1a3a5c', tag:'Key Reminder', title:'Safety is Everyone\'s Responsibility', body:'Complete this training to document your commitment to safe driving.'},
+  ];
+}
+
+// ── VOICE SCRIPT BUILDER ──────────────────────────────────────
+function buildVoiceScript(m){
+  // Strip HTML tags and build a readable narration
+  const raw = m.body.replace(/<[^>]+>/g,'').replace(/✓|✦/g,'').replace(/\s+/g,' ').trim();
+  const q = m.quiz;
+  return raw + ' Now, here is your knowledge check. ' + q.q +
+    ' Option A: ' + q.opts[0] +
+    '. Option B: ' + q.opts[1] +
+    '. Option C: ' + (q.opts[2]||'') +
+    (q.opts[3] ? '. Option D: ' + q.opts[3] : '') + '.';
+}
+
+// ── CURRICULUM MAP ────────────────────────────────────────────
 const CURRICULA = {
-  'Backing':               { label:'Backing Safety Remediation', dur:'26 min', modules:[
-    {icon:'🎯', title:'Why backing accidents happen', req:true, body:`
-      <div class="ai-tag">✦ AI-personalized · Backing accident · Claim #${P.claim}</div>
-      <div class="content-block"><strong>The backing blind spot problem.</strong> Backing accidents account for roughly 25% of all fleet incidents — the majority at speeds under 5 mph. That's not a speed problem. It's a visibility problem. When seated behind the wheel, drivers cannot see a zone approximately 6 feet deep and the full width of the vehicle directly behind them.</div>
-      <div class="highlight">Over 500 fatalities and 15,000 injuries occur annually from backing accidents. Fleet drivers are 3x more likely to be involved than the general public due to the frequency of backing maneuvers throughout a shift.</div>
-      <div class="content-block">The top three contributing factors in fleet backing accidents are: (1) <strong>failure to physically check</strong> behind the vehicle before backing, (2) <strong>over-reliance on cameras and mirrors</strong> without a physical walkround, and (3) <strong>time pressure</strong> — rushing the maneuver to save 30 seconds.</div>
-      <div class="key-point">✓ The good news: backing accidents are among the most preventable in fleet safety. A single habit change eliminates the majority of them.</div>`,
-      quiz:{q:'What percentage of fleet accidents involve backing maneuvers?', opts:['About 10%','About 25%','About 50%','About 75%'], correct:1}
-    },
-    {icon:'📐', title:'The G.O.A.L. method', req:true, body:`
-      <div class="ai-tag">✦ AI-personalized · Based on your accident narrative</div>
-      <div class="content-block"><strong>Get Out And Look.</strong> G.O.A.L. is the single most effective habit in fleet safety. Before any backing maneuver, exit the vehicle, walk a complete circle around it, confirm clearances, then return and back immediately — within 30 seconds while the picture is fresh.</div>
-      <div class="key-point">CCM policy: G.O.A.L. is required for any backing maneuver longer than 15 feet, in any parking lot, or any time the area behind the vehicle is not <em>fully</em> visible from the driver's seat.</div>
-      <div class="content-block">The walkround takes 15–20 seconds. A backing accident involving a pedestrian can cost your employer $500,000 or more and end your driving career. The math is straightforward.</div>
-      <div class="highlight">If you stop during a backing maneuver for more than 30 seconds — to answer a call, wait for traffic — conditions have changed. Exit and re-check before continuing.</div>`,
-      quiz:{q:'G.O.A.L. stands for:', opts:['Guide Officers At Location','Get Out And Look','General Operations Alert Level','Go On Assess Later'], correct:1}
-    },
-    {icon:'🔍', title:'Mirrors, cameras & blind zones', req:true, body:`
-      <div class="ai-tag">✦ AI-personalized · Vehicle type: Fleet van/SUV</div>
-      <div class="content-block"><strong>Cameras show 130 degrees. Your vehicle is 180 degrees wide.</strong> That's a 25-degree blind zone on each side that no camera captures — exactly where children crouch and cyclists pass. Cameras are a tool, not a substitute for physical checking.</div>
-      <div class="content-block">Side mirrors should be set so you can <em>just barely</em> see the rear corner of your vehicle in the innermost sliver of the mirror. If you're seeing the full side of your vehicle, you've lost coverage of the zone beside you. Adjust before every trip.</div>
-      <div class="key-point">✓ Scanning sequence: left mirror → center camera → right mirror → repeat. Do this every 3 seconds during any backing maneuver, not just at the start.</div>`,
-      quiz:{q:'A backup camera\'s field of view is approximately:', opts:['90 degrees','130 degrees','180 degrees','270 degrees'], correct:1}
-    },
-    {icon:'✅', title:'Final assessment', req:true, body:`
-      <div class="content-block">You've completed all three learning modules on backing safety. Answer the final question to receive your completion certificate. A score of 80% or higher is required — you have two attempts.</div>`,
-      quiz:{q:'Which single practice most effectively prevents backing accidents?', opts:['Installing an additional camera system','Honking before reversing','Physically walking around the vehicle before every backing maneuver (G.O.A.L.)','Backing more slowly'], correct:2}
-    },
+  'Backing': { label:'Backing Safety Remediation', dur:'26 min', modules:[
+    {icon:'🎯',title:'Why backing accidents happen',req:true,body:`<div class="ai-tag">✦ AI-personalized · Backing accident · Claim #${P.claim}</div><div class="content-block"><strong>The backing blind spot problem.</strong> Backing accidents account for roughly 25% of all fleet incidents — the majority at speeds under 5 mph. That's not a speed problem. It's a visibility problem. When seated behind the wheel, drivers cannot see a zone approximately 6 feet deep and the full width of the vehicle directly behind them.</div><div class="highlight">Over 500 fatalities and 15,000 injuries occur annually from backing accidents. Fleet drivers are 3x more likely to be involved than the general public due to the frequency of backing maneuvers throughout a shift.</div><div class="content-block">The top three contributing factors: (1) <strong>failure to physically check</strong> behind the vehicle before backing, (2) <strong>over-reliance on cameras and mirrors</strong> without a physical walkround, and (3) <strong>time pressure</strong> — rushing the maneuver to save 30 seconds.</div><div class="key-point">✓ Backing accidents are among the most preventable in fleet safety. A single habit change eliminates the majority of them.</div>`,quiz:{q:'What percentage of fleet accidents involve backing maneuvers?',opts:['About 10%','About 25%','About 50%','About 75%'],correct:1}},
+    {icon:'📐',title:'The G.O.A.L. method',req:true,body:`<div class="ai-tag">✦ AI-personalized · Based on your accident</div><div class="content-block"><strong>Get Out And Look.</strong> G.O.A.L. is the single most effective habit in fleet safety. Before any backing maneuver, exit the vehicle, walk a complete circle around it, confirm clearances, then return and back immediately — within 30 seconds while the picture is fresh.</div><div class="key-point">CCM policy: G.O.A.L. is required for any backing maneuver longer than 15 feet, in any parking lot, or any time the area behind the vehicle is not fully visible from the driver's seat.</div><div class="content-block">The walkround takes 15–20 seconds. A backing accident involving a pedestrian can cost your employer $500,000 or more and end your driving career.</div><div class="highlight">If you stop during a backing maneuver for more than 30 seconds — to answer a call, wait for traffic — conditions have changed. Exit and re-check before continuing.</div>`,quiz:{q:'G.O.A.L. stands for:',opts:['Guide Officers At Location','Get Out And Look','General Operations Alert Level','Go On Assess Later'],correct:1}},
+    {icon:'🔍',title:'Mirrors, cameras & blind zones',req:true,body:`<div class="ai-tag">✦ AI-personalized · Vehicle type: Fleet van/SUV</div><div class="content-block"><strong>Cameras show 130 degrees. Your vehicle is 180 degrees wide.</strong> That's a 25-degree blind zone on each side that no camera captures — exactly where children crouch and cyclists pass. Cameras are a tool, not a substitute for physical checking.</div><div class="content-block">Side mirrors should be set so you can just barely see the rear corner of your vehicle in the innermost sliver of the mirror. Adjust before every trip.</div><div class="key-point">✓ Scanning sequence: left mirror → center camera → right mirror → repeat. Do this every 3 seconds during any backing maneuver.</div>`,quiz:{q:"A backup camera's field of view is approximately:",opts:['90 degrees','130 degrees','180 degrees','270 degrees'],correct:1}},
+    {icon:'✅',title:'Final assessment',req:true,body:`<div class="content-block">You've completed all three learning modules on backing safety. Answer the final question to receive your completion certificate.</div>`,quiz:{q:'Which single practice most effectively prevents backing accidents?',opts:['Installing an additional camera system','Honking before reversing','Physically walking around the vehicle before every backing maneuver (G.O.A.L.)','Backing more slowly'],correct:2}},
   ]},
-  'Rear-End — Our Driver':  { label:'Following Distance Remediation', dur:'30 min', modules:[
-    {icon:'📏', title:'Space management fundamentals', req:true, body:`<div class="ai-tag">✦ AI-personalized · Rear-end accident · Claim #${P.claim}</div><div class="content-block"><strong>The 4-second rule.</strong> At highway speeds, maintain at least 4 seconds of following distance. Count from when the vehicle ahead passes a fixed object to when you reach the same object. In rain or reduced visibility, double it to 8 seconds.</div><div class="highlight">In rear-end accidents where our driver is at fault, 94% involve following distance of under 2 seconds. At 60 mph, 2 seconds is only 176 feet — less than the stopping distance on dry pavement, before reaction time is even added.</div><div class="key-point">✓ If you can't see the bottom of the tires of the vehicle ahead, you're too close.</div>`, quiz:{q:'At highway speeds, the minimum recommended following distance is:',opts:['1 second','2 seconds','4 seconds','6 seconds'],correct:2}},
-    {icon:'⚠️', title:'Hazard perception and scanning', req:true, body:`<div class="content-block"><strong>Look 12–15 seconds ahead.</strong> At city speeds that's about one block. At highway speeds it's about a quarter mile. Drivers who scan far ahead have 3–5 seconds of additional reaction time compared to drivers who focus only on the vehicle immediately ahead.</div><div class="key-point">✓ When the vehicle two cars ahead brakes, you should already be covering the brake — not waiting for the car directly in front to respond first.</div>`, quiz:{q:'How far ahead should a driver\'s eyes scan at highway speeds?',opts:['The car directly ahead','50–100 feet','12–15 seconds ahead','The horizon'],correct:2}},
-    {icon:'🧠', title:'Reaction time and distraction', req:true, body:`<div class="content-block"><strong>The 1.5-second gap.</strong> Average driver reaction time is 1.5 seconds. At 60 mph that's 132 feet before braking even begins. Distracted drivers — including those who "just glanced" at a text — take 3–4 seconds to react. That's the length of a football field before brakes engage.</div><div class="highlight">Looking at a phone for just 2 seconds at 60 mph means traveling the length of two basketball courts completely blind.</div>`, quiz:{q:'Average driver reaction time before braking is:',opts:['0.5 seconds','1.5 seconds','3 seconds','5 seconds'],correct:1}},
-    {icon:'✅', title:'Final assessment', req:true, body:`<div class="content-block">You've completed all three modules. Answer the final question to receive your certificate.</div>`, quiz:{q:'The most effective way to prevent rear-end accidents is:',opts:['Watching brake lights only','Maintaining 4 seconds following distance and scanning 12–15 seconds ahead','Staying in the right lane','Slowing below the speed limit'],correct:1}},
+  'Rear-End — Our Driver': { label:'Following Distance Remediation', dur:'30 min', modules:[
+    {icon:'📏',title:'Space management fundamentals',req:true,body:`<div class="ai-tag">✦ AI-personalized · Rear-end accident · Claim #${P.claim}</div><div class="content-block"><strong>The 4-second rule.</strong> At highway speeds, maintain at least 4 seconds of following distance. Count from when the vehicle ahead passes a fixed object to when you reach the same object. In rain or reduced visibility, double it to 8 seconds.</div><div class="highlight">In rear-end accidents where our driver is at fault, 94% involve following distance of under 2 seconds. At 60 mph, 2 seconds is only 176 feet — less than the stopping distance on dry pavement, before reaction time is even added.</div><div class="key-point">✓ If you can't see the bottom of the tires of the vehicle ahead, you're too close.</div>`,quiz:{q:'At highway speeds, the minimum recommended following distance is:',opts:['1 second','2 seconds','4 seconds','6 seconds'],correct:2}},
+    {icon:'⚠️',title:'Hazard perception and scanning',req:true,body:`<div class="content-block"><strong>Look 12–15 seconds ahead.</strong> At city speeds that's about one block. At highway speeds it's about a quarter mile. Drivers who scan far ahead have 3–5 seconds of additional reaction time compared to drivers who focus only on the vehicle immediately ahead.</div><div class="key-point">✓ When the vehicle two cars ahead brakes, you should already be covering the brake — not waiting for the car directly in front to respond first.</div>`,quiz:{q:"How far ahead should a driver's eyes scan at highway speeds?",opts:['The car directly ahead','50–100 feet','12–15 seconds ahead','The horizon'],correct:2}},
+    {icon:'🧠',title:'Reaction time and distraction',req:true,body:`<div class="content-block"><strong>The 1.5-second gap.</strong> Average driver reaction time is 1.5 seconds. At 60 mph that's 132 feet before braking even begins. Distracted drivers take 3–4 seconds to react. That's the length of a football field before brakes engage.</div><div class="highlight">Looking at a phone for just 2 seconds at 60 mph means traveling the length of two basketball courts completely blind.</div>`,quiz:{q:'Average driver reaction time before braking is:',opts:['0.5 seconds','1.5 seconds','3 seconds','5 seconds'],correct:1}},
+    {icon:'✅',title:'Final assessment',req:true,body:`<div class="content-block">You've completed all three modules. Answer the final question to receive your certificate.</div>`,quiz:{q:'The most effective way to prevent rear-end accidents is:',opts:['Watching brake lights only','Maintaining 4 seconds following distance and scanning 12–15 seconds ahead','Staying in the right lane','Slowing below the speed limit'],correct:1}},
   ]},
-  'Hit Fixed Object':       { label:'Spatial Awareness Remediation', dur:'24 min', modules:[
-    {icon:'📦', title:'Understanding your vehicle dimensions', req:true, body:`<div class="ai-tag">✦ AI-personalized · Fixed object accident · Claim #${P.claim}</div><div class="content-block"><strong>Most drivers underestimate their vehicle by 15–20%.</strong> This gap between perceived and actual size is the leading cause of fixed object strikes. Your vehicle's width at the mirrors is 6–8 inches wider than the body. Your turning radius swings the rear in the opposite direction of the turn.</div><div class="highlight">Before driving any unfamiliar vehicle, walk it. Know the exact dimensions before you encounter the first tight situation, not during it.</div>`, quiz:{q:'Vehicle rear swing during a turn goes:',opts:['In the same direction as the turn','In the opposite direction of the turn','Straight back','It depends on the vehicle'],correct:1}},
-    {icon:'🅿️', title:'Parking and tight maneuvering', req:true, body:`<div class="content-block"><strong>Reference points.</strong> Every vehicle has external reference points visible from the driver's seat — spots where the edge of a mirror, the end of the hood, or a pillar aligns with a known external marker. Learning your vehicle's reference points eliminates guesswork in tight situations.</div><div class="key-point">✓ When in doubt, get out and look. The 30 seconds it takes to check is always faster than the time and cost of a claim.</div>`, quiz:{q:'The most reliable tool for navigating tight spaces is:',opts:['Going faster to clear quickly','Reference points and getting out to check','Using only the backup camera','Guessing based on experience'],correct:1}},
-    {icon:'✅', title:'Final assessment', req:true, body:`<div class="content-block">Answer the final question to complete your training.</div>`, quiz:{q:'What should a driver do when unsure if they have clearance?',opts:['Proceed slowly','Honk to warn others','Get out and physically verify clearance','Use the camera only'],correct:2}},
+  'Lost Control': { label:'Vehicle Control Remediation', dur:'32 min', modules:[
+    {icon:'⚠️',title:'Why vehicles lose control',req:true,body:`<div class="ai-tag">✦ AI-personalized · Lost Control accident · Claim #${P.claim}</div><div class="content-block"><strong>Loss of control is almost always preventable.</strong> The vast majority of single-vehicle lost-control accidents share three contributing factors: excessive speed for conditions, a sudden steering or braking input that overwhelms traction, and a driver who was not anticipating the hazard. None of these require icy roads or extreme weather — loss of control happens on dry pavement every day.</div><div class="highlight">Fleet drivers are disproportionately involved in lost-control incidents during the first two seconds of an evasive maneuver. The vehicle goes where physics demands, not where the driver intends.</div><div class="content-block"><strong>Traction budget.</strong> Every tire has a finite amount of grip. Braking spends some of it. Cornering spends some. Exceed the budget and the tire slides — once a tire slides, steering stops working. This is physics, and it is predictable.</div><div class="key-point">✓ Slow down before the hazard, not during it. Speed choices made 3–5 seconds before the event determine the outcome.</div>`,quiz:{q:'What is the most common driver error that leads to loss of control?',opts:['Mechanical failure of the vehicle','Excessive speed combined with an abrupt steering or braking input','Wet or icy road conditions alone','Other drivers causing a distraction'],correct:1}},
+    {icon:'🌧️',title:'Adverse conditions & speed management',req:true,body:`<div class="ai-tag">✦ AI-personalized · Conditions awareness</div><div class="content-block"><strong>Posted speed limits are dry, clear, ideal-conditions numbers.</strong> In rain, your stopping distance doubles. In light snow, it triples. Black ice multiplies it by 10. The posted limit has no awareness of current road conditions — the driver does.</div><div class="content-block">The rule of thumb: in rain, reduce speed by 5–10 mph below posted. In snow or slush, cut it by a third. On ice, slow to whatever speed allows you to stop in the distance you can see.</div><div class="key-point">✓ Scanning 12–15 seconds ahead is what makes speed reduction possible. If you can't see far enough to stop safely, you are going too fast regardless of the posted limit.</div>`,quiz:{q:'On wet roads, your stopping distance approximately:',opts:['Stays the same as dry pavement','Doubles compared to dry pavement','Triples compared to dry pavement','Is halved with ABS active'],correct:1}},
+    {icon:'🔄',title:'Skid recovery techniques',req:true,body:`<div class="ai-tag">✦ AI-personalized · Emergency response</div><div class="content-block"><strong>Understeer (pushing straight):</strong> Front tires lose grip; vehicle continues straight despite turning the wheel. Response: ease off the gas, reduce steering angle slightly, allow front tires to regain grip. Do not brake hard.</div><div class="content-block"><strong>Oversteer (rear slides out):</strong> Rear of the vehicle swings wider than the front. Response: steer in the direction of the slide, ease off gas, avoid sudden braking.</div><div class="highlight">Modern fleet vehicles have Electronic Stability Control (ESC). ESC cuts engine power and applies individual wheel brakes automatically during a skid. Your job: ease off the accelerator and steer smoothly. Do not fight the system.</div>`,quiz:{q:'During a skid, the correct response with a modern ESC-equipped fleet vehicle is:',opts:['Brake firmly to stop the vehicle immediately','Ease off the accelerator and steer smoothly toward the intended path','Accelerate to regain control','Turn the wheel sharply in the opposite direction'],correct:1}},
+    {icon:'✅',title:'Final assessment',req:true,body:`<div class="content-block">You've completed all three Vehicle Control modules. Answer the final question to receive your certificate.</div>`,quiz:{q:'The single most effective way to prevent loss-of-control accidents is:',opts:['Always keeping both hands on the wheel','Maintaining appropriate speed for conditions and scanning far ahead','Checking tire pressure weekly','Avoiding highway driving'],correct:1}},
+  ]},
+  'Rollover': { label:'Rollover Prevention Remediation', dur:'28 min', modules:[
+    {icon:'⚡',title:'Understanding rollover risk',req:true,body:`<div class="ai-tag">✦ AI-personalized · Rollover accident · Claim #${P.claim}</div><div class="content-block"><strong>Rollovers account for only 3% of crashes but 30% of occupant fatalities.</strong> Fleet vans, SUVs, and pickup trucks have a higher center of gravity than passenger cars, making them more susceptible. When lateral force exceeds the vehicle's rollover threshold, the vehicle tips.</div><div class="highlight">Tripped rollovers — where the vehicle hits a curb, ditch, or soft shoulder — account for 95% of single-vehicle rollovers. Hitting a soft shoulder at 40 mph while correcting a drift is enough.</div><div class="key-point">✓ Seatbelt use cuts rollover fatality risk by 75%. This is non-negotiable for all occupants before movement.</div>`,quiz:{q:'What percentage of single-vehicle rollovers are "tripped" rollovers?',opts:['About 30%','About 60%','About 95%','About 100%'],correct:2}},
+    {icon:'📦',title:'Load management and center of gravity',req:true,body:`<div class="content-block"><strong>Cargo placement matters.</strong> Heavy cargo loaded high raises the vehicle's center of gravity. The same cargo placed low and centered reduces rollover risk. Always load heavy items on the floor of the cargo area.</div><div class="key-point">✓ An unsecured load that shifts suddenly in a turn can transfer enough weight to tip a van. Secure all cargo before moving.</div>`,quiz:{q:'To reduce rollover risk in a cargo van, heavy items should be:',opts:['Loaded as high as possible for easier access','Placed low and centered on the cargo floor','Distributed evenly on all shelving levels','Loaded at the rear for better weight distribution'],correct:1}},
+    {icon:'✅',title:'Final assessment',req:true,body:`<div class="content-block">Answer the final question to complete your training.</div>`,quiz:{q:'The most important single action to prevent rollover fatalities is:',opts:['Driving below 50 mph at all times','Ensuring all occupants wear seatbelts before the vehicle moves','Avoiding curves and ramps','Checking tire pressure before each shift'],correct:1}},
+  ]},
+  'Hit Fixed Object': { label:'Spatial Awareness Remediation', dur:'24 min', modules:[
+    {icon:'📦',title:'Understanding your vehicle dimensions',req:true,body:`<div class="ai-tag">✦ AI-personalized · Fixed object accident · Claim #${P.claim}</div><div class="content-block"><strong>Most drivers underestimate their vehicle by 15–20%.</strong> Your vehicle's width at the mirrors is 6–8 inches wider than the body. Your turning radius swings the rear in the opposite direction of the turn.</div><div class="highlight">Before driving any unfamiliar vehicle, walk it. Know the exact dimensions before you encounter the first tight situation, not during it.</div>`,quiz:{q:'Vehicle rear swing during a turn goes:',opts:['In the same direction as the turn','In the opposite direction of the turn','Straight back','It depends on the vehicle'],correct:1}},
+    {icon:'🅿️',title:'Parking and tight maneuvering',req:true,body:`<div class="content-block"><strong>Reference points.</strong> Every vehicle has external reference points visible from the driver's seat. Learning your vehicle's reference points eliminates guesswork in tight situations.</div><div class="key-point">✓ When in doubt, get out and look. The 30 seconds it takes to check is always faster than the time and cost of a claim.</div>`,quiz:{q:'The most reliable tool for navigating tight spaces is:',opts:['Going faster to clear quickly','Reference points and getting out to check','Using only the backup camera','Guessing based on experience'],correct:1}},
+    {icon:'✅',title:'Final assessment',req:true,body:`<div class="content-block">Answer the final question to complete your training.</div>`,quiz:{q:'What should a driver do when unsure if they have clearance?',opts:['Proceed slowly','Honk to warn others','Get out and physically verify clearance','Use the camera only'],correct:2}},
   ]},
 };
 
 const DEFAULT_CURR = { label:'Defensive Driving Remediation', dur:'24 min', modules:[
-  {icon:'🛡️', title:'Defensive driving principles', req:true, body:`<div class="ai-tag">✦ AI-generated · Claim #${P.claim}</div><div class="content-block"><strong>Defensive driving means expecting the unexpected.</strong> The defensive driver assumes other road users will make mistakes and maintains the space and time to respond safely when they do.</div><div class="key-point">✓ The three core habits: scan far ahead, maintain space cushion, communicate your intentions early.</div>`, quiz:{q:'Defensive driving primarily means:',opts:['Driving slowly at all times','Anticipating others\' mistakes and maintaining response options','Staying in the right lane','Following GPS routes exactly'],correct:1}},
-  {icon:'✅', title:'Final assessment', req:true, body:`<div class="content-block">Answer the final question to complete your training.</div>`, quiz:{q:'The most important element of defensive driving is:',opts:['Speed control','Maintaining a space cushion and scanning ahead','Signaling early','Using mirrors frequently'],correct:1}},
+  {icon:'🛡️',title:'Defensive driving principles',req:true,body:`<div class="ai-tag">✦ AI-generated · Claim #${P.claim}</div><div class="content-block"><strong>Defensive driving means expecting the unexpected.</strong> The defensive driver assumes other road users will make mistakes and maintains the space and time to respond safely when they do.</div><div class="key-point">✓ The three core habits: scan far ahead, maintain space cushion, communicate your intentions early.</div>`,quiz:{q:'Defensive driving primarily means:',opts:['Driving slowly at all times','Anticipating others\' mistakes and maintaining response options','Staying in the right lane','Following GPS routes exactly'],correct:1}},
+  {icon:'✅',title:'Final assessment',req:true,body:`<div class="content-block">Answer the final question to complete your training.</div>`,quiz:{q:'The most important element of defensive driving is:',opts:['Speed control','Maintaining a space cushion and scanning ahead','Signaling early','Using mirrors frequently'],correct:1}},
 ]};
 
 const curr = CURRICULA[P.type] || DEFAULT_CURR;
 const modules = curr.modules;
-let modIdx = 0;
-let totalCorrect = 0;
-let quizDone = false;
-const completed = new Set();
+let modIdx=0, totalCorrect=0, quizDone=false;
+const completed=new Set();
 
-// Load saved progress
 try{
-  const saved = JSON.parse(localStorage.getItem('ccm_training_'+P.claim)||'null');
-  if(saved){
-    saved.completed?.forEach(i=>completed.add(i));
-    modIdx = saved.modIdx||0;
-    totalCorrect = saved.correct||0;
-  }
+  const saved=JSON.parse(localStorage.getItem('ccm_training_'+P.claim)||'null');
+  if(saved){ saved.completed?.forEach(i=>completed.add(i)); modIdx=saved.modIdx||0; totalCorrect=saved.correct||0; }
 }catch(e){}
 
 function saveProgress(){
-  try{
-    localStorage.setItem('ccm_training_'+P.claim, JSON.stringify({
-      completed:[...completed], modIdx, correct:totalCorrect
-    }));
-  }catch(e){}
+  try{ localStorage.setItem('ccm_training_'+P.claim,JSON.stringify({completed:[...completed],modIdx,correct:totalCorrect})); }catch(e){}
 }
 
-// ── INIT ──
+// ── INIT ──────────────────────────────────────────────────────
 function init(){
-  document.getElementById('hdrTitle').textContent = curr.label;
-  document.getElementById('wHero').textContent = curr.label;
-  document.getElementById('wSub').textContent = 'Complete all '+ modules.length +' modules to receive your safety certificate. You can pause and resume anytime.';
-  document.getElementById('wClaim').textContent = '#'+P.claim;
-  document.getElementById('wType').textContent = P.type;
-  document.getElementById('wDur').textContent = curr.dur;
-
-  // Days remaining badge
-  const days = 7 - (Math.floor((Date.now() - (parseInt(P.issued)||Date.now()))/86400000));
-  document.getElementById('hdrBadge').textContent = days > 0 ? 'Due in '+days+' days' : 'Due today';
-
+  document.getElementById('hdrTitle').textContent=curr.label;
+  document.getElementById('wHero').textContent=curr.label;
+  document.getElementById('wSub').textContent='Complete all '+modules.length+' modules to receive your safety certificate. Each module includes a short video overview and lesson you can listen to.';
+  document.getElementById('wClaim').textContent='#'+P.claim;
+  document.getElementById('wType').textContent=P.type;
+  document.getElementById('wDur').textContent=curr.dur;
+  const days=7-(Math.floor((Date.now()-(parseInt(P.issued)||Date.now()))/86400000));
+  document.getElementById('hdrBadge').textContent=days>0?'Due in '+days+' days':'Due today';
   renderModuleList();
-  if(completed.size === modules.length){ showCert(); return; }
-  if(modIdx > 0 && completed.size > 0){
-    document.getElementById('startBtn').textContent = 'Resume Training →';
-  }
+  if(completed.size===modules.length){showCert();return;}
+  if(modIdx>0&&completed.size>0) document.getElementById('startBtn').textContent='Resume Training →';
 }
 
 function renderModuleList(){
-  const list = document.getElementById('moduleList');
-  list.innerHTML = modules.map((m,i)=>`
+  document.getElementById('moduleList').innerHTML=modules.map((m,i)=>`
     <div class="module-item ${completed.has(i)?'done':''}" onclick="${completed.has(i)||i<=modIdx?'jumpTo('+i+')':''}">
-      <div class="mod-icon ${completed.has(i)?'done':(i===modIdx?'':'')}">
-        ${completed.has(i)?'✓':m.icon}
-      </div>
+      <div class="mod-icon ${completed.has(i)?'done':''}">${completed.has(i)?'✓':m.icon}</div>
       <div class="mod-info">
         <div class="mod-title">${m.title}</div>
-        <div class="mod-meta">~8 min · ${m.req?'Required':'Optional'}</div>
+        <div class="mod-meta">~8 min · Video + lesson · ${m.req?'Required':'Optional'}</div>
       </div>
-      <div class="mod-status ${completed.has(i)?'done':(i<=modIdx?'req':'lock')}">
-        ${completed.has(i)?'Done':(i===modIdx?'Start':'Locked')}
+      <div class="mod-status ${completed.has(i)?'done':i<=modIdx?'req':'lock'}">
+        ${completed.has(i)?'Done':i===modIdx?'Start':'Locked'}
       </div>
     </div>`).join('');
 }
 
-function jumpTo(i){ modIdx=i; startTraining(); }
+function jumpTo(i){modIdx=i;startTraining();}
 
 function startTraining(){
   show('scrLesson');
@@ -336,29 +744,50 @@ function startTraining(){
 }
 
 function renderLesson(){
-  const m = modules[modIdx];
-  quizDone = false;
-  document.getElementById('lessonIcon').textContent = m.icon;
-  document.getElementById('lessonTitle').textContent = m.title;
-  document.getElementById('lessonSub').textContent = `Module ${modIdx+1} of ${modules.length} · ${curr.label}`;
-  document.getElementById('lessonBody').innerHTML = m.body + buildQuiz(m.quiz, modIdx);
+  const m=modules[modIdx];
+  quizDone=false;
+  stopAudio();
 
-  // Progress
-  const pct = Math.round((modIdx/modules.length)*100);
-  document.getElementById('progFill').style.width = pct+'%';
-  document.getElementById('progLabel').textContent = `Module ${modIdx+1} of ${modules.length}`;
-  document.getElementById('progPct').textContent = pct+'% complete';
+  document.getElementById('lessonIcon').textContent=m.icon;
+  document.getElementById('lessonTitle').textContent=m.title;
+  document.getElementById('lessonSub').textContent=`Module ${modIdx+1} of ${modules.length} · ${curr.label}`;
+  document.getElementById('lessonBody').innerHTML=m.body+buildQuiz(m.quiz,modIdx);
 
-  // Step dots
-  document.getElementById('stepDots').innerHTML = modules.map((_,i)=>
-    `<div class="step-dot ${completed.has(i)?'done':i===modIdx?'active':''}"></div>`).join('');
+  const pct=Math.round((modIdx/modules.length)*100);
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('progLabel').textContent=`Module ${modIdx+1} of ${modules.length}`;
+  document.getElementById('progPct').textContent=pct+'% complete';
+  document.getElementById('stepDots').innerHTML=modules.map((_,i)=>`<div class="step-dot ${completed.has(i)?'done':i===modIdx?'active':''}"></div>`).join('');
 
-  const nb = document.getElementById('nextBtn');
-  nb.disabled = true;
-  nb.textContent = modIdx===modules.length-1 ? 'Complete Training' : 'Continue →';
+  const nb=document.getElementById('nextBtn');
+  nb.disabled=true;
+  nb.textContent=modIdx===modules.length-1?'Complete Training':'Continue →';
+
+  // Start video
+  const slides=getSlides(P.type,modIdx,m.title,m.icon);
+  videoElapsed=0;
+  slideIdx=0;
+  startVideoPlayer(modIdx);
+
+  // Auto-read lesson after short delay (let video start first)
+  document.getElementById('voiceToggleBtn').textContent='⏸ Pause';
+  setVoiceUI(true);
+  setTimeout(()=>speakLessonContent(), 1200);
+
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function buildQuiz(q, idx){
+function speakLessonContent(){
+  const m=modules[modIdx];
+  const script=buildVoiceScript(m);
+  speakText(script, ()=>{
+    // After reading, enable continue if quiz not yet done
+    setVoiceUI(false);
+    document.getElementById('voiceToggleBtn').textContent='▶ Read Aloud';
+  });
+}
+
+function buildQuiz(q,idx){
   return `<div class="quiz-wrap">
     <div class="quiz-label">Knowledge check</div>
     <div class="quiz-q">${q.q}</div>
@@ -369,86 +798,76 @@ function buildQuiz(q, idx){
   </div>`;
 }
 
-function answerQuiz(modI, sel, correct){
+function answerQuiz(modI,sel,correct){
   if(quizDone) return;
-  quizDone = true;
-  const isCorrect = sel === correct;
+  quizDone=true;
+  const isCorrect=sel===correct;
   if(isCorrect) totalCorrect++;
-
   modules[modI].quiz.opts.forEach((_,i)=>{
-    const btn = document.getElementById(`qo_${modI}_${i}`);
+    const btn=document.getElementById(`qo_${modI}_${i}`);
     if(!btn) return;
     if(i===correct) btn.classList.add('correct');
-    else if(i===sel && !isCorrect) btn.classList.add('wrong');
-    btn.disabled = true;
+    else if(i===sel&&!isCorrect) btn.classList.add('wrong');
+    btn.disabled=true;
   });
-
-  const fb = document.getElementById('qfb_'+modI);
+  const fb=document.getElementById('qfb_'+modI);
   if(fb){
-    fb.className = 'quiz-fb show '+(isCorrect?'ok':'no');
-    fb.textContent = isCorrect
-      ? '✓ Correct. Well done.'
-      : `✗ The correct answer is "${modules[modI].quiz.opts[correct]}". Review the content above before continuing.`;
+    fb.className='quiz-fb show '+(isCorrect?'ok':'no');
+    fb.textContent=isCorrect?'✓ Correct. Well done.':`✗ The correct answer is "${modules[modI].quiz.opts[correct]}". Review the content above before continuing.`;
   }
+  // Read the feedback aloud
+  const msg=isCorrect?'Correct! Well done.':'That\'s not quite right. The correct answer is: '+modules[modI].quiz.opts[correct]+'. Review the lesson above before continuing.';
+  speakText(msg,()=>{ setVoiceUI(false); document.getElementById('voiceToggleBtn').textContent='▶ Read Aloud'; });
   completed.add(modI);
   saveProgress();
-  document.getElementById('nextBtn').disabled = false;
+  document.getElementById('nextBtn').disabled=false;
 }
 
 function nextLesson(){
   modIdx++;
-  if(modIdx >= modules.length){ showCert(); return; }
+  if(modIdx>=modules.length){showCert();return;}
   renderLesson();
-  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 function showCert(){
+  stopAudio();
   show('scrCert');
   document.getElementById('progWrap').style.display='block';
   document.getElementById('progFill').style.width='100%';
   document.getElementById('progLabel').textContent='Training complete';
   document.getElementById('progPct').textContent='100%';
-
-  const score = modules.length > 0 ? Math.round((totalCorrect/modules.length)*100) : 0;
-  document.getElementById('certCurr').textContent = curr.label;
-  document.getElementById('certScore').textContent = score+'%';
-  setTimeout(()=>{ document.getElementById('scoreFill').style.width=score+'%'; }, 300);
-
-  const now = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  document.getElementById('certGrid').innerHTML = [
-    ['Driver', P.driver||'—'],
-    ['Driver ID', P.id||'—'],
-    ['Company', P.company||'—'],
-    ['Claim #', '#'+P.claim],
-    ['Accident type', P.type],
-    ['Completed', now],
-    ['Assigned by', 'CCM Safety Team'],
-    ['Reference', P.ref||'—'],
+  const score=modules.length>0?Math.round((totalCorrect/modules.length)*100):0;
+  document.getElementById('certCurr').textContent=curr.label;
+  document.getElementById('certScore').textContent=score+'%';
+  setTimeout(()=>{document.getElementById('scoreFill').style.width=score+'%';},300);
+  const now=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('certGrid').innerHTML=[
+    ['Driver',P.driver||'—'],['Driver ID',P.id||'—'],['Company',P.company||'—'],
+    ['Claim #','#'+P.claim],['Accident type',P.type],['Completed',now],
+    ['Assigned by','CCM Safety Team'],['Reference',P.ref||'—'],
   ].map(([l,v])=>`<div><div class="cert-row-lbl">${l}</div><div class="cert-row-val">${v}</div></div>`).join('');
-
-  // Clear localStorage on completion
-  try{ localStorage.removeItem('ccm_training_'+P.claim); }catch(e){}
-
-  // Notify completion to CCM (fire and forget)
-  fetch('/api/complete-training', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ claimNum:P.claim, driverID:P.id, driverName:P.driver, score, accidentType:P.type, completedAt:new Date().toISOString() })
+  try{localStorage.removeItem('ccm_training_'+P.claim);}catch(e){}
+  // Read certificate aloud
+  speakText('Congratulations, '+P.driver+'. You have completed your safety training with a score of '+score+' percent. Your certificate has been recorded against claim number '+P.claim+'. Thank you for your commitment to safe driving.', null);
+  fetch('/api/complete-training',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({claimNum:P.claim,driverID:P.id,driverName:P.driver,score,accidentType:P.type,completedAt:new Date().toISOString()})
   }).catch(()=>{});
 }
 
 function saveExit(){
-  saveProgress();
-  show('scrWelcome');
-  renderModuleList();
+  saveProgress();stopAudio();slidePlaying=false;
+  show('scrWelcome');renderModuleList();
   document.getElementById('progWrap').style.display='none';
-  document.getElementById('startBtn').textContent = 'Resume Training →';
+  document.getElementById('startBtn').textContent='Resume Training →';
 }
 
 function show(id){
   document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
   document.getElementById(id).classList.add('on');
 }
+
+// Unlock AudioContext on first tap (iOS requirement)
+document.addEventListener('click',()=>{ try{_getCtx();}catch(e){} },{once:true});
 
 init();
 </script>
