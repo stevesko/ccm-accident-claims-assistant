@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant | Built: 2026-04-08 12:30 PM EDT -->
+<!-- CCM Accident Assistant | Built: 2026-04-15 11:51 AM EDT -->
 <!-- CCM Accident Assistant — Built: 2026-04-01 12:51 PM ET -->
 <!DOCTYPE html>
 <html lang="en">
@@ -220,6 +220,7 @@ body{
 .og-1{grid-template-columns:1fr}
 .og-2{grid-template-columns:1fr 1fr}
 .og-3{grid-template-columns:1fr 1fr 1fr}
+.og-4{grid-template-columns:1fr 1fr 1fr 1fr}
 .opt{
   background:var(--bg2);border:1.5px solid var(--bd0);border-radius:var(--r12);
   padding:13px 10px;color:var(--t0);font-family:var(--f);font-size:13px;font-weight:600;
@@ -1072,8 +1073,8 @@ function isEnvironmentalType(a){ return accIn(a,'Act of Nature','Fire','Glass / 
 const Qs=[
   // Identification collected on scrID1/scrID2 screens before interview begins
   {id:2,  text:"How many vehicles were involved?",                type:'vehicles'},
-  {id:3,  text:"Were there any passengers in any of the vehicles?",                      type:'yn', skip:a=>isCriminalType(a)},
-  {id:4,  text:"Was anyone injured?",                                             type:'yn'},
+  {id:3,  text:"Were there any passengers in any of the vehicles?",                      type:'yn3', skip:a=>isCriminalType(a)},
+  {id:4,  text:"Was anyone injured?",                                             type:'yn3'},
   {id:5,  text:"Select who was injured in each vehicle.",                         type:'injsel',  skip:a=>a[4]==='No'},
   {id:6,  text:"Please provide the name and injury details for each person who was injured.",         type:'injdet',  skip:a=>a[4]==='No'},
   // Q7 removed — hospitalization captured in injury detail form (hospital transport radio buttons)
@@ -1090,7 +1091,7 @@ const Qs=[
   {id:11, text:"How would you describe the road conditions?",                                  type:'dd',opts:RD,ph:'Select road conditions…',
     skip:a=>isCriminalType(a)||isParkedType(a)||isEnvironmentalType(a)||isBackingType(a)
   },
-  {id:12, text:"How was the traffic at the time of the accident?",                                    type:'og3',opts:['Light','Moderate','Heavy'],
+  {id:12, text:"How was the traffic at the time of the accident?",                                    type:'og4',opts:['Light','Moderate','Heavy','Unknown'],
     skip:a=>isCriminalType(a)||isParkedType(a)||isBackingType(a)||isEnvironmentalType(a)||
             accIn(a,'Hit Animal','Rollover','Lost Control','Run Off Road','Hit Fixed Object')
   },
@@ -1111,22 +1112,22 @@ const Qs=[
   {id:21, text:"Please provide the other driver's name and contact information.",                         type:'fotherdrv',skip:isSolo},
   {id:22, text:"Now let us get the details of the other vehicle involved.",                        type:'fotherveh',skip:isSolo},
   {id:23, text:"Please provide the other driver's insurance information.",               type:'fins',key:'od',skip:isSolo},
-  {id:24, text:"Please describe the damage to your vehicle, and let us know whether it is still drivable.",           type:'fdmg'},
+  {id:24, text:"Please describe the damage to your vehicle, and let us know whether it is still drivable.",           type:'fdmg', skip:a=>{ const myPh=S.photos.filter(p=>p.category==='Vehicle Damage - Yours'||p.category==='Vehicle Damage'); return myPh.length>0 && !isSolo(a) && (S.photos.filter(p=>p.category==='Vehicle Damage - Other'||p.category==='Other Vehicle Damage').length>0); }},
   {id:25, text:"Was there visible damage to any of the other vehicles involved?",               type:'yn', skip:a=>isSolo(a)},
-  {id:26, text:'Please describe the damage you observed on the other vehicle or vehicles.', type:'fothdmg', skip:a=>a[25]==='No'||isSolo(a)},
-  {id:251, text:"Was there any damage to property — such as a fence, guardrail, or building?", type:'yn', skip:a=>isCriminalType(a)||!isSolo(a)},
-  {id:252, text:'Please describe the property that was damaged and the extent of the damage.', type:'fpropdmg', skip:a=>a[251]==='No'},
-  {id:27, text:"Did any airbags deploy during the accident?",                                         type:'yn', skip:a=>isNoImpactType(a)||isEnvironmentalType(a)},
+  {id:26, text:'Please describe the damage you observed on the other vehicle or vehicles.', type:'fothdmg', skip:a=>{ if(a[25]==='No'||isSolo(a)) return true; const odPh=S.photos.filter(p=>p.category==='Vehicle Damage - Other'||p.category==='Other Vehicle Damage'); return odPh.length>0; }},
+  {id:251, text:"Was there any damage to property — such as a fence, guardrail, or building?", type:'yn', skip:a=>isCriminalType(a)},
+  {id:252, text:'Please describe the property that was damaged and the extent of the damage.', type:'fpropdmg', skip:a=>a[251]!=='Yes'},
+  {id:27, text:"Did any airbags deploy during the accident?",                                         type:'yn3', skip:a=>isNoImpactType(a)||isEnvironmentalType(a)},
   {id:28, text:"Please select which vehicles had airbags deploy.",                       type:'airbags',skip:a=>a[27]==='No'},
-  {id:29, text:"Does your vehicle need to be towed from the scene?",                             type:'yn'},
+  {id:29, text:"Does your vehicle need to be towed from the scene?",                             type:'yn3'},
   {id:30, text:"Please provide the tow company name and where your vehicle is being taken.",                   type:'ftow',skip:a=>a[29]==='No'},
-  {id:291,text:()=>{ const n=parseInt(S.ans[2])||1; return n>=3?'Do any of the other vehicles need to be towed?':'Does the other vehicle need to be towed?'; }, type:'yn', skip:a=>isSolo(a)},
-  {id:301,text:"Please provide the tow details for the other vehicle.",                        type:'ftoword',skip:a=>a[291]==='No'||isSolo(a)},
+  {id:291,text:()=>{ const n=parseInt(S.ans[2])||1; return n>=3?'Do any of the other vehicles need to be towed?':'Does the other vehicle need to be towed?'; }, type:'yn3', skip:a=>isSolo(a)},
+  {id:301,text:"Please provide the tow details for the other vehicle.",                        type:'ftoword',skip:a=>a[291]!=='Yes'||isSolo(a)},
   {id:31, text:"Was a police report filed at the scene?",                                      type:'fpolcheck'},
   {id:32, text:"Please provide the police report details.",                                  type:'fpol',skip:a=>a[31]==='No'},
-  {id:33, text:"Was a citation or ticket issued at the scene?",                             type:'yn', skip:a=>isCriminalType(a)||isEnvironmentalType(a)},
+  {id:33, text:"Was a citation or ticket issued at the scene?",                             type:'yn3', skip:a=>isCriminalType(a)||isEnvironmentalType(a)},
   {id:34, text:"Please provide the citation details.",                                       type:'fcit',skip:a=>a[33]==='No'},
-  {id:35, text:"Were there any witnesses to the accident?",                                       type:'yn'},
+  {id:35, text:"Were there any witnesses to the accident?",                                       type:'yn3'},
   {id:36, text:"Please provide the witness name and their contact information.",                   type:'fwit',skip:a=>a[35]==='No'},
   {id:37, text:"In your own words, please describe how the accident happened. Take your time.",          type:'narr'},
   {id:38, text:"Is there anything else you would like our claims team to know, or do you need any additional assistance?",          type:'yn'},
@@ -1374,7 +1375,18 @@ function loadModels(make, modelId){
   }
   const sel2 = document.getElementById(modelId);
   sel2.innerHTML='<option value="">Select model…</option>'+
-    models.map(m=>`<option value="${m}">${m}</option>`).join('');
+    models.map(m=>`<option value="${m}">${m}</option>`).join('')+
+    '<option value="__other__">Other / Not listed — type below</option>';
+  // Listen for "Other" selection — swap to text input
+  sel2.addEventListener('change', function(){
+    if(this.value==='__other__'){
+      const inp=document.createElement('input');
+      inp.className='fi'; inp.id=modelId; inp.type='text';
+      inp.placeholder='Type model name…';
+      this.parentNode.replaceChild(inp,this);
+      inp.focus();
+    }
+  });
 }
 
 // ── Speech to Text ──────────────────────────────────────
@@ -1837,6 +1849,8 @@ function submitID2(){
 async function lookupReturningDriver(driverID, name){
   S.prefill = {};
   S.returning = false;
+  // Clear stale VIN data so previous accident's vehicle doesn't bleed in
+  try{localStorage.removeItem('ccm_vin_v1');localStorage.removeItem('ccm_vin_v2');}catch(e){}
   if(!driverID) return;
   try{
     const controller = new AbortController();
@@ -2027,7 +2041,7 @@ function renderAns(q){
   const area=document.getElementById('ansArea');
   area.innerHTML='';
   ({
-    'yn':rYN,'og2':rOg,'og3':rOg,'vehicles':rVeh,'dd':rDD,'dir':rDir,
+    'yn':rYN,'yn3':rYN3,'og2':rOg,'og3':rOg,'vehicles':rVeh,'dd':rDD,'dir':rDir,
     'loc':rLoc,'dt':rDt,'txt':rTxt,'ta':rTa,'narr':rNarr,
     'photoprompt':rFPhotoPrompt,'ddAT':rDDAT,'fdriver':rFDriver,'fvehicle':rFVehicle,'fins':rFIns,
     'fotherdrv':rFOtherDrv,'fotherveh':rFOtherVeh,
@@ -2066,8 +2080,15 @@ function rYN(a,q){
     <button class="byn byn-n" onclick="ans(gQ(${q.id}),'No')">✗ No</button>
   </div><div class="vpreview" id="vhint"></div>`;
 }
+function rYN3(a,q){
+  a.innerHTML=`<div style="display:flex;gap:10px">
+    <button class="byn byn-y" style="flex:1" onclick="ans(gQ(${q.id}),'Yes')">✓ Yes</button>
+    <button class="byn byn-n" style="flex:1" onclick="ans(gQ(${q.id}),'No')">✗ No</button>
+    <button class="byn" style="flex:1;background:rgba(99,155,230,.08);border-color:rgba(99,155,230,.35);color:var(--blue)" onclick="ans(gQ(${q.id}),'Unsure')">? Unsure</button>
+  </div><div class="vpreview" id="vhint"></div>`;
+}
 function rOg(a,q){
-  const cls=q.type==='og3'?'og-3':'og-2';
+  const cls=q.type==='og4'?'og-4':q.type==='og3'?'og-3':'og-2';
   a.innerHTML=`<div class="og ${cls}">${q.opts.map(o=>`
     <button class="opt" onclick="ans(gQ(${q.id}),'${o.replace(/'/g,"\\'")}')">
       ${o}
@@ -2099,10 +2120,14 @@ function rDir(a,q){
   </div>
   <div class="or-sep">or type street name</div>
   ${inp('dirI','e.g. Main St heading toward…','text','data-v')}
-  <button class="btn btn-primary mt10" onclick="
-    const v=document.getElementById('dirI').value.trim();
-    if(v)ans(gQ(${q.id}),v);
-  ">Submit</button>`;
+  <div style="display:flex;gap:10px;margin-top:10px">
+    <button class="btn btn-primary" style="flex:1" onclick="
+      const v=document.getElementById('dirI').value.trim();
+      if(v)ans(gQ(${q.id}),v);
+    ">Submit</button>
+    <button style="flex:1;background:rgba(99,155,230,.08);border:1px solid rgba(99,155,230,.35);border-radius:var(--r8);padding:12px;color:var(--blue);font-size:13px;font-weight:700;cursor:pointer"
+      onclick="ans(gQ(${q.id}),'Unknown')">? Unknown</button>
+  </div>`;
 }
 function rLoc(a,q){
   a.innerHTML=`
@@ -2347,11 +2372,7 @@ function rFDriver(a,q){
 function rFVehicle(a,q){
   const isCo=S.identity.driverType==='employee'||S.identity.driverType==='family';
   const pf = S.prefill.vehicle || {};
-  // Check localStorage for VIN decode result
-  try{
-    const vinSaved = JSON.parse(localStorage.getItem('ccm_vin_v1')||'null');
-    if(vinSaved && !pf.make){ Object.assign(pf, vinSaved); }
-  }catch(e){}
+  // NOTE: ccm_vin_v1 is cleared on every new interview start — no stale bleed
   const hasPrefill = !!(pf.make || pf.year);
   const pfLabel = [pf.year, pf.make, pf.model].filter(Boolean).join(' ');
   const pfPlate = pf.plate ? ' | Plate: '+pf.plate : '';
@@ -2410,7 +2431,8 @@ function rFVehicle(a,q){
 function subVeh(qid){
   const y=document.getElementById('vY').value;
   const mk=document.getElementById('vMk').value;
-  const mo=document.getElementById('vMo').value||document.getElementById('vMo').options[document.getElementById('vMo').selectedIndex]?.text||'';
+  const vMoEl=document.getElementById('vMo');
+  const mo=vMoEl?(vMoEl.tagName==='INPUT'?vMoEl.value.trim():(vMoEl.value==='__other__'?'':vMoEl.value))||'':'';
   const cl=document.getElementById('vCl').value;
   const pl=document.getElementById('vPl').value.trim();
   const ps=document.getElementById('vPs').value;
@@ -2500,10 +2522,13 @@ function rFOtherDrv(a,q){
   const p1Phone = (p1OD.match(/Phone:\s*([^|]+)/i)||[])[1]?.trim() || '';
   a.innerHTML=`<div class="fcard">
     ${p1Name ? `<div style="background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.2);border-radius:var(--r8);padding:10px 13px;margin-bottom:12px;font-size:12px;color:var(--teal)">📋 Pre-filled from Phase 1</div>` : ''}
-    ${fg('Driver Name',`<div class="mic-wrap"><input class="fi" id="oN" type="text" placeholder="Full name" value="${p1Name}"><button class="mic-btn" onclick="startSTT('oN',this)" title="Tap to speak">🎤</button></div>`)}
-    ${fg('Phone / Contact',`<div class="mic-wrap"><input class="fi" id="oP" type="tel" placeholder="(555)-123-4567" value="${p1Phone}" oninput="formatPhone(this)"><button class="mic-btn" onclick="startSTT('oP',this)" title="Tap to speak">🎤</button></div>`)}
+    <div style="background:#fff8e6;border:1px solid #fcd34d;border-radius:var(--r8);padding:10px 14px;margin-bottom:14px;font-size:13px;color:#92400e">
+      ⚠️ Enter what is available. Tap <strong>Unknown</strong> next to any field you could not obtain.
+    </div>
+    ${fg('Driver Name',`<div style="display:flex;gap:8px;align-items:center"><div class="mic-wrap" style="flex:1"><input class="fi" id="oN" type="text" placeholder="Full name" value="${p1Name}"><button class="mic-btn" onclick="startSTT('oN',this)" title="Tap to speak">🎤</button></div><button onclick="document.getElementById('oN').value='Unknown'" style="background:#f3f4f6;border:1px solid #d1d5db;border-radius:var(--r8);padding:10px 12px;font-size:12px;font-weight:700;cursor:pointer;color:#555;white-space:nowrap;flex-shrink:0">Unknown</button></div>`)}
+    ${fg('Phone / Contact',`<div style="display:flex;gap:8px;align-items:center"><div class="mic-wrap" style="flex:1"><input class="fi" id="oP" type="tel" placeholder="(555)-123-4567" value="${p1Phone}" oninput="formatPhone(this)"><button class="mic-btn" onclick="startSTT('oP',this)" title="Tap to speak">🎤</button></div><button onclick="document.getElementById('oP').value='Unknown'" style="background:#f3f4f6;border:1px solid #d1d5db;border-radius:var(--r8);padding:10px 12px;font-size:12px;font-weight:700;cursor:pointer;color:#555;white-space:nowrap;flex-shrink:0">Unknown</button></div>`)}
     <div class="r2">
-      ${fg('License #',inp('oL','License #','text','data-v'))}
+      ${fg('License #',`<div style="display:flex;gap:6px;align-items:center"><input class="fi" id="oL" type="text" placeholder="License # or Unknown" style="flex:1"><button onclick="document.getElementById('oL').value='Unknown'" style="background:#f3f4f6;border:1px solid #d1d5db;border-radius:var(--r8);padding:10px 10px;font-size:11px;font-weight:700;cursor:pointer;color:#555;white-space:nowrap">?</button></div>`)}
       ${fg('State',sel(ST,'oS','State'))}
     </div>
     <div class="fg"><label class="fl">Other Driver's License Photo</label><label class="uzone" for="odLicFile" style="flex-direction:row;padding:13px;gap:10px"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg><div><p style="margin:0;font-size:14px;font-weight:700;color:var(--t0)">📷 Photograph Other Driver's License</p><p style="margin:2px 0 0;font-size:11px;color:var(--t1)">Photo or PDF accepted</p></div></label><input type="file" id="odLicFile" accept="image/*,application/pdf" class="hidden" onchange="addFiles(event,'Other Driver License')" capture="environment"><p id="odLicFileConfirm" style="display:none;color:var(--teal);font-size:12px;margin-top:6px">✓ Photo attached</p></div>
@@ -2597,11 +2622,17 @@ function rFDmg(a,q){
         </button>
       </div>
     </div>
-    <button class="btn btn-primary" onclick="
-      const d=document.getElementById('dmgD').value.trim();
-      const dr=window._drvSel||'Unknown';
-      ans(gQ(${q.id}),(d||'Not described')+' | Drivable: '+dr);
-    ">Submit</button>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-primary" style="flex:1" onclick="
+        const d=document.getElementById('dmgD').value.trim();
+        const dr=window._drvSel||'Unknown';
+        ans(gQ(${q.id}),(d||'Not described')+' | Drivable: '+dr);
+      ">Submit</button>
+      ${hasDmgPhotos ? `<button style="flex:1;background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.3);border-radius:var(--r8);padding:12px;color:var(--amber);font-size:13px;font-weight:700;cursor:pointer"
+        onclick="ans(gQ(${q.id}),'Damage photographed — see attachments | Drivable: '+(window._drvSel||'Unknown'))">
+        ⚠️ Photos Only
+      </button>` : ''}
+    </div>
   </div>`;
 }
 function rFOthDmg(a,q){
@@ -2931,24 +2962,33 @@ function rFCit(a,q){
         <option value="Other">Other / Not Listed</option>
       </select>
     </div>
-    ${fg('Violation',inp('ctV','e.g. Failure to yield, speeding…','text','data-v'))}
-    <button class="btn btn-primary" onclick="
-      const t=document.getElementById('ctT').value;
-      const v=document.getElementById('ctV').value.trim();
-      if(!t){alert('Please select who received the citation.');return;}
-      ans(gQ(${q.id}),'Issued to: '+(t||'N/A')+' | Violation: '+(v||'N/A'));
-    ">Submit</button>
+    ${fg('Violation',`<div style="display:flex;gap:8px;align-items:center"><input class="fi" id="ctV" type="text" placeholder="e.g. Failure to yield, speeding…" style="flex:1"><button onclick="document.getElementById('ctV').value='Unknown'" style="background:#f3f4f6;border:1px solid #d1d5db;border-radius:var(--r8);padding:10px 10px;font-size:11px;font-weight:700;cursor:pointer;color:#555;white-space:nowrap;flex-shrink:0">?</button></div>`)}
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" style="flex:1" onclick="
+        const t=document.getElementById('ctT').value;
+        const v=document.getElementById('ctV').value.trim();
+        if(!t){alert('Please select who received the citation.');return;}
+        ans(gQ(${q.id}),'Issued to: '+(t||'N/A')+' | Violation: '+(v||'Unknown'));
+      ">Submit</button>
+      <button style="flex:1;background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.3);border-radius:var(--r8);padding:12px;color:var(--amber);font-size:13px;font-weight:700;cursor:pointer"
+        onclick="ans(gQ(${q.id}),'Citation details unknown at scene')">⚠️ Unknown</button>
+    </div>
   </div>`;
 }
 function rFWit(a,q){
   a.innerHTML=`<div class="fcard">
     ${fg('Witness Full Name',inp('wN','Full name','text','data-v'))}
-    ${fg('Phone or Email',inp('wC','Contact information','text','data-v'))}
-    <button class="btn btn-primary" onclick="
-      const n=document.getElementById('wN').value.trim();
-      const c=document.getElementById('wC').value.trim();
-      ans(gQ(${q.id}),'Name: '+(n||'N/A')+' | Contact: '+(c||'N/A'));
-    ">Submit</button>
+    ${fg('Phone or Email',`<div style="display:flex;gap:8px;align-items:center"><input class="fi" id="wC" type="text" placeholder="Contact information" style="flex:1"><button onclick="document.getElementById('wC').value='Unknown'" style="background:#f3f4f6;border:1px solid #d1d5db;border-radius:var(--r8);padding:10px 10px;font-size:11px;font-weight:700;cursor:pointer;color:#555;white-space:nowrap;flex-shrink:0">?</button></div>`)}
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-primary" style="flex:1" onclick="
+        const n=document.getElementById('wN').value.trim();
+        const c=document.getElementById('wC').value.trim();
+        if(!n){alert('Please enter the witness name.');return;}
+        ans(gQ(${q.id}),'Name: '+(n||'N/A')+' | Contact: '+(c||'Unknown'));
+      ">Submit</button>
+      <button style="flex:1;background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.3);border-radius:var(--r8);padding:12px;color:var(--amber);font-size:13px;font-weight:700;cursor:pointer"
+        onclick="ans(gQ(${q.id}),'Witness contact information not obtained')">⚠️ No Contact Info</button>
+    </div>
   </div>`;
 }
 function rFContact(a,q){
@@ -3789,8 +3829,9 @@ async function submitReport(){
       }, 1000);
       // ── Send training assignment email (fire and forget) ──
       const _driverEmail = S.identity.email||'';
-      const _accType = S.ans[13]||'Unknown';
-      if(_driverEmail && _driverEmail.includes('@')){
+      const _accType = S.ans[13]||'';
+      console.log('[Training] driverEmail:', _driverEmail, '| accType:', _accType, '| claimNum:', S.claimNum);
+      if(_driverEmail && _driverEmail.includes('@') && S.claimNum){
         const _trainingUrl = window.location.origin+'/training?claim='+S.claimNum
           +'&type='+encodeURIComponent(_accType)
           +'&driver='+encodeURIComponent(S.identity.name||'')
@@ -3810,10 +3851,13 @@ async function submitReport(){
             refNum:      S.refNum||'',
             trainingUrl: _trainingUrl
           })
-        }).then(r=>r.json()).then(d=>{
-          if(d.success) console.log('Training assignment email sent to',_driverEmail);
-          else console.warn('Training email failed:',d);
-        }).catch(e=>console.warn('Training email error:',e));
+        }).then(r=>{ 
+          if(!r.ok) return r.text().then(t=>{ throw new Error('HTTP '+r.status+': '+t); });
+          return r.json(); 
+        }).then(d=>{
+          if(d.success) console.log('[Training] ✓ Email sent to',_driverEmail,'for claim',S.claimNum);
+          else console.error('[Training] ✗ API returned failure:',JSON.stringify(d));
+        }).catch(e=>console.error('[Training] ✗ Fetch error:',e.message));
       }
     } else {
       // ── Phase 2: Update existing DB record ──
