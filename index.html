@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant | Built: 2026-04-15 11:51 AM EDT -->
+<!-- CCM Accident Assistant | Built: 2026-04-16 08:23 AM EDT -->
 <!-- CCM Accident Assistant — Built: 2026-04-01 12:51 PM ET -->
 <!DOCTYPE html>
 <html lang="en">
@@ -2041,7 +2041,7 @@ function renderAns(q){
   const area=document.getElementById('ansArea');
   area.innerHTML='';
   ({
-    'yn':rYN,'yn3':rYN3,'og2':rOg,'og3':rOg,'vehicles':rVeh,'dd':rDD,'dir':rDir,
+    'yn':rYN,'yn3':rYN3,'og2':rOg,'og3':rOg,'og4':rOg,'vehicles':rVeh,'dd':rDD,'dir':rDir,
     'loc':rLoc,'dt':rDt,'txt':rTxt,'ta':rTa,'narr':rNarr,
     'photoprompt':rFPhotoPrompt,'ddAT':rDDAT,'fdriver':rFDriver,'fvehicle':rFVehicle,'fins':rFIns,
     'fotherdrv':rFOtherDrv,'fotherveh':rFOtherVeh,
@@ -2056,11 +2056,16 @@ function sel(o,id,ph='Select…'){
   return `<select class="fs" id="${id}"><option value="">${ph}</option>${o.map(x=>`<option value="${x}">${x}</option>`).join('')}</select>`;
 }
 function selAT(id,ph='Select accident type…'){
-  const groups=AT_GROUPS.map(g=>
-    `<optgroup label="${g.group}">`
-    +g.options.map(o=>`<option value="${o}">${o}</option>`).join('')
-    +'</optgroup>'
-  ).join('');
+  const solo = isSolo(S.ans);
+  // Groups only relevant to multi-vehicle accidents
+  const multiVehicleGroups = ['Collision — Multiple Vehicles'];
+  const groups=AT_GROUPS
+    .filter(g=> !solo || !multiVehicleGroups.includes(g.group))
+    .map(g=>
+      `<optgroup label="${g.group}">`
+      +g.options.map(o=>`<option value="${o}">${o}</option>`).join('')
+      +'</optgroup>'
+    ).join('');
   return `<select class="fs" id="${id}"><option value="">${ph}</option>${groups}</select>`;
 }
 function inp(id,ph='',type='text',extra=''){
@@ -2197,6 +2202,10 @@ function rNarr(a,q){
   </button>
   <p style="font-size:11px;color:var(--t2);text-align:center;margin-bottom:12px">Your words are added to the description above. Tap again to stop.</p>
   <button class="btn btn-primary" onclick="
+    // Stop any active dictation first
+    if(_narrRec){try{_narrRec.stop();}catch(e){} _narrRec=null;}
+    // Stop any TTS that's still reading the question
+    stopSpeak();
     const v=document.getElementById('narrI').value.trim();
     if(v)ans(gQ(${q.id}),v);
   ">Submit Description</button>`;
