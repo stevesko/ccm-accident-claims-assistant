@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant | Built: 2026-04-16 08:23 AM EDT -->
+<!-- CCM Accident Assistant | Built: 2026-04-16 10:05 AM EDT -->
 <!-- CCM Accident Assistant — Built: 2026-04-01 12:51 PM ET -->
 <!DOCTYPE html>
 <html lang="en">
@@ -3837,10 +3837,12 @@ async function submitReport(){
         speak('Phase 2 is optional but recommended. It includes vehicle details, insurance information, damage description, police report, and accident narrative. The more detail you provide, the faster your claim can be processed.');
       }, 1000);
       // ── Send training assignment email (fire and forget) ──
-      const _driverEmail = S.identity.email||'';
+      const _driverEmail = (S.identity.email && S.identity.email.includes('@'))
+        ? S.identity.email
+        : CLAIMS_EMAIL;  // fallback to CCM email if driver didn't provide one
       const _accType = S.ans[13]||'';
       console.log('[Training] driverEmail:', _driverEmail, '| accType:', _accType, '| claimNum:', S.claimNum);
-      if(_driverEmail && _driverEmail.includes('@') && S.claimNum){
+      if(_accType && S.claimNum){
         const _trainingUrl = window.location.origin+'/training?claim='+S.claimNum
           +'&type='+encodeURIComponent(_accType)
           +'&driver='+encodeURIComponent(S.identity.name||'')
