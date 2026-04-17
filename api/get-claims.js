@@ -61,9 +61,18 @@ export default async function handler(req, res) {
     const rawLimit = parseInt(query.limit) || 500;
     const limit    = isNaN(rawLimit) ? 500 : Math.min(rawLimit, 500);
     let result;
-    if(driverID){
+    const claimNumber = query.claimNumber || null;
+    const refFilter   = query.ref || null;
+
+    if(claimNumber){
+      // Phase 2 entry lookup — by claim number (+ optional ref for validation)
       result = await client.execute({
-        sql: 'SELECT id, ref_number, phase, submitted_at, company, driver_name, driver_id, driver_email, driver_phone, accident_type, location, date_time, injured, vehicles, status, payload FROM claims WHERE driver_id=? ORDER BY submitted_at DESC LIMIT ?',
+        sql: 'SELECT id, claim_number, ref_number, phase, submitted_at, company, driver_name, driver_id, driver_email, driver_phone, accident_type, location, date_time, injured, vehicles, status, payload FROM claims WHERE claim_number=? ORDER BY submitted_at DESC LIMIT 1',
+        args: [parseInt(claimNumber)]
+      });
+    } else if(driverID){
+      result = await client.execute({
+        sql: 'SELECT id, claim_number, ref_number, phase, submitted_at, company, driver_name, driver_id, driver_email, driver_phone, accident_type, location, date_time, injured, vehicles, status, payload FROM claims WHERE driver_id=? ORDER BY submitted_at DESC LIMIT ?',
         args: [driverID, limit]
       });
     } else {
