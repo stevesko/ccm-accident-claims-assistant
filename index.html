@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant | Built: 2026-04-16 10:05 AM EDT -->
+<!-- CCM Accident Assistant | Built: 2026-04-17 10:51 AM EDT -->
 <!-- CCM Accident Assistant — Built: 2026-04-01 12:51 PM ET -->
 <!DOCTYPE html>
 <html lang="en">
@@ -763,7 +763,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
       <label class="fl">Reference Number</label>
       <input class="fi" id="p2Ref" placeholder="e.g. CCM-2026-847291" type="text" style="margin-bottom:8px" oninput="tryAutoP2()">
       <p class="field-err" id="p2Err" style="display:none;margin-bottom:10px"></p>
-      <button class="btn btn-primary" onclick="submitPhase2Entry()" style="margin-bottom:10px">Continue to Phase 2 →</button>
+      <button class="btn btn-primary" id="p2SubmitBtn" onclick="submitPhase2Entry()" style="margin-bottom:10px">Continue to Phase 2 →</button>
       <div style="border-top:1px solid var(--bd0);padding-top:14px;margin-top:6px">
         <p style="font-size:12px;color:var(--t1);margin-bottom:10px">Can't find your numbers?</p>
         <div id="resendPhoneBlock" style="display:none;margin-bottom:10px">
@@ -4017,8 +4017,9 @@ function showPhase2Entry(){
   setTimeout(()=>{ speak('Welcome back. Please enter your Claim Number and Reference Number to continue your report.'); }, 350);
 }
 
-function submitPhase2Entry(){
-  const err      = document.getElementById('p2Err');
+async function submitPhase2Entry(){
+  const err = document.getElementById('p2Err');
+  const btn = document.getElementById('p2SubmitBtn');
   err.style.display='none';
   err.style.color='var(--red)';
   const claimNum = document.getElementById('p2ClaimNum').value.trim();
@@ -4027,56 +4028,91 @@ function submitPhase2Entry(){
   if(!claimNum){ err.textContent='Please enter your Claim Number.'; err.style.display='block'; return; }
   if(!ref){ err.textContent='Please enter your Reference Number.'; err.style.display='block'; return; }
 
+  if(btn){ btn.disabled=true; btn.textContent='Looking up claim…'; }
+
   try{
-    // Check if Phase 2 was already completed for this claim number
+    // ── STEP 1: Look up from database (works from any device/browser) ──
+    let restored = false;
     try{
-      const p2done = JSON.parse(localStorage.getItem('ccm_p2_complete_'+claimNum)||'null');
-      if(p2done){
-        err.style.color='var(--amber)';
-        err.innerHTML='<strong>Phase 2 Already Submitted</strong><br>'
-          +'Claim #'+p2done.claimNum+' was completed on '+p2done.completedAt+'.<br>'
-          +'If you believe this is an error, please contact Corporate Claims Management.';
+      const r = await fetch('/api/get-claims?claimNumber='+encodeURIComponent(claimNum)+'&ref='+encodeURIComponent(ref), {
+        signal: AbortSignal.timeout(6000)
+      });
+      if(r.ok){
+        const d = await r.json();
+        const claim = (d.claims||[])[0];
+        if(claim){
+          if((claim.ref_number||'').toUpperCase() !== ref){
+            err.textContent='Reference Number does not match. Please check and try again.';
+            err.style.display='block';
+            if(btn){btn.disabled=false;btn.textContent='Continue to Phase 2 →';}
+            return;
+          }
+          if((claim.phase||1) >= 2){
+            err.style.color='var(--amber)';
+            err.innerHTML='<strong>Phase 2 Already Submitted</strong><br>This claim has already been completed. Contact CCM if you believe this is an error.';
+            err.style.display='block';
+            if(btn){btn.disabled=false;btn.textContent='Continue to Phase 2 →';}
+            return;
+          }
+          const payload = JSON.parse(claim.payload||'{}');
+          S.identity = payload.identity || {
+            name:claim.driver_name||'', driverID:claim.driver_id||'',
+            email:claim.driver_email||'', phone:claim.driver_phone||'',
+            company:claim.company||'', driverType:claim.driver_type||''
+          };
+          S.ans    = payload.ans || {};
+          S.photos = [];
+          S.refNum   = claim.ref_number || ref;
+          S.claimNum = String(claim.claim_number || claimNum);
+          restored = true;
+        }
+      }
+    }catch(dbErr){
+      console.warn('DB lookup failed, falling back to localStorage:', dbErr.message);
+    }
+
+    // ── STEP 2: Fall back to localStorage (same device as Phase 1) ──
+    if(!restored){
+      const saved = JSON.parse(localStorage.getItem('ccm_p1_ans')||'null');
+      if(!saved){
+        err.textContent='Claim not found. Please verify your Claim Number and Reference Number, or contact CCM for assistance.';
         err.style.display='block';
+        if(btn){btn.disabled=false;btn.textContent='Continue to Phase 2 →';}
         return;
       }
-    }catch(e){}
+      if(ref !== (saved.ref||'').toUpperCase()){
+        err.textContent='Reference Number does not match. Please check and try again.';
+        err.style.display='block';
+        if(btn){btn.disabled=false;btn.textContent='Continue to Phase 2 →';}
+        return;
+      }
+      const savedClaim=String(saved.claimNum||'').trim();
+      if(savedClaim && savedClaim!=='Pending...' && claimNum!==savedClaim){
+        err.textContent='Claim Number does not match. Please check and try again.';
+        err.style.display='block';
+        if(btn){btn.disabled=false;btn.textContent='Continue to Phase 2 →';}
+        return;
+      }
+      S.identity = {...(saved.identity||{})};
+      S.ans      = saved.ans||{};
+      S.photos   = (saved.photos||[]).map(p=>({...p, url:''}));
+      S.refNum   = saved.ref||'';
+      S.claimNum = saved.claimNum||claimNum;
+    }
 
-    const saved=JSON.parse(localStorage.getItem('ccm_p1_ans')||'null');
-    if(!saved){
-      err.textContent='No saved report found on this device. Please tap "Text to my phone number" below.';
-      err.style.display='block'; return;
-    }
-    if(ref !== (saved.ref||'').toUpperCase()){
-      err.textContent='Reference Number does not match. Please check and try again.';
-      err.style.display='block'; return;
-    }
-    // Allow claimNum match or if pending
-    const savedClaim=String(saved.claimNum||'').trim();
-    if(savedClaim && savedClaim!=='Pending...' && claimNum!==savedClaim){
-      err.textContent='Claim Number does not match. Please check and try again.';
-      err.style.display='block'; return;
-    }
-
-    // Verified — restore Phase 1 state
-    S.identity   = {...(saved.identity||{})};
-    S.ans        = saved.ans||{};
-    S.photos     = (saved.photos||[]).map(p=>({...p, url:''}));
-    S.refNum     = saved.ref||'';
-    S.claimNum   = saved.claimNum||claimNum;
-    S.phase      = 2;
-    S.idx        = 0;
-    S.paused     = false;
-    S.airbags    = [];
-    S.injSel     = {};
-    S.contactMethod='';
+    // ── STEP 3: Start Phase 2 ──
+    S.phase=2; S.idx=0; S.paused=false; S.airbags=[]; S.injSel={}; S.contactMethod='';
     document.getElementById('progBar').classList.add('show');
     document.getElementById('cbar').classList.add('show');
     document.getElementById('pauseBtn').classList.remove('hidden');
     initVoice();
-    speak('Welcome back. We have your information on file. Let us continue with the remaining details of your report.', ()=>{ goToQ(0); });
+    speak('Welcome back. We have your Phase 1 information on file. Let us continue with the remaining details of your accident report.', ()=>{ goToQ(0); });
+
   }catch(e){
+    console.error('Phase 2 entry error:', e);
     err.textContent='An error occurred. Please contact CCM for assistance.';
     err.style.display='block';
+    if(btn){btn.disabled=false;btn.textContent='Continue to Phase 2 →';}
   }
 }
 
