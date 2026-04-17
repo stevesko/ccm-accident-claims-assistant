@@ -1,8 +1,7 @@
 {
   "version": 2,
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/dashboard", "dest": "/dashboard.html" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    { "src": "/training", "dest": "/training.html" }
   ]
 }
