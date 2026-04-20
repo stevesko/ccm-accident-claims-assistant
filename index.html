@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant | Built: 2026-04-17 11:47 AM EDT -->
+<!-- CCM Accident Assistant | Built: 2026-04-19 10:17 AM EDT -->
 <!-- CCM Accident Assistant — Built: 2026-04-01 12:51 PM ET -->
 <!DOCTYPE html>
 <html lang="en">
@@ -3356,9 +3356,19 @@ function closeM(id){document.getElementById(id).classList.remove('on');}
    SUMMARY & EXPORT
 ───────────────────────────────── */
 const SECS_P1=[
-  {t:'Incident Overview',   ids:[2,4,8,9,13]},
-  {t:'Other Driver',        ids:[21]},
-  {t:'Scene Actions',       ids:[29,31]},
+  {t:'Incident Overview',        ids:[2,4,8,9,13]},
+  {t:'Passengers & Injuries',    ids:[3,5,6]},
+  {t:'Scene Conditions',         ids:[14,10,11,12,15]},
+  {t:'Your Vehicle',             ids:[17,19]},
+  {t:'Your Information',         ids:[16,20]},
+  {t:'Other Driver & Vehicle',   ids:[21,22,23]},
+  {t:'Vehicle Damage',           ids:[24,25,26,251,252]},
+  {t:'Airbags',                  ids:[27,28]},
+  {t:'Tow & Recovery',           ids:[29,30,291,301]},
+  {t:'Law Enforcement',          ids:[31,32,33,34]},
+  {t:'Witnesses',                ids:[35,36]},
+  {t:'Accident Narrative',       ids:[37]},
+  {t:'Follow-Up',                ids:[38,39]},
 ];
 const SECS_P2=[
   {t:'Injuries',                   ids:[5,6]},
@@ -3553,153 +3563,252 @@ function dlCSV(){
 function buildHTMLReport(name, company, driverID, isFamilyDrv, phaseLabel, now){
   const claimNum = S.claimNum || S.refNum || 'Pending';
   const refNum   = S.refNum   || 'N/A';
+  const isP1     = S.phase === 1;
 
-  // Build sections HTML
-  const activeSecs = S.phase===1 ? SECS_P1 : SECS_P2;
+  // ── Severity badge ──────────────────────────────────────────
+  const injured   = S.ans[4];
+  const towed     = S.ans[29];
+  const accType   = S.ans[13] || '';
+  const highSeverity = injured === 'Yes' || accType.toLowerCase().includes('rollover') || accType.toLowerCase().includes('head-on');
+  const medSeverity  = !highSeverity && (towed === 'Yes' || accType.toLowerCase().includes('lost control'));
+  const severityColor = highSeverity ? '#b91c1c' : medSeverity ? '#92400e' : '#1e7e3e';
+  const severityBg    = highSeverity ? '#fef2f2' : medSeverity ? '#fffbeb' : '#eaf6ee';
+  const severityLabel = highSeverity ? '⚠ HIGH SEVERITY' : medSeverity ? '● MODERATE' : '✓ STANDARD';
+
+  // ── Helper: clean answer display ───────────────────────────
+  function fmtAns(a){
+    if(!a) return '—';
+    // If pipe-delimited, convert to readable list
+    if(a.includes(' | ')){
+      return a.split(' | ').map(part => {
+        const [k,v] = part.split(/:\s*(.*)/s);
+        if(v !== undefined) return `<span style="color:#777;font-size:11px">${k}:</span> <strong>${v}</strong>`;
+        return part;
+      }).join('<br>');
+    }
+    return a;
+  }
+
+  // ── Build section rows ──────────────────────────────────────
+  const activeSecs = isP1 ? SECS_P1 : SECS_P2;
   let sectionsHTML = '';
-  activeSecs.forEach(sec=>{
-    const rows = sec.ids.map(id=>{
-      const q = Qs.find(x=>x.id===id);
+  let hasContent = false;
+
+  activeSecs.forEach((sec, si) => {
+    const rows = sec.ids.map(id => {
+      const q = Qs.find(x => x.id === id);
       const a = S.ans[id];
-      if(!q||!a||a==='Skipped') return '';
-      const qText = typeof q.text==='function' ? q.text() : q.text;
+      if(!q || !a || a === 'Skipped') return '';
+      const qText = typeof q.text === 'function' ? q.text() : q.text;
+      // Shorten long question text for email
+      const shortQ = qText.length > 60 ? qText.slice(0,57)+'…' : qText;
       return `<tr>
-        <td style="padding:10px 14px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;width:40%;vertical-align:top">${qText}</td>
-        <td style="padding:10px 14px;font-size:13px;color:#1a1a2e;border-bottom:1px solid #f0f0f0;font-weight:500">${a}</td>
+        <td style="padding:9px 16px;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0;width:38%;vertical-align:top;line-height:1.4">${shortQ}</td>
+        <td style="padding:9px 16px;font-size:13px;color:#1a2333;border-bottom:1px solid #f0f0f0;font-weight:500;vertical-align:top;line-height:1.5">${fmtAns(a)}</td>
       </tr>`;
     }).filter(Boolean).join('');
     if(!rows) return;
+    hasContent = true;
+    const sectionBg = si % 2 === 0 ? '#f8f9fc' : '#f2f4f8';
     sectionsHTML += `
-      <tr><td colspan="2" style="padding:14px 14px 6px;background:#f8f9fc">
-        <span style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#2F3744">${sec.t}</span>
+      <tr><td colspan="2" style="padding:12px 16px 6px;background:${sectionBg};border-top:2px solid #e2e6ef">
+        <span style="font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#1a2333">${sec.t}</span>
       </td></tr>
       ${rows}`;
   });
 
-  // Attachments
-  let attachHTML = '';
+  // ── Attachments ─────────────────────────────────────────────
+  let attachRows = '';
   if(S.photos.length){
-    const cats=['Driver License','Insurance Card','Other Driver License','Other Driver Insurance',
-                'Vehicle 1 VIN','Vehicle 2 VIN','Police Report','Vehicle Damage - Yours','Accident Scene'];
-    const rows = cats.map(cat=>{
-      const files = S.photos.filter(p=>(p.category||'Accident Scene')===cat);
-      if(!files.length) return '';
-      const links = files.map(p=>p.blobUrl
-        ? `<a href="${p.blobUrl}" style="color:#2F3744;font-weight:700;text-decoration:none;background:#D6DCE4;padding:3px 10px;border-radius:4px;font-size:12px" target="_blank">View Photo</a>`
-        : `<span style="color:#888;font-size:12px">${p.name} (uploading...)</span>`
-      ).join(' &nbsp; ');
-      return `<tr>
-        <td style="padding:8px 14px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;width:40%;vertical-align:middle">${cat}</td>
-        <td style="padding:8px 14px;border-bottom:1px solid #f0f0f0">${links}</td>
+    const catOrder = [
+      'Driver License','Insurance Card',
+      'Other Driver License','Other Driver Insurance',
+      'Vehicle 1 VIN','Vehicle 2 VIN',
+      'Police Report',
+      'Vehicle Damage - Yours','Vehicle Damage - Other','Accident Scene'
+    ];
+    const catLabels = {
+      'Driver License':          'Driver License',
+      'Insurance Card':          'Your Insurance Card',
+      'Other Driver License':    'Other Driver License',
+      'Other Driver Insurance':  'Other Driver Insurance',
+      'Vehicle 1 VIN':           'Your Vehicle VIN',
+      'Vehicle 2 VIN':           'Other Vehicle VIN',
+      'Police Report':           'Police Report',
+      'Vehicle Damage - Yours':  'Your Vehicle Damage',
+      'Vehicle Damage - Other':  'Other Vehicle Damage',
+      'Accident Scene':          'Accident Scene',
+    };
+    catOrder.forEach(cat => {
+      const files = S.photos.filter(p => (p.category||'Accident Scene') === cat);
+      if(!files.length) return;
+      const links = files.map((p,i) => p.blobUrl
+        ? `<a href="${p.blobUrl}" style="display:inline-block;margin:2px 4px 2px 0;background:#1a2333;color:#fff;font-size:11px;font-weight:700;padding:4px 12px;border-radius:4px;text-decoration:none" target="_blank">View ${i>0?'#'+(i+1):''}</a>`
+        : `<span style="font-size:11px;color:#999;font-style:italic">uploading…</span>`
+      ).join('');
+      attachRows += `<tr>
+        <td style="padding:8px 16px;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0;vertical-align:middle">${catLabels[cat]||cat}</td>
+        <td style="padding:8px 16px;border-bottom:1px solid #f0f0f0;vertical-align:middle">${links}</td>
       </tr>`;
-    }).filter(Boolean).join('');
-    const other = S.photos.filter(p=>!cats.includes(p.category||'Accident Scene'));
-    const otherRow = other.length ? `<tr>
-      <td style="padding:8px 14px;font-size:13px;color:#555">Other</td>
-      <td style="padding:8px 14px">${other.map(p=>p.blobUrl
-        ? `<a href="${p.blobUrl}" style="color:#2F3744;font-weight:700;text-decoration:none;background:#D6DCE4;padding:3px 10px;border-radius:4px;font-size:12px" target="_blank">View Photo</a>`
-        : p.name).join(' &nbsp; ')}</td>
-    </tr>` : '';
-    if(rows||otherRow){
-      attachHTML = `
-        <tr><td colspan="2" style="padding:14px 14px 6px;background:#f8f9fc">
-          <span style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#2F3744">Attachments (${S.photos.length} file${S.photos.length!==1?'s':''})</span>
-        </td></tr>
-        ${rows}${otherRow}`;
+    });
+    // Any uncategorised
+    const other = S.photos.filter(p=>!catOrder.includes(p.category||'Accident Scene'));
+    if(other.length){
+      attachRows += `<tr>
+        <td style="padding:8px 16px;font-size:12px;color:#666;border-bottom:1px solid #f0f0f0">Other</td>
+        <td style="padding:8px 16px;border-bottom:1px solid #f0f0f0">${other.map((p,i)=>p.blobUrl?`<a href="${p.blobUrl}" style="display:inline-block;margin:2px 4px 2px 0;background:#1a2333;color:#fff;font-size:11px;font-weight:700;padding:4px 12px;border-radius:4px;text-decoration:none" target="_blank">View ${i>0?'#'+(i+1):''}</a>`:'<span style="font-size:11px;color:#999;font-style:italic">uploading…</span>').join('')}</td>
+      </tr>`;
     }
   }
+  const attachSection = attachRows ? `
+    <tr><td colspan="2" style="padding:12px 16px 6px;background:#f0f4f8;border-top:2px solid #e2e6ef">
+      <span style="font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#1a2333">
+        📎 Attachments (${S.photos.length} file${S.photos.length!==1?'s':''})
+      </span>
+    </td></tr>
+    ${attachRows}` : '';
 
-  // Driver info rows
-  let driverRows = `
-    <tr><td style="padding:8px 14px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0;width:40%">Name</td>
-        <td style="padding:8px 14px;font-size:13px;color:#1a1a2e;border-bottom:1px solid #f0f0f0;font-weight:500">${name}</td></tr>`;
-  if(isFamilyDrv){
-    driverRows += `
-    <tr><td style="padding:8px 14px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0">Driver Type</td>
-        <td style="padding:8px 14px;font-size:13px;color:#1a1a2e;border-bottom:1px solid #f0f0f0">Family Member / Authorized Driver</td></tr>
-    <tr><td style="padding:8px 14px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0">Relationship</td>
-        <td style="padding:8px 14px;font-size:13px;color:#1a1a2e;border-bottom:1px solid #f0f0f0">${S.identity.relationship||'N/A'}</td></tr>
-    <tr><td style="padding:8px 14px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0">Assigned Employee</td>
-        <td style="padding:8px 14px;font-size:13px;color:#1a1a2e;border-bottom:1px solid #f0f0f0">${S.identity.employeeName||'N/A'} (${S.identity.employeeID||'N/A'})</td></tr>`;
-  } else {
-    driverRows += `
-    <tr><td style="padding:8px 14px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0">Driver ID</td>
-        <td style="padding:8px 14px;font-size:13px;color:#1a1a2e;border-bottom:1px solid #f0f0f0;font-weight:500">${driverID}</td></tr>`;
+  // ── Driver rows ──────────────────────────────────────────────
+  function dRow(label, val){
+    return `<tr>
+      <td style="padding:8px 16px;font-size:12px;color:#888;border-bottom:1px solid #eef0f5;width:38%">${label}</td>
+      <td style="padding:8px 16px;font-size:13px;color:#1a2333;border-bottom:1px solid #eef0f5;font-weight:600">${val||'—'}</td>
+    </tr>`;
   }
-  driverRows += `
-    <tr><td style="padding:8px 14px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0">Company</td>
-        <td style="padding:8px 14px;font-size:13px;color:#1a1a2e;border-bottom:1px solid #f0f0f0;font-weight:500">${company}</td></tr>
-    <tr><td style="padding:8px 14px;font-size:13px;color:#555;border-bottom:1px solid #f0f0f0">Phone</td>
-        <td style="padding:8px 14px;font-size:13px;color:#1a1a2e;border-bottom:1px solid #f0f0f0">${S.identity.phone||'N/A'}</td></tr>
-    <tr><td style="padding:8px 14px;font-size:13px;color:#555">Email</td>
-        <td style="padding:8px 14px;font-size:13px;color:#1a1a2e">${S.identity.email||'N/A'}</td></tr>`;
+  let driverRows = dRow('Driver Name', name);
+  if(isFamilyDrv){
+    driverRows += dRow('Driver Type','Family Member / Authorized Driver');
+    driverRows += dRow('Relationship', S.identity.relationship||'');
+    driverRows += dRow('Assigned Employee', (S.identity.employeeName||'')+(S.identity.employeeID?' ('+S.identity.employeeID+')':''));
+  } else {
+    driverRows += dRow('Driver ID', driverID);
+  }
+  driverRows += dRow('Company', company);
+  driverRows += dRow('Phone', S.identity.phone||'');
+  driverRows += dRow('Email', S.identity.email||'');
+
+  // ── Quick-facts strip ────────────────────────────────────────
+  function qfCell(label, val, highlight){
+    return `<td style="padding:14px 18px;border-right:1px solid #dde1e8;text-align:left;vertical-align:top">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:${highlight?'#b91c1c':'#666'};margin-bottom:4px">${label}</div>
+      <div style="font-size:15px;font-weight:800;color:${highlight?'#b91c1c':'#1a2333'}">${val||'—'}</div>
+    </td>`;
+  }
+
+  const location    = S.ans[8]  || '—';
+  const accDateTime = S.ans[9]  || '—';
+  const injuredAns  = S.ans[4]  || '—';
+  const towedAns    = S.ans[29] || '—';
 
   return `<!DOCTYPE html>
-<html><head><meta charset="UTF-8">
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CCM Accident Report — Claim ${claimNum}</title>
 <style>
-  body{margin:0;padding:0;background:#eef0f5;font-family:Arial,Helvetica,sans-serif}
-  .wrap{max-width:680px;margin:24px auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.12)}
-  table{width:100%;border-collapse:collapse}
+  body{margin:0;padding:20px;background:#eef0f5;font-family:Arial,Helvetica,sans-serif}
+  @media print{body{padding:0;background:#fff} .wrap{box-shadow:none!important;border-radius:0!important}}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap" style="max-width:680px;margin:0 auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,.12)">
 
-  <!-- Header -->
-  <table><tr>
-    <td style="background:#2F3744;padding:24px 28px">
-      <div style="font-size:22px;font-weight:800;color:#C4A77D;letter-spacing:.04em">CCM</div>
-      <div style="font-size:13px;color:rgba(255,255,255,.7);margin-top:2px">Corporate Claims Management</div>
-    </td>
-    <td style="background:#2F3744;padding:24px 28px;text-align:right;vertical-align:top">
-      <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#C4A77D">First Notice of Loss</div>
-      <div style="font-size:16px;font-weight:800;color:#fff;margin-top:4px">${phaseLabel}</div>
-    </td>
-  </tr></table>
+  <!-- ═══ HEADER ═══ -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#1a2333">
+    <tr>
+      <td style="padding:22px 24px">
+        <div style="font-size:24px;font-weight:800;color:#C4A77D;letter-spacing:.06em">CCM</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.6);margin-top:2px;letter-spacing:.04em">Corporate Claims Management</div>
+      </td>
+      <td style="padding:22px 24px;text-align:right;vertical-align:middle">
+        <div style="display:inline-block;background:${severityBg};border:1.5px solid ${severityColor};border-radius:5px;padding:6px 14px">
+          <div style="font-size:11px;font-weight:800;color:${severityColor};letter-spacing:.1em">${severityLabel}</div>
+        </div>
+        <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:8px">${phaseLabel}</div>
+      </td>
+    </tr>
+  </table>
 
-  <!-- Claim Reference Banner -->
-  <table style="background:#D6DCE4"><tr>
-    <td style="padding:14px 28px">
-      <table><tr>
-        <td style="padding-right:32px">
-          <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#2F3744;opacity:.7">Claim Number</div>
-          <div style="font-size:20px;font-weight:800;color:#2F3744;margin-top:2px">${claimNum}</div>
-        </td>
-        <td style="padding-right:32px">
-          <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#2F3744;opacity:.7">Reference Number</div>
-          <div style="font-size:15px;font-weight:700;color:#2F3744;margin-top:2px">${refNum}</div>
-        </td>
-        <td>
-          <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#2F3744;opacity:.7">Report Generated</div>
-          <div style="font-size:13px;font-weight:600;color:#2F3744;margin-top:2px">${now}</div>
-        </td>
-      </tr></table>
-    </td>
-  </tr></table>
+  <!-- ═══ CLAIM REFERENCE STRIP ═══ -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#C4A77D">
+    <tr>
+      <td style="padding:14px 24px">
+        <table cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="padding-right:36px;vertical-align:top">
+              <div style="font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,0,0,.5)">Claim Number</div>
+              <div style="font-size:24px;font-weight:800;color:#1a2333;margin-top:2px;letter-spacing:.04em">${claimNum}</div>
+            </td>
+            <td style="padding-right:36px;vertical-align:top">
+              <div style="font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,0,0,.5)">Reference</div>
+              <div style="font-size:15px;font-weight:700;color:#1a2333;margin-top:5px">${refNum}</div>
+            </td>
+            <td style="vertical-align:top">
+              <div style="font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,0,0,.5)">Submitted</div>
+              <div style="font-size:12px;font-weight:600;color:#1a2333;margin-top:5px">${now}</div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 
-  <!-- Driver Section -->
-  <table>
-    <tr><td colspan="2" style="padding:14px 14px 6px;background:#2F3744">
-      <span style="font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#C4A77D">Driver / Claimant</span>
+  <!-- ═══ QUICK FACTS ═══ -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="border-bottom:2px solid #e2e6ef">
+    <tr>
+      ${qfCell('Accident Type', accType)}
+      ${qfCell('Date / Time', accDateTime)}
+      ${qfCell('Injuries', injuredAns, injuredAns==='Yes')}
+      ${qfCell('Vehicle Towed', towedAns, towedAns==='Yes')}
+    </tr>
+  </table>
+
+  <!-- ═══ LOCATION BAR ═══ -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fc;border-bottom:1px solid #e2e6ef">
+    <tr>
+      <td style="padding:10px 18px;font-size:12px">
+        <span style="font-weight:800;color:#1a2333;letter-spacing:.06em;text-transform:uppercase;font-size:10px">📍 Location: </span>
+        <span style="color:#444;font-weight:500">${location}</span>
+      </td>
+    </tr>
+  </table>
+
+  <!-- ═══ DRIVER / CLAIMANT ═══ -->
+  <table width="100%" cellpadding="0" cellspacing="0">
+    <tr><td colspan="2" style="padding:12px 16px 6px;background:#1a2333">
+      <span style="font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#C4A77D">Driver / Claimant</span>
     </td></tr>
     ${driverRows}
   </table>
 
-  <!-- Report Sections -->
-  <table>
+  <!-- ═══ REPORT SECTIONS ═══ -->
+  <table width="100%" cellpadding="0" cellspacing="0">
     ${sectionsHTML}
-    ${attachHTML}
+    ${attachSection}
   </table>
 
-  <!-- Footer -->
-  <table><tr><td style="background:#2F3744;padding:18px 28px;text-align:center">
-    <div style="font-size:11px;color:rgba(255,255,255,.6)">Submitted via CCM Accident Assistant &nbsp;|&nbsp; ${now}</div>
-    <div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:4px">Questions: sskoletsky@ccmservices.com</div>
-  </td></tr></table>
+  <!-- ═══ ACTION FOOTER ═══ -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8f9fc;border-top:2px solid #e2e6ef">
+    <tr>
+      <td style="padding:16px 24px">
+        <div style="font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#1a2333;margin-bottom:8px">Next Steps</div>
+        <div style="font-size:12px;color:#555;line-height:1.7">
+          ${isP1
+            ? '• Contact driver to verify details and request Phase 2 completion<br>• Review any photos attached above<br>• Open claim file in FC2 and assign adjuster'
+            : '• Review full damage description and narrative above<br>• Confirm police report and citation details<br>• Proceed with adjuster assignment and liability assessment'}
+        </div>
+      </td>
+      <td style="padding:16px 24px;text-align:right;vertical-align:middle">
+        <div style="font-size:10px;color:#999">CCM Accident Assistant</div>
+        <div style="font-size:10px;color:#999;margin-top:2px">sskoletsky@ccmservices.com</div>
+        ${isP1 ? '<div style="margin-top:8px;font-size:10px;color:#e8472a;font-weight:700">⚠ Phase 2 not yet submitted</div>' : '<div style="margin-top:8px;font-size:10px;color:#1e7e3e;font-weight:700">✓ Phase 2 complete</div>'}
+      </td>
+    </tr>
+  </table>
 
 </div>
 </body></html>`;
 }
+
 
 async function submitReport(){
   const btn=document.getElementById('submitBtn');
