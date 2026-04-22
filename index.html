@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant | Built: 2026-04-22 07:39 AM EDT -->
+<!-- CCM Accident Assistant | Built: 2026-04-22 08:16 AM EDT -->
 <!-- CCM Accident Assistant — Built: 2026-04-01 12:51 PM ET -->
 <!DOCTYPE html>
 <html lang="en">
@@ -3969,16 +3969,24 @@ async function submitReport(){
           text:    'Accident report for '+name+' | Claim: '+S.claimNum+' | Ref: '+S.refNum
         })
       });
-      const emailData = await emailResp.json();
-      if(!emailResp.ok) throw new Error(emailData.detail||emailData.error||'SendGrid error '+emailResp.status);
-      console.log('CCM email sent via SendGrid to:', CLAIMS_EMAIL);
+      const emailData = await emailResp.json().catch(()=>({}));
+      if(!emailResp.ok){
+        const errDetail = emailData.detail||emailData.error||'HTTP '+emailResp.status;
+        console.error('[Email] SendGrid FAILED — status:',emailResp.status,'detail:',errDetail,'full:',JSON.stringify(emailData));
+        throw new Error(errDetail);
+      }
+      console.log('[Email] ✓ SendGrid HTML email sent to:', CLAIMS_EMAIL);
     }catch(emailErr){
-      // Fallback to EmailJS if SendGrid fails
-      console.warn('SendGrid failed, falling back to EmailJS:', emailErr.message);
-      await emailjs.send('service_lefri76','template_g91f9a7',{
-        driver_name: name, driver_id: driverID, company: company,
-        date: date, report: report.slice(0,3000), to_email: CLAIMS_EMAIL, subject: emailSubject,
-      });
+      console.error('[Email] ✗ SendGrid error:', emailErr.message);
+      try{
+        await emailjs.send('service_lefri76','template_g91f9a7',{
+          driver_name: name, driver_id: driverID, company: company,
+          date: date, report: report.slice(0,3000), to_email: CLAIMS_EMAIL, subject: emailSubject,
+        });
+        console.warn('[Email] Fell back to EmailJS plain text');
+      }catch(ejErr){
+        console.error('[Email] EmailJS also failed:', ejErr.message);
+      }
     }
 
     // ── STEP 3: Send driver confirmation WITH claim number ──
