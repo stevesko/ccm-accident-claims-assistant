@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant | Built: 2026-04-19 10:17 AM EDT -->
+<!-- CCM Accident Assistant | Built: 2026-04-22 07:39 AM EDT -->
 <!-- CCM Accident Assistant — Built: 2026-04-01 12:51 PM ET -->
 <!DOCTYPE html>
 <html lang="en">
@@ -1075,8 +1075,8 @@ const Qs=[
   {id:2,  text:"How many vehicles were involved?",                type:'vehicles'},
   {id:3,  text:"Were there any passengers in any of the vehicles?",                      type:'yn3', skip:a=>isCriminalType(a)},
   {id:4,  text:"Was anyone injured?",                                             type:'yn3'},
-  {id:5,  text:"Select who was injured in each vehicle.",                         type:'injsel',  skip:a=>a[4]==='No'},
-  {id:6,  text:"Please provide the name and injury details for each person who was injured.",         type:'injdet',  skip:a=>a[4]==='No'},
+  {id:5,  text:"Select who was injured in each vehicle.",                         type:'injsel',  skip:a=>a[4]!=='Yes'},
+  {id:6,  text:"Please provide the name and injury details for each person who was injured.",         type:'injdet',  skip:a=>a[4]!=='Yes'},
   // Q7 removed — hospitalization captured in injury detail form (hospital transport radio buttons)
   {id:8,  text:"Where did the accident take place?",                                   type:'loc'},
   {id:9,  text:"What was the date and time of the accident? If it just happened, you can use today's date.",                     type:'dt'},
@@ -1118,17 +1118,17 @@ const Qs=[
   {id:251, text:"Was there any damage to property — such as a fence, guardrail, or building?", type:'yn', skip:a=>isCriminalType(a)},
   {id:252, text:'Please describe the property that was damaged and the extent of the damage.', type:'fpropdmg', skip:a=>a[251]!=='Yes'},
   {id:27, text:"Did any airbags deploy during the accident?",                                         type:'yn3', skip:a=>isNoImpactType(a)||isEnvironmentalType(a)},
-  {id:28, text:"Please select which vehicles had airbags deploy.",                       type:'airbags',skip:a=>a[27]==='No'},
+  {id:28, text:"Please select which vehicles had airbags deploy.",                       type:'airbags',skip:a=>a[27]!=='Yes'},
   {id:29, text:"Does your vehicle need to be towed from the scene?",                             type:'yn3'},
-  {id:30, text:"Please provide the tow company name and where your vehicle is being taken.",                   type:'ftow',skip:a=>a[29]==='No'},
+  {id:30, text:"Please provide the tow company name and where your vehicle is being taken.",                   type:'ftow',skip:a=>a[29]!=='Yes'},
   {id:291,text:()=>{ const n=parseInt(S.ans[2])||1; return n>=3?'Do any of the other vehicles need to be towed?':'Does the other vehicle need to be towed?'; }, type:'yn3', skip:a=>isSolo(a)},
   {id:301,text:"Please provide the tow details for the other vehicle.",                        type:'ftoword',skip:a=>a[291]!=='Yes'||isSolo(a)},
   {id:31, text:"Was a police report filed at the scene?",                                      type:'fpolcheck'},
   {id:32, text:"Please provide the police report details.",                                  type:'fpol',skip:a=>a[31]==='No'},
   {id:33, text:"Was a citation or ticket issued at the scene?",                             type:'yn3', skip:a=>isCriminalType(a)||isEnvironmentalType(a)},
-  {id:34, text:"Please provide the citation details.",                                       type:'fcit',skip:a=>a[33]==='No'},
+  {id:34, text:"Please provide the citation details.",                                       type:'fcit',skip:a=>a[33]!=='Yes'},
   {id:35, text:"Were there any witnesses to the accident?",                                       type:'yn3'},
-  {id:36, text:"Please provide the witness name and their contact information.",                   type:'fwit',skip:a=>a[35]==='No'},
+  {id:36, text:"Please provide the witness name and their contact information.",                   type:'fwit',skip:a=>a[35]!=='Yes'},
   {id:37, text:"In your own words, please describe how the accident happened. Take your time.",          type:'narr'},
   {id:38, text:"Is there anything else you would like our claims team to know, or do you need any additional assistance?",          type:'yn'},
   {id:39, text:"How would you prefer that we contact you for follow-up on this claim?",         type:'fcontact'},
@@ -4104,7 +4104,7 @@ function closeScrLater(){
   try{ window.close(); }catch(e){}
   // Fallback: return to welcome screen so driver isn't stranded
   setTimeout(()=>{
-    show('scrWelcome');
+    show('scrStart');
   }, 150);
 }
 function showPhase2Later(){
