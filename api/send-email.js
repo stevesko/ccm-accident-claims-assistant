@@ -1,4 +1,4 @@
-// CCM Accident Assistant | Built: 2026-04-22 07:50 AM EDT
+// CCM Accident Assistant | Built: 2026-04-27 08:42 AM EDT
 /**
  * CCM Accident Assistant — Send Email API
  * POST /api/send-email

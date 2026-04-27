@@ -1,3 +1,4 @@
+// CCM Accident Assistant | Built: 2026-04-27 08:42 AM EDT
 /**
  * CCM SafeDriver — Send Training Assignment API
  * POST /api/send-training
