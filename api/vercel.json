@@ -1,7 +1,0 @@
-{
-  "version": 2,
-  "routes": [
-    { "src": "/dashboard", "dest": "/dashboard.html" },
-    { "src": "/training", "dest": "/training.html" }
-  ]
-}
