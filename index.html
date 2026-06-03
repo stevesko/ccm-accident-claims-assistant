@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant | Built: 2026-04-27 12:00 PM EDT -->
+<!-- CCM Accident Assistant | Built: 2026-05-19 12:36 PM EDT -->
 <!-- CCM Accident Assistant — Built: 2026-04-01 12:51 PM ET -->
 <!DOCTYPE html>
 <html lang="en">
@@ -3981,7 +3981,7 @@ async function submitReport(){
       try{
         await emailjs.send('service_lefri76','template_g91f9a7',{
           driver_name: name, driver_id: driverID, company: company,
-          date: date, report: report.slice(0,3000), to_email: CLAIMS_EMAIL, subject: emailSubject,
+          date: date, report: report.slice(0,9000), to_email: CLAIMS_EMAIL, subject: emailSubject,
         });
         console.warn('[Email] Fell back to EmailJS plain text');
       }catch(ejErr){
