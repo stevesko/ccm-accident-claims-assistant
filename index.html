@@ -1,5 +1,4 @@
-<!-- CCM Accident Assistant | Built: 2026-05-19 12:36 PM EDT -->
-<!-- CCM Accident Assistant — Built: 2026-04-01 12:51 PM ET -->
+<!-- CCM Accident Assistant | Built: 2026-06-03 11:30 AM EDT -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-04-01 12:51 PM ET</title>
+<title>CCM Accident Assistant — 2026-06-03 11:30 AM EDT</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -592,7 +591,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-04-01 12:51 PM ET</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-06-03 11:30 AM EDT</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -3575,18 +3574,32 @@ function buildHTMLReport(name, company, driverID, isFamilyDrv, phaseLabel, now){
   const severityBg    = highSeverity ? '#fef2f2' : medSeverity ? '#fffbeb' : '#eaf6ee';
   const severityLabel = highSeverity ? '⚠ HIGH SEVERITY' : medSeverity ? '● MODERATE' : '✓ STANDARD';
 
+  // ── Helper: HTML-escape raw answer text before injecting into email ───
+  function escHtml(s){
+    return String(s||'')
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;');
+  }
+
   // ── Helper: clean answer display ───────────────────────────
   function fmtAns(a){
     if(!a) return '—';
     // If pipe-delimited, convert to readable list
+    // Use indexOf instead of /s regex flag for universal browser compatibility
     if(a.includes(' | ')){
       return a.split(' | ').map(part => {
-        const [k,v] = part.split(/:\s*(.*)/s);
-        if(v !== undefined) return `<span style="color:#777;font-size:11px">${k}:</span> <strong>${v}</strong>`;
-        return part;
+        const colonIdx = part.indexOf(': ');
+        if(colonIdx !== -1){
+          const k = part.slice(0, colonIdx);
+          const v = part.slice(colonIdx + 2);
+          return `<span style="color:#777;font-size:11px">${escHtml(k)}:</span> <strong>${escHtml(v)}</strong>`;
+        }
+        return escHtml(part);
       }).join('<br>');
     }
-    return a;
+    return escHtml(a);
   }
 
   // ── Build section rows ──────────────────────────────────────
@@ -3954,25 +3967,37 @@ async function submitReport(){
     }
     const claimLine=S.phase===1?'Claim Number: '+S.claimNum+'\n':'';
     report=claimLine+report;
-    const htmlReport = buildHTMLReport(name, company, driverID, isFamilyDrv, phaseLabel, now);
-    // Send formatted HTML email via Vercel API (nodemailer) for proper HTML rendering
+
+    // ── Build HTML report — isolated try/catch so a render error doesn't kill email ──
+    let htmlReport = null;
+    try{
+      htmlReport = buildHTMLReport(name, company, driverID, isFamilyDrv, phaseLabel, now);
+      console.log('[Email] HTML report built, size:', htmlReport.length, 'chars');
+    }catch(htmlErr){
+      console.error('[Email] buildHTMLReport threw:', htmlErr.message, htmlErr.stack);
+    }
+
+    // Send formatted HTML email via Vercel API for proper HTML rendering
     const emailSubject = (S.phase===1?'Accident Claim Phase 1 Complete':'Accident Claim Phase 2 Complete')+' | '+company+' | '+name+' | Claim: '+S.claimNum;
     // ── Send CCM report via SendGrid (full HTML) ──
     try{
+      if(!htmlReport) throw new Error('HTML report failed to build — see console for details');
+      const sgPayload = {
+        to:      CLAIMS_EMAIL,
+        subject: emailSubject,
+        html:    htmlReport,
+        text:    'Accident report for '+name+' | Claim: '+S.claimNum+' | Ref: '+S.refNum
+      };
+      console.log('[Email] Sending to SendGrid, subject:', emailSubject, '| html size:', htmlReport.length);
       const emailResp = await fetch('/api/send-email', {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({
-          to:      CLAIMS_EMAIL,
-          subject: emailSubject,
-          html:    htmlReport,
-          text:    'Accident report for '+name+' | Claim: '+S.claimNum+' | Ref: '+S.refNum
-        })
+        body: JSON.stringify(sgPayload)
       });
       const emailData = await emailResp.json().catch(()=>({}));
       if(!emailResp.ok){
         const errDetail = emailData.detail||emailData.error||'HTTP '+emailResp.status;
-        console.error('[Email] SendGrid FAILED — status:',emailResp.status,'detail:',errDetail,'full:',JSON.stringify(emailData));
+        console.error('[Email] SendGrid FAILED — status:',emailResp.status,'| detail:',errDetail,'| full response:',JSON.stringify(emailData));
         throw new Error(errDetail);
       }
       console.log('[Email] ✓ SendGrid HTML email sent to:', CLAIMS_EMAIL);
