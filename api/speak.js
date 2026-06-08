@@ -6,7 +6,7 @@
  * Returns: { audioContent: string }  ← base64 MP3, same format as Google TTS response
  *
  * Keeps GOOGLE_API_KEY server-side — never exposed to the browser.
- * Voice: Google Cloud Chirp 3 HD — en-US-Chirp3-HD-Callirrhoe
+ * Voice: Google Cloud Chirp 3 HD — en-US-Chirp3-HD-Leda
  * Env var required: GOOGLE_API_KEY
  */
 
@@ -42,7 +42,7 @@ export default async function handler(req, res) {
       input: { text: safeText },
       voice: {
         languageCode: 'en-US',
-        name: 'en-US-Chirp3-HD-Callirrhoe',
+        name: 'en-US-Chirp3-HD-Leda',
       },
       audioConfig: {
         audioEncoding: 'MP3',
