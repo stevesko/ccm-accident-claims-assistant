@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant | Built: 2026-06-03 11:30 AM EDT -->
+<!-- CCM Accident Assistant | Built: 2026-06-08 10:00 AM EDT -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-06-03 11:30 AM EDT</title>
+<title>CCM Accident Assistant — 2026-06-08 10:00 AM EDT</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -591,7 +591,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-06-03 11:30 AM EDT</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-06-08 10:00 AM EDT</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -839,6 +839,22 @@ input[type="datetime-local"].fi{color-scheme:dark}
   </section>
 
   <!-- PHASE 1 SUCCESS -->
+  <!-- ── CCM Tow Alert Acknowledgment Screen ── -->
+  <section class="scr" id="scrTowMsg">
+    <div style="max-width:440px;margin:0 auto;padding:24px 16px">
+      <div style="background:#fff3cd;border:2px solid #e67e22;border-radius:14px;padding:28px 24px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.12)">
+        <div style="font-size:52px;line-height:1;margin-bottom:16px">🏪</div>
+        <h2 style="margin:0 0 12px;font-size:20px;font-weight:800;color:#7d4a00;line-height:1.3">Important Notice From CCM</h2>
+        <p style="margin:0 0 20px;font-size:16px;font-weight:700;color:#1a2333;line-height:1.5">CCM will select the repair shop for your vehicle.</p>
+        <p style="margin:0 0 24px;font-size:14px;color:#4a6285;line-height:1.6">Do <strong>not</strong> authorize any repairs until you hear from a CCM representative. We have been notified and will contact you shortly.</p>
+        <button class="btn btn-primary" style="width:100%;font-size:16px;font-weight:800;padding:16px;background:#e67e22;border-color:#e67e22"
+          onclick="dismissTowMsg()">
+          I Understand — Continue
+        </button>
+      </div>
+    </div>
+  </section>
+
   <section class="scr" id="scrOK">
     <div class="succ">
       <div class="succ-ring">✅</div>
@@ -1107,7 +1123,7 @@ const Qs=[
 
 
   {id:19, text:"Now let us get the details of your vehicle.",                               type:'fvehicle'},
-  {id:20, text:"Please provide your auto insurance information.",                        type:'fins',key:'my'},
+  {id:20, text:"Please provide your auto insurance information.",                        type:'fins',key:'my', skip:a=>S.phase===1},
   {id:21, text:"Please provide the other driver's name and contact information.",                         type:'fotherdrv',skip:isSolo},
   {id:22, text:"Now let us get the details of the other vehicle involved.",                        type:'fotherveh',skip:isSolo},
   {id:23, text:"Please provide the other driver's insurance information.",               type:'fins',key:'od',skip:isSolo},
@@ -1119,6 +1135,25 @@ const Qs=[
   {id:27, text:"Did any airbags deploy during the accident?",                                         type:'yn3', skip:a=>isNoImpactType(a)||isEnvironmentalType(a)},
   {id:28, text:"Please select which vehicles had airbags deploy.",                       type:'airbags',skip:a=>a[27]!=='Yes'},
   {id:29, text:"Does your vehicle need to be towed from the scene?",                             type:'yn3'},
+  // ── NEW Phase 1 tow chain ───────────────────────────────────────────────────────
+  {id:41, text:"Is there a tow truck on the scene?",                                            type:'og2', opts:['Yes','No']},
+  {id:42, text:"Is your vehicle being towed by police or a private tow company?",               type:'og3', opts:['Police','Private','Unknown'],
+    skip:a=>a[41]!=='Yes'
+  },
+  {id:43, text:"Where is your vehicle being taken?",                                            type:'ftowdest',
+    skip:a=>a[41]!=='Yes'
+  },
+  // ── NEW Phase 1 police on scene ─────────────────────────────────────────────────
+  {id:40, text:"Are police currently on the scene?",                                            type:'og2', opts:['Yes','No']},
+  // ── NEW Phase 1 injuries & medical ─────────────────────────────────────────────
+  {id:44, text:"Has medical assistance been called to the scene?",                              type:'og2', opts:['Yes','No']},
+  // ── NEW Phase 1 damage flags ────────────────────────────────────────────────────
+  {id:45, text:"Was there visible damage to any of the vehicles involved?",                     type:'yn3'},
+  {id:46, text:"Was there damage to any property — such as a fence, guardrail, or building?",  type:'yn3'},
+  // ── NEW Phase 1 personal vehicle insurance (skips for company vehicles) ─────────
+  {id:47, text:"Please provide your personal auto insurance information.",                      type:'fins', key:'my',
+    skip:a=>a[17]!=='Personal Vehicle'
+  },
   {id:30, text:"Please provide the tow company name and where your vehicle is being taken.",                   type:'ftow',skip:a=>a[29]!=='Yes'},
   {id:291,text:()=>{ const n=parseInt(S.ans[2])||1; return n>=3?'Do any of the other vehicles need to be towed?':'Does the other vehicle need to be towed?'; }, type:'yn3', skip:a=>isSolo(a)},
   {id:301,text:"Please provide the tow details for the other vehicle.",                        type:'ftoword',skip:a=>a[291]!=='Yes'||isSolo(a)},
@@ -1161,7 +1196,10 @@ const S={
 };
 
 // Phase 1 question IDs — asked at the scene
-const PHASE1_IDS=new Set([2,4,8,9,13,50,21,29,31]); // Q5,Q6,Q7 in Phase 2
+// Order: vehicles(2), accident type(13), location(8), date/time(9),
+//        police on scene(40), tow(29), tow truck on scene(41), tow type(42), tow dest(43),
+//        injured(4), medical(44), vehicle damage(45), property damage(46), personal insurance(47)
+const PHASE1_IDS=new Set([2,13,8,9,40,29,41,42,43,4,44,45,46,47]);
 
 /* ─────────────────────────────────
    SCREEN UTIL
@@ -1472,7 +1510,7 @@ function initVoice(){
   if(SR){S.rec=new SR();S.rec.continuous=false;S.rec.interimResults=false;S.rec.lang='en-US';S.hasMic=true;}
 }
 /* ── AUDIO ENGINE ─────────────────────────────────────────
-   Voice:   Google Cloud TTS  Chirp 3 HD — Callirrhoe
+   Voice:   Google Cloud TTS  Chirp 3 HD — Leda
             Natural, warm professional female. Never robotic.
    KEY:     Replace PASTE_YOUR_KEY_HERE with your AIza... key
    Cache:   Each question fetched once per session only.
@@ -2033,6 +2071,23 @@ function togglePause(){
   }
 }
 
+// ── CCM Tow Alert Acknowledgment ─────────────────────────────────────────
+function showCCMTowMessage(){
+  stopSpeak();
+  // Read the message aloud before showing the screen
+  const msg = 'Important notice from CCM. CCM will select the repair shop for your vehicle. Do not authorize any repairs until you hear from a CCM representative. We have been notified and will contact you shortly. Tap I Understand to continue.';
+  speak(msg, ()=>{});
+  show('scrTowMsg');
+}
+
+function dismissTowMsg(){
+  stopSpeak();
+  show('scrQ');
+  // Resume the question flow from the current index (Q43 was already answered by subTowDest)
+  // getVis() and S.idx are already advanced by ans() inside subTowDest
+  goToQ(S.idx);
+}
+
 /* ─────────────────────────────────
    RENDER ANSWER AREA
 ───────────────────────────────── */
@@ -2044,7 +2099,7 @@ function renderAns(q){
     'loc':rLoc,'dt':rDt,'txt':rTxt,'ta':rTa,'narr':rNarr,
     'photoprompt':rFPhotoPrompt,'ddAT':rDDAT,'fdriver':rFDriver,'fvehicle':rFVehicle,'fins':rFIns,
     'fotherdrv':rFOtherDrv,'fotherveh':rFOtherVeh,
-    'fdmg':rFDmg,'fothdmg':rFOthDmg,'fpropdmg':rFPropDmg,'ftow':rFTow,'ftoword':rFTowOrd,'fpol':rFPol,'fpolcheck':rFPolCheck,'fcit':rFCit,
+    'fdmg':rFDmg,'fothdmg':rFOthDmg,'fpropdmg':rFPropDmg,'ftow':rFTow,'ftowdest':rFTowDest,'ftoword':rFTowOrd,'fpol':rFPol,'fpolcheck':rFPolCheck,'fcit':rFCit,
     'fwit':rFWit,'fcontact':rFContact,
     'injsel':rInjSel,'injdet':rInjDet,'airbags':rAirbags,
   }[q.type]||rTxt)(area,q);
@@ -2855,6 +2910,131 @@ function rFTow(a,q){
 function rFTowOrd(a,q){
   a.innerHTML = towCard('od', q.id, 'Other Vehicle Tow Details');
 }
+
+// ── Phase 1 tow destination renderer — triggers tow alert after answer ──
+function rFTowDest(a,q){
+  a.innerHTML=`<div class="fcard">
+    <div style="font-size:13px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px">Where Is Your Vehicle Being Taken?</div>
+    ${fg('Tow Destination',inp('towDestI','Storage lot, police impound, or shop name and address','text','data-v'))}
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-primary" style="flex:1" onclick="
+        const v=document.getElementById('towDestI').value.trim();
+        if(v){ subTowDest(${q.id},v); }
+      ">Submit</button>
+      <button style="flex:1;background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.3);border-radius:var(--r8);padding:12px;color:var(--amber);font-size:13px;font-weight:700;cursor:pointer"
+        onclick="subTowDest(${q.id},'Destination not known at scene')">
+        ⚠️ Unknown
+      </button>
+    </div>
+  </div>`;
+}
+
+async function subTowDest(qid, dest){
+  // Record the answer
+  ans(gQ(qid), dest);
+
+  // ── Assign claim number and reference number early ──────────────────────
+  if(!S.claimNum || S.claimNum===''){
+    S.refNum = 'CCM-'+new Date().getFullYear()+'-'+String(Date.now()).slice(-6);
+    try{
+      const claimPayload = buildJSON();
+      claimPayload.identity  = S.identity;
+      claimPayload.refNumber = S.refNum;
+      claimPayload.phase     = 1;
+      claimPayload.ans       = S.ans;
+      claimPayload.photoUrls = S.photos.map(p=>({name:p.name,url:p.blobUrl||null,category:p.category}));
+      const dbRes  = await fetch(FTP_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({claim:claimPayload})});
+      const dbData = await dbRes.json();
+      S.claimNum   = dbData.claimNumber ? String(dbData.claimNumber) : 'CCM-'+String(Date.now()).slice(-6);
+    }catch(e){
+      console.warn('[TowAlert] Early DB assign failed:',e);
+      S.claimNum = 'CCM-'+String(Date.now()).slice(-6);
+    }
+    S.towAlertClaimAssigned = true;
+  }
+
+  // ── Fire tow alert email to CCM ─────────────────────────────────────────
+  const a = S.ans;
+  const towType     = a[42] || 'Unknown';
+  const truckOnScene= a[41] || 'Unknown';
+  const needsTow    = a[29] || 'Unknown';
+  const policeOnScene = a[40] || 'Unknown';
+  const location    = a[8]  || 'Not yet provided';
+  const dateTime    = a[9]  || 'Not yet provided';
+  const driverName  = S.identity.name  || 'Unknown';
+  const driverPhone = S.identity.phone || 'Not provided';
+  const company     = S.identity.company || 'Unknown';
+  const claimNum    = S.claimNum || 'Pending';
+  const refNum      = S.refNum   || 'Pending';
+
+  const towAlertHtml = `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<style>
+  body{font-family:Arial,sans-serif;background:#f2f4f8;margin:0;padding:20px}
+  .wrap{max-width:600px;margin:0 auto;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.1)}
+  .hdr{background:#c0392b;padding:24px 28px;color:#fff}
+  .hdr h1{margin:0;font-size:22px;letter-spacing:.02em}
+  .hdr p{margin:6px 0 0;font-size:13px;opacity:.85}
+  .urgent{background:#fff3cd;border-left:4px solid #e67e22;padding:14px 18px;margin:20px;border-radius:4px;font-size:14px;font-weight:700;color:#7d4a00}
+  .body{padding:20px 28px}
+  table{width:100%;border-collapse:collapse;margin-bottom:20px}
+  td{padding:10px 12px;font-size:13px;border-bottom:1px solid #f0f0f0;vertical-align:top}
+  td:first-child{font-weight:700;color:#1a2333;width:42%;background:#f8f9fc}
+  .sec{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#c0392b;padding:12px 0 4px;border-bottom:2px solid #c0392b;margin-bottom:4px}
+  .ftr{background:#1a2333;color:#fff;padding:16px 28px;font-size:12px;text-align:center}
+</style></head><body>
+<div class="wrap">
+  <div class="hdr">
+    <h1>🚨 Tow Alert — Immediate Action Required</h1>
+    <p>CCM Accident Assistant — Phase 1 Tow Notification</p>
+  </div>
+  <div class="urgent">⚠️ A client vehicle is being towed. Please contact the driver immediately to coordinate recovery and prevent excessive storage charges.</div>
+  <div class="body">
+    <div class="sec">Driver Information</div>
+    <table>
+      <tr><td>Driver Name</td><td>${driverName}</td></tr>
+      <tr><td>Phone</td><td>${driverPhone}</td></tr>
+      <tr><td>Company</td><td>${company}</td></tr>
+      <tr><td>Claim Number</td><td>${claimNum}</td></tr>
+      <tr><td>Reference Number</td><td>${refNum}</td></tr>
+    </table>
+    <div class="sec">Incident Details</div>
+    <table>
+      <tr><td>Accident Location</td><td>${location}</td></tr>
+      <tr><td>Date &amp; Time</td><td>${dateTime}</td></tr>
+      <tr><td>Police On Scene</td><td>${policeOnScene}</td></tr>
+    </table>
+    <div class="sec">Tow Details</div>
+    <table>
+      <tr><td>Vehicle Needs Tow</td><td>${needsTow}</td></tr>
+      <tr><td>Tow Truck On Scene</td><td>${truckOnScene}</td></tr>
+      <tr><td>Towing By</td><td>${towType}</td></tr>
+      <tr><td>Vehicle Being Taken To</td><td>${dest}</td></tr>
+    </table>
+  </div>
+  <div class="ftr">CCM Accident Assistant — This is an automated tow alert. Do not reply to this email.</div>
+</div>
+</body></html>`;
+
+  try{
+    await fetch('/api/send-email',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        to:      CLAIMS_EMAIL,
+        subject: '🚨 TOW ALERT — '+company+' — '+driverName+' — Claim: '+claimNum,
+        html:    towAlertHtml,
+        text:    'TOW ALERT\nDriver: '+driverName+' | '+driverPhone+'\nCompany: '+company+'\nClaim: '+claimNum+' | Ref: '+refNum+'\nLocation: '+location+'\nPolice on scene: '+policeOnScene+'\nTow type: '+towType+'\nVehicle taken to: '+dest,
+      })
+    });
+    console.log('[TowAlert] ✓ Tow alert sent for claim',claimNum);
+  }catch(e){
+    console.error('[TowAlert] ✗ Failed to send tow alert:',e.message);
+  }
+
+  // ── Show CCM acknowledgment screen ──────────────────────────────────────
+  showCCMTowMessage();
+}
 function rFPolCheck(a,q){
   var qid=q.id;
   var html='<div class="fcard">';
@@ -3355,19 +3535,11 @@ function closeM(id){document.getElementById(id).classList.remove('on');}
    SUMMARY & EXPORT
 ───────────────────────────────── */
 const SECS_P1=[
-  {t:'Incident Overview',        ids:[2,4,8,9,13]},
-  {t:'Passengers & Injuries',    ids:[3,5,6]},
-  {t:'Scene Conditions',         ids:[14,10,11,12,15]},
-  {t:'Your Vehicle',             ids:[17,19]},
-  {t:'Your Information',         ids:[16,20]},
-  {t:'Other Driver & Vehicle',   ids:[21,22,23]},
-  {t:'Vehicle Damage',           ids:[24,25,26,251,252]},
-  {t:'Airbags',                  ids:[27,28]},
-  {t:'Tow & Recovery',           ids:[29,30,291,301]},
-  {t:'Law Enforcement',          ids:[31,32,33,34]},
-  {t:'Witnesses',                ids:[35,36]},
-  {t:'Accident Narrative',       ids:[37]},
-  {t:'Follow-Up',                ids:[38,39]},
+  {t:'Incident Overview',        ids:[2,13,8,9]},
+  {t:'Police & Towing',          ids:[40,29,41,42,43]},
+  {t:'Injuries & Medical',       ids:[4,44]},
+  {t:'Damage',                   ids:[45,46]},
+  {t:'Insurance',                ids:[47]},
 ];
 const SECS_P2=[
   {t:'Injuries',                   ids:[5,6]},
@@ -3375,8 +3547,8 @@ const SECS_P2=[
   {t:'Your Information',           ids:[17,16,19,20]},
   {t:'Other Party Details',        ids:[22,23]},
   {t:'Vehicle Damage',             ids:[24,25,26,251,252,27,28]},
-  {t:'Tow / Recovery',             ids:[29,30,291,301]},
-  {t:'Law Enforcement',            ids:[32,33,34]},
+  {t:'Tow / Recovery',             ids:[291,301]},
+  {t:'Law Enforcement',            ids:[31,32,33,34]},
   {t:'Witnesses',                  ids:[35,36]},
   {t:'Accident Narrative',         ids:[37]},
   {t:'Follow-Up Preferences',      ids:[38,39]},
@@ -3574,32 +3746,18 @@ function buildHTMLReport(name, company, driverID, isFamilyDrv, phaseLabel, now){
   const severityBg    = highSeverity ? '#fef2f2' : medSeverity ? '#fffbeb' : '#eaf6ee';
   const severityLabel = highSeverity ? '⚠ HIGH SEVERITY' : medSeverity ? '● MODERATE' : '✓ STANDARD';
 
-  // ── Helper: HTML-escape raw answer text before injecting into email ───
-  function escHtml(s){
-    return String(s||'')
-      .replace(/&/g,'&amp;')
-      .replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;')
-      .replace(/"/g,'&quot;');
-  }
-
   // ── Helper: clean answer display ───────────────────────────
   function fmtAns(a){
     if(!a) return '—';
     // If pipe-delimited, convert to readable list
-    // Use indexOf instead of /s regex flag for universal browser compatibility
     if(a.includes(' | ')){
       return a.split(' | ').map(part => {
-        const colonIdx = part.indexOf(': ');
-        if(colonIdx !== -1){
-          const k = part.slice(0, colonIdx);
-          const v = part.slice(colonIdx + 2);
-          return `<span style="color:#777;font-size:11px">${escHtml(k)}:</span> <strong>${escHtml(v)}</strong>`;
-        }
-        return escHtml(part);
+        const [k,v] = part.split(/:\s*(.*)/s);
+        if(v !== undefined) return `<span style="color:#777;font-size:11px">${k}:</span> <strong>${v}</strong>`;
+        return part;
       }).join('<br>');
     }
-    return escHtml(a);
+    return a;
   }
 
   // ── Build section rows ──────────────────────────────────────
@@ -3910,9 +4068,13 @@ async function submitReport(){
   try{
     // ── STEP 1: Get claim number from DB FIRST ──
     if(S.phase===1){
-      S.refNum='CCM-'+new Date().getFullYear()+'-'+String(Date.now()).slice(-6);
+      // If tow alert already assigned a claim number early (at Q43), skip the DB insert
+      // and just use the existing claimNum and refNum
+      if(!S.towAlertClaimAssigned){
+        S.refNum='CCM-'+new Date().getFullYear()+'-'+String(Date.now()).slice(-6);
+      }
       if(btn) btn.textContent='Assigning claim number…';
-      if(FTP_ENDPOINT){
+      if(FTP_ENDPOINT && !S.towAlertClaimAssigned){
         try{
           const claimPayload=buildJSON();
           claimPayload.identity=S.identity;
@@ -3935,7 +4097,7 @@ async function submitReport(){
           console.warn('DB error, using fallback claim number:',dbErr);
           S.claimNum='CCM-'+String(Date.now()).slice(-6);
         }
-      } else {
+      } else if(!S.towAlertClaimAssigned){
         S.claimNum='CCM-'+String(Date.now()).slice(-6);
       }
       // Update displayed numbers
@@ -3967,37 +4129,25 @@ async function submitReport(){
     }
     const claimLine=S.phase===1?'Claim Number: '+S.claimNum+'\n':'';
     report=claimLine+report;
-
-    // ── Build HTML report — isolated try/catch so a render error doesn't kill email ──
-    let htmlReport = null;
-    try{
-      htmlReport = buildHTMLReport(name, company, driverID, isFamilyDrv, phaseLabel, now);
-      console.log('[Email] HTML report built, size:', htmlReport.length, 'chars');
-    }catch(htmlErr){
-      console.error('[Email] buildHTMLReport threw:', htmlErr.message, htmlErr.stack);
-    }
-
-    // Send formatted HTML email via Vercel API for proper HTML rendering
+    const htmlReport = buildHTMLReport(name, company, driverID, isFamilyDrv, phaseLabel, now);
+    // Send formatted HTML email via Vercel API (nodemailer) for proper HTML rendering
     const emailSubject = (S.phase===1?'Accident Claim Phase 1 Complete':'Accident Claim Phase 2 Complete')+' | '+company+' | '+name+' | Claim: '+S.claimNum;
     // ── Send CCM report via SendGrid (full HTML) ──
     try{
-      if(!htmlReport) throw new Error('HTML report failed to build — see console for details');
-      const sgPayload = {
-        to:      CLAIMS_EMAIL,
-        subject: emailSubject,
-        html:    htmlReport,
-        text:    'Accident report for '+name+' | Claim: '+S.claimNum+' | Ref: '+S.refNum
-      };
-      console.log('[Email] Sending to SendGrid, subject:', emailSubject, '| html size:', htmlReport.length);
       const emailResp = await fetch('/api/send-email', {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
-        body: JSON.stringify(sgPayload)
+        body: JSON.stringify({
+          to:      CLAIMS_EMAIL,
+          subject: emailSubject,
+          html:    htmlReport,
+          text:    'Accident report for '+name+' | Claim: '+S.claimNum+' | Ref: '+S.refNum
+        })
       });
       const emailData = await emailResp.json().catch(()=>({}));
       if(!emailResp.ok){
         const errDetail = emailData.detail||emailData.error||'HTTP '+emailResp.status;
-        console.error('[Email] SendGrid FAILED — status:',emailResp.status,'| detail:',errDetail,'| full response:',JSON.stringify(emailData));
+        console.error('[Email] SendGrid FAILED — status:',emailResp.status,'detail:',errDetail,'full:',JSON.stringify(emailData));
         throw new Error(errDetail);
       }
       console.log('[Email] ✓ SendGrid HTML email sent to:', CLAIMS_EMAIL);
