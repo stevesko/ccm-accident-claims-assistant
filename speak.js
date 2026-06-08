@@ -1,4 +1,4 @@
-// CCM Accident Assistant | Built: 2026-06-03 01:15 PM EDT
+// CCM Accident Assistant | Built: 2026-06-08 10:00 AM EDT
 /**
  * CCM Accident Assistant — Google Cloud TTS Proxy
  * POST /api/speak
@@ -6,7 +6,7 @@
  * Returns: { audioContent: string }  ← base64 MP3, same format as Google TTS response
  *
  * Keeps GOOGLE_API_KEY server-side — never exposed to the browser.
- * Voice: Google Cloud Chirp 3 HD — en-US-Chirp3-HD-Leda
+ * Voice: Google Cloud Chirp 3 HD — en-US-Chirp3-HD-Callirrhoe
  * Env var required: GOOGLE_API_KEY
  */
 
@@ -42,7 +42,7 @@ export default async function handler(req, res) {
       input: { text: safeText },
       voice: {
         languageCode: 'en-US',
-        name: 'en-US-Chirp3-HD-Leda',
+        name: 'en-US-Chirp3-HD-Callirrhoe',
       },
       audioConfig: {
         audioEncoding: 'MP3',
