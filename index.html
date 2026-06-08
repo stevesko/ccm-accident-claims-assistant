@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant | Built: 2026-06-08 10:00 AM EDT -->
+<!-- CCM Accident Assistant | Built: 2026-06-08 09:22 AM EDT -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-06-08 10:00 AM EDT</title>
+<title>CCM Accident Assistant — 2026-06-08 09:22 AM EDT</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -591,7 +591,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-06-08 10:00 AM EDT</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-06-08 09:22 AM EDT</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -2082,9 +2082,7 @@ function showCCMTowMessage(){
 
 function dismissTowMsg(){
   stopSpeak();
-  show('scrQ');
-  // Resume the question flow from the current index (Q43 was already answered by subTowDest)
-  // getVis() and S.idx are already advanced by ans() inside subTowDest
+  // S.idx was already advanced by subTowDest — go straight to next question
   goToQ(S.idx);
 }
 
@@ -2930,8 +2928,14 @@ function rFTowDest(a,q){
 }
 
 async function subTowDest(qid, dest){
-  // Record the answer
-  ans(gQ(qid), dest);
+  // Record the answer SILENTLY — do not call ans() here because ans() calls
+  // goToQ(S.idx+1) which would immediately render the next question and flash
+  // past the CCM acknowledgment screen. We advance manually in dismissTowMsg().
+  stopSpeak(); stopListen();
+  S.ans[qid] = dest;
+  saveDraft();
+  // Advance S.idx so dismissTowMsg knows where to resume
+  S.idx = S.idx + 1;
 
   // ── Assign claim number and reference number early ──────────────────────
   if(!S.claimNum || S.claimNum===''){
