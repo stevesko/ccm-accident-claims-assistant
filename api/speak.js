@@ -1,11 +1,14 @@
-// CCM Accident Assistant | Built: 2026-04-27 08:42 AM EDT
+// CCM Accident Assistant | Built: 2026-06-08 10:00 AM EDT
 /**
- * CCM Accident Assistant — TTS Proxy
- * POST /api/speak — proxies to Google Cloud TTS
- * Env var: GOOGLE_API_KEY
+ * CCM Accident Assistant — Google Cloud TTS Proxy
+ * POST /api/speak
+ * Body: { text: string }
+ * Returns: { audioContent: string }  ← base64 MP3, same format as Google TTS response
+ *
+ * Keeps GOOGLE_API_KEY server-side — never exposed to the browser.
+ * Voice: Google Cloud Chirp 3 HD — en-US-Chirp3-HD-Callirrhoe
+ * Env var required: GOOGLE_API_KEY
  */
-
-import https from 'https';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -16,59 +19,67 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { text } = req.body || {};
-  if (!text) return res.status(400).json({ error: 'Missing text' });
+  if (!text || typeof text !== 'string') {
+    return res.status(400).json({ error: 'Missing or invalid text' });
+  }
 
   const apiKey = process.env.GOOGLE_API_KEY;
-  if (!apiKey) return res.status(500).json({ error: 'GOOGLE_API_KEY not configured' });
+  if (!apiKey) {
+    return res.status(500).json({ error: 'GOOGLE_API_KEY not configured' });
+  }
 
-  const payload = JSON.stringify({
-    input: { text: text.slice(0, 5000) },
-    voice: { languageCode: 'en-US', name: 'en-US-chirp3-hd-leda' },
-    audioConfig: { audioEncoding: 'MP3' },
-  });
+  // Trim to 5000 chars — well within Google's 5000 byte limit for standard input
+  const safeText = text.slice(0, 5000).trim();
+  if (!safeText) {
+    return res.status(400).json({ error: 'Text is empty after trimming' });
+  }
 
-  return new Promise((resolve) => {
-    const options = {
-      hostname: 'texttospeech.googleapis.com',
-      path: '/v1beta1/text:synthesize?key=' + apiKey,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(payload),
+  try {
+    // Chirp 3 HD uses the v1beta1 endpoint
+    const googleUrl = `https://texttospeech.googleapis.com/v1beta1/text:synthesize?key=${apiKey}`;
+
+    const payload = {
+      input: { text: safeText },
+      voice: {
+        languageCode: 'en-US',
+        name: 'en-US-Chirp3-HD-Callirrhoe',
+      },
+      audioConfig: {
+        audioEncoding: 'MP3',
+        speakingRate: 0.95,   // Slightly slower — clearer for accident scene use
+        pitch: 0.0,
       },
     };
 
-    const req2 = https.request(options, (r2) => {
-      let body = '';
-      r2.on('data', chunk => body += chunk);
-      r2.on('end', () => {
-        try {
-          const data = JSON.parse(body);
-          if (r2.statusCode !== 200) {
-            console.error('Google TTS error:', r2.statusCode, body);
-            res.status(500).json({ error: 'TTS failed', detail: data?.error?.message || r2.statusCode });
-            return resolve();
-          }
-          if (!data.audioContent) {
-            res.status(500).json({ error: 'No audio in TTS response' });
-            return resolve();
-          }
-          res.status(200).json({ audioContent: data.audioContent });
-          resolve();
-        } catch (e) {
-          res.status(500).json({ error: 'TTS parse error', detail: e.message });
-          resolve();
-        }
+    const r = await fetch(googleUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!r.ok) {
+      const errBody = await r.json().catch(() => ({}));
+      const detail  = errBody?.error?.message || errBody?.error || r.status;
+      console.error('Google TTS error:', r.status, JSON.stringify(errBody));
+      return res.status(r.status).json({
+        error:  'Google TTS error',
+        detail: String(detail),
+        status: r.status,
       });
-    });
+    }
 
-    req2.on('error', (e) => {
-      console.error('TTS request error:', e);
-      res.status(500).json({ error: 'TTS request failed', detail: e.message });
-      resolve();
-    });
+    const data = await r.json();
 
-    req2.write(payload);
-    req2.end();
-  });
+    if (!data.audioContent) {
+      console.error('Google TTS returned no audioContent:', JSON.stringify(data));
+      return res.status(500).json({ error: 'No audio in Google TTS response' });
+    }
+
+    // Return in the same shape the client expects
+    return res.status(200).json({ audioContent: data.audioContent });
+
+  } catch (err) {
+    console.error('speak.js error:', err);
+    return res.status(500).json({ error: 'TTS proxy error', detail: err.message });
+  }
 }
