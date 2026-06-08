@@ -2032,6 +2032,16 @@ function ans(q,val){
   S.ans[q.id]=val;
   saveDraft();
 
+  // ── Special case: Q41 (tow truck on scene) answered No ──────────────────
+  // If Q29 (needs tow) = Yes AND Q41 = No, the vehicle IS being towed but
+  // no truck is there yet. Fire the tow alert immediately with no destination,
+  // then show the CCM message before continuing.
+  if(q.id===41 && val==='No' && S.ans[29]==='Yes'){
+    S.idx = S.idx + 1;
+    fireTowAlertNoDestination();
+    return;
+  }
+
   const vis=getVis();
   goToQ(S.idx+1);
 }
@@ -2078,6 +2088,106 @@ function dismissTowMsg(){
   stopSpeak();
   // S.idx was already advanced by subTowDest — go straight to next question
   goToQ(S.idx);
+}
+
+// ── Tow alert when Q29=Yes, Q41=No (tow confirmed but no truck yet) ──────
+async function fireTowAlertNoDestination(){
+  // Assign claim number early if not already done
+  if(!S.claimNum || S.claimNum===''){
+    S.refNum = 'CCM-'+new Date().getFullYear()+'-'+String(Date.now()).slice(-6);
+    try{
+      const claimPayload = buildJSON();
+      claimPayload.identity  = S.identity;
+      claimPayload.refNumber = S.refNum;
+      claimPayload.phase     = 1;
+      claimPayload.ans       = S.ans;
+      claimPayload.photoUrls = S.photos.map(p=>({name:p.name,url:p.blobUrl||null,category:p.category}));
+      const dbRes  = await fetch(FTP_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({claim:claimPayload})});
+      const dbData = await dbRes.json();
+      S.claimNum   = dbData.claimNumber ? String(dbData.claimNumber) : 'CCM-'+String(Date.now()).slice(-6);
+    }catch(e){
+      console.warn('[TowAlert] Early DB assign failed:',e);
+      S.claimNum = 'CCM-'+String(Date.now()).slice(-6);
+    }
+    S.towAlertClaimAssigned = true;
+  }
+
+  const a             = S.ans;
+  const policeOnScene = a[40] || 'Unknown';
+  const location      = a[8]  || 'Not yet provided';
+  const dateTime      = a[9]  || 'Not yet provided';
+  const driverName    = S.identity.name  || 'Unknown';
+  const driverPhone   = S.identity.phone || 'Not provided';
+  const company       = S.identity.company || 'Unknown';
+  const claimNum      = S.claimNum || 'Pending';
+  const refNum        = S.refNum   || 'Pending';
+
+  const towAlertHtml = `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<style>
+  body{font-family:Arial,sans-serif;background:#f2f4f8;margin:0;padding:20px}
+  .wrap{max-width:600px;margin:0 auto;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.1)}
+  .hdr{background:#c0392b;padding:24px 28px;color:#fff}
+  .hdr h1{margin:0;font-size:22px;letter-spacing:.02em}
+  .hdr p{margin:6px 0 0;font-size:13px;opacity:.85}
+  .urgent{background:#fff3cd;border-left:4px solid #e67e22;padding:14px 18px;margin:20px;border-radius:4px;font-size:14px;font-weight:700;color:#7d4a00}
+  .body{padding:20px 28px}
+  table{width:100%;border-collapse:collapse;margin-bottom:20px}
+  td{padding:10px 12px;font-size:13px;border-bottom:1px solid #f0f0f0;vertical-align:top}
+  td:first-child{font-weight:700;color:#1a2333;width:42%;background:#f8f9fc}
+  .sec{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#c0392b;padding:12px 0 4px;border-bottom:2px solid #c0392b;margin-bottom:4px}
+  .ftr{background:#1a2333;color:#fff;padding:16px 28px;font-size:12px;text-align:center}
+</style></head><body>
+<div class="wrap">
+  <div class="hdr">
+    <h1>🚨 Tow Alert — No Tow Truck On Scene Yet</h1>
+    <p>CCM Accident Assistant — Immediate Action Required</p>
+  </div>
+  <div class="urgent">⚠️ Driver confirms vehicle needs to be towed but no tow truck has arrived yet. Contact the driver immediately to arrange recovery before police order their own tow to a storage facility.</div>
+  <div class="body">
+    <div class="sec">Driver Information</div>
+    <table>
+      <tr><td>Driver Name</td><td>${driverName}</td></tr>
+      <tr><td>Phone</td><td>${driverPhone}</td></tr>
+      <tr><td>Company</td><td>${company}</td></tr>
+      <tr><td>Claim Number</td><td>${claimNum}</td></tr>
+      <tr><td>Reference Number</td><td>${refNum}</td></tr>
+    </table>
+    <div class="sec">Incident Details</div>
+    <table>
+      <tr><td>Accident Location</td><td>${location}</td></tr>
+      <tr><td>Date &amp; Time</td><td>${dateTime}</td></tr>
+      <tr><td>Police On Scene</td><td>${policeOnScene}</td></tr>
+    </table>
+    <div class="sec">Tow Status</div>
+    <table>
+      <tr><td>Vehicle Needs Tow</td><td>Yes</td></tr>
+      <tr><td>Tow Truck On Scene</td><td>No — not yet arrived</td></tr>
+      <tr><td>Destination</td><td>Unknown — contact driver now</td></tr>
+    </table>
+  </div>
+  <div class="ftr">CCM Accident Assistant — Automated tow alert. Do not reply to this email.</div>
+</div>
+</body></html>`;
+
+  try{
+    await fetch('/api/send-email',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        to:      CLAIMS_EMAIL,
+        subject: '🚨 TOW ALERT (No Truck Yet) — '+company+' — '+driverName+' — Claim: '+claimNum,
+        html:    towAlertHtml,
+        text:    'TOW ALERT — No tow truck on scene yet\nDriver: '+driverName+' | '+driverPhone+'\nCompany: '+company+'\nClaim: '+claimNum+' | Ref: '+refNum+'\nLocation: '+location+'\nPolice on scene: '+policeOnScene+'\nAction required: Contact driver immediately to arrange tow before police order storage.',
+      })
+    });
+    console.log('[TowAlert] ✓ No-truck tow alert sent for claim',claimNum);
+  }catch(e){
+    console.error('[TowAlert] ✗ Failed to send no-truck tow alert:',e.message);
+  }
+
+  // Show CCM acknowledgment screen — same screen as the destination path
+  showCCMTowMessage();
 }
 
 /* ─────────────────────────────────
