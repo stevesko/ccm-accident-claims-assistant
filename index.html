@@ -1086,87 +1086,81 @@ function isNoImpactType(a){ return accIn(a,'Vandalism','Vehicle Theft','Glass / 
 function isEnvironmentalType(a){ return accIn(a,'Act of Nature','Fire','Glass / Windshield','Debris / Pothole Damage'); }
 
 const Qs=[
-  // Identification collected on scrID1/scrID2 screens before interview begins
+  // ── PHASE 1 — At scene (order matches approved sequence) ──────────────────
   {id:2,  text:"How many vehicles were involved?",                type:'vehicles'},
-  {id:3,  text:"Were there any passengers in any of the vehicles?",                      type:'yn3', skip:a=>isCriminalType(a)},
-  {id:4,  text:"Was anyone injured?",                                             type:'yn3'},
-  {id:5,  text:"Select who was injured in each vehicle.",                         type:'injsel',  skip:a=>a[4]!=='Yes'},
-  {id:6,  text:"Please provide the name and injury details for each person who was injured.",         type:'injdet',  skip:a=>a[4]!=='Yes'},
+  {id:13, text:"What type of accident was this?",                 type:'ddAT',ph:'Select accident type…'},
+  {id:8,  text:"Where did the accident take place?",              type:'loc'},
+  {id:9,  text:"What was the date and time of the accident? If it just happened, you can use today's date.", type:'dt'},
+  {id:40, text:"Are police currently on the scene?",              type:'og2', opts:['Yes','No']},
+  {id:29, text:"Does your vehicle need to be towed from the scene?", type:'yn3'},
+  {id:41, text:"Is there a tow truck on the scene?",              type:'og2', opts:['Yes','No']},
+  {id:42, text:"Is your vehicle being towed by police or a private tow company?", type:'og3', opts:['Police','Private','Unknown'],
+    skip:a=>a[41]!=='Yes'
+  },
+  {id:43, text:"Where is your vehicle being taken?",              type:'ftowdest',
+    skip:a=>a[41]!=='Yes'
+  },
+  {id:4,  text:"Was anyone injured?",                             type:'yn3'},
+  {id:44, text:"Has medical assistance been called to the scene?", type:'og2', opts:['Yes','No']},
+  {id:45, text:"Was there visible damage to any of the vehicles involved?", type:'yn3'},
+  {id:46, text:"Was there damage to any property — such as a fence, guardrail, or building?", type:'yn3'},
+  {id:47, text:"Please provide your personal auto insurance information.", type:'fins', key:'my',
+    skip:a=>a[17]!=='Personal Vehicle'
+  },
+
+  // ── PHASE 2 — Detailed follow-up (order unchanged) ────────────────────────
+  {id:3,  text:"Were there any passengers in any of the vehicles?", type:'yn3', skip:a=>isCriminalType(a)},
+  {id:5,  text:"Select who was injured in each vehicle.",         type:'injsel', skip:a=>a[4]!=='Yes'},
+  {id:6,  text:"Please provide the name and injury details for each person who was injured.", type:'injdet', skip:a=>a[4]!=='Yes'},
   // Q7 removed — hospitalization captured in injury detail form (hospital transport radio buttons)
-  {id:8,  text:"Where did the accident take place?",                                   type:'loc'},
-  {id:9,  text:"What was the date and time of the accident? If it just happened, you can use today's date.",                     type:'dt'},
-  {id:13, text:"What type of accident was this?",                                 type:'ddAT',ph:'Select accident type…'},
-  {id:50, text:"While you are still at the scene, please take photos of all licenses, insurance cards, and vehicle damage.",    type:'photoprompt'},
-  {id:14, text:"At the moment of impact, was your vehicle moving, parked, or stopped?",          type:'og3',opts:['Moving','Parked','Stopped'],
+  {id:50, text:"While you are still at the scene, please take photos of all licenses, insurance cards, and vehicle damage.", type:'photoprompt'},
+  {id:14, text:"At the moment of impact, was your vehicle moving, parked, or stopped?", type:'og3',opts:['Moving','Parked','Stopped'],
     skip:a=>isCriminalType(a)||isParkedType(a)
   },
-  {id:10, text:"What were the weather conditions at the time of the accident?",                               type:'dd',opts:WX,ph:'Select weather…',
+  {id:10, text:"What were the weather conditions at the time of the accident?", type:'dd',opts:WX,ph:'Select weather…',
     skip:a=>isCriminalType(a)||accIn(a,'Fire','Backing','Parking Lot','Hit While Parked','Hit & Run — Parked')
   },
-  {id:11, text:"How would you describe the road conditions?",                                  type:'dd',opts:RD,ph:'Select road conditions…',
+  {id:11, text:"How would you describe the road conditions?", type:'dd',opts:RD,ph:'Select road conditions…',
     skip:a=>isCriminalType(a)||isParkedType(a)||isEnvironmentalType(a)||isBackingType(a)
   },
-  {id:12, text:"How was the traffic at the time of the accident?",                                    type:'og4',opts:['Light','Moderate','Heavy','Unknown'],
+  {id:12, text:"How was the traffic at the time of the accident?", type:'og4',opts:['Light','Moderate','Heavy','Unknown'],
     skip:a=>isCriminalType(a)||isParkedType(a)||isBackingType(a)||isEnvironmentalType(a)||
             accIn(a,'Hit Animal','Rollover','Lost Control','Run Off Road','Hit Fixed Object')
   },
-  {id:15, text:"Which direction were you traveling when the accident occurred?",                             type:'dir',
+  {id:15, text:"Which direction were you traveling when the accident occurred?", type:'dir',
     skip:a=>{
       const parked=(a[14]||'').toLowerCase().includes('parked');
       return parked||isCriminalType(a)||isParkedType(a)||isBackingType(a)||isEnvironmentalType(a)||
              accIn(a,'Hit Animal','Debris / Pothole Damage');
     }
   },
-  {id:17, text:"Is the vehicle you were driving a company vehicle or your personal vehicle?",                          type:'og2',opts:['Company Vehicle','Personal Vehicle']},
-  {id:16, text:"Please provide your driver's license number and the state that issued it.",  type:'fdriver'},
-
-
-
-  {id:19, text:"Now let us get the details of your vehicle.",                               type:'fvehicle'},
-  {id:20, text:"Please provide your auto insurance information.",                        type:'fins',key:'my', skip:a=>S.phase===1},
-  {id:21, text:"Please provide the other driver's name and contact information.",                         type:'fotherdrv',skip:isSolo},
-  {id:22, text:"Now let us get the details of the other vehicle involved.",                        type:'fotherveh',skip:isSolo},
-  {id:23, text:"Please provide the other driver's insurance information.",               type:'fins',key:'od',skip:isSolo},
-  {id:24, text:"Please describe the damage to your vehicle, and let us know whether it is still drivable.",           type:'fdmg', skip:a=>{ const myPh=S.photos.filter(p=>p.category==='Vehicle Damage - Yours'||p.category==='Vehicle Damage'); return myPh.length>0 && !isSolo(a) && (S.photos.filter(p=>p.category==='Vehicle Damage - Other'||p.category==='Other Vehicle Damage').length>0); }},
-  {id:25, text:"Was there visible damage to any of the other vehicles involved?",               type:'yn', skip:a=>isSolo(a)},
+  {id:17, text:"Is the vehicle you were driving a company vehicle or your personal vehicle?", type:'og2',opts:['Company Vehicle','Personal Vehicle']},
+  {id:16, text:"Please provide your driver's license number and the state that issued it.", type:'fdriver'},
+  {id:19, text:"Now let us get the details of your vehicle.",     type:'fvehicle'},
+  {id:20, text:"Please provide your auto insurance information.", type:'fins',key:'my', skip:a=>S.phase===1},
+  {id:21, text:"Please provide the other driver's name and contact information.", type:'fotherdrv',skip:isSolo},
+  {id:22, text:"Now let us get the details of the other vehicle involved.", type:'fotherveh',skip:isSolo},
+  {id:23, text:"Please provide the other driver's insurance information.", type:'fins',key:'od',skip:isSolo},
+  {id:24, text:"Please describe the damage to your vehicle, and let us know whether it is still drivable.", type:'fdmg', skip:a=>{ const myPh=S.photos.filter(p=>p.category==='Vehicle Damage - Yours'||p.category==='Vehicle Damage'); return myPh.length>0 && !isSolo(a) && (S.photos.filter(p=>p.category==='Vehicle Damage - Other'||p.category==='Other Vehicle Damage').length>0); }},
+  {id:25, text:"Was there visible damage to any of the other vehicles involved?", type:'yn', skip:a=>isSolo(a)},
   {id:26, text:'Please describe the damage you observed on the other vehicle or vehicles.', type:'fothdmg', skip:a=>{ if(a[25]==='No'||isSolo(a)) return true; const odPh=S.photos.filter(p=>p.category==='Vehicle Damage - Other'||p.category==='Other Vehicle Damage'); return odPh.length>0; }},
-  {id:251, text:"Was there any damage to property — such as a fence, guardrail, or building?", type:'yn', skip:a=>isCriminalType(a)},
-  {id:252, text:'Please describe the property that was damaged and the extent of the damage.', type:'fpropdmg', skip:a=>a[251]!=='Yes'},
-  {id:27, text:"Did any airbags deploy during the accident?",                                         type:'yn3', skip:a=>isNoImpactType(a)||isEnvironmentalType(a)},
-  {id:28, text:"Please select which vehicles had airbags deploy.",                       type:'airbags',skip:a=>a[27]!=='Yes'},
-  {id:29, text:"Does your vehicle need to be towed from the scene?",                             type:'yn3'},
-  // ── NEW Phase 1 tow chain ───────────────────────────────────────────────────────
-  {id:41, text:"Is there a tow truck on the scene?",                                            type:'og2', opts:['Yes','No']},
-  {id:42, text:"Is your vehicle being towed by police or a private tow company?",               type:'og3', opts:['Police','Private','Unknown'],
-    skip:a=>a[41]!=='Yes'
-  },
-  {id:43, text:"Where is your vehicle being taken?",                                            type:'ftowdest',
-    skip:a=>a[41]!=='Yes'
-  },
-  // ── NEW Phase 1 police on scene ─────────────────────────────────────────────────
-  {id:40, text:"Are police currently on the scene?",                                            type:'og2', opts:['Yes','No']},
-  // ── NEW Phase 1 injuries & medical ─────────────────────────────────────────────
-  {id:44, text:"Has medical assistance been called to the scene?",                              type:'og2', opts:['Yes','No']},
-  // ── NEW Phase 1 damage flags ────────────────────────────────────────────────────
-  {id:45, text:"Was there visible damage to any of the vehicles involved?",                     type:'yn3'},
-  {id:46, text:"Was there damage to any property — such as a fence, guardrail, or building?",  type:'yn3'},
-  // ── NEW Phase 1 personal vehicle insurance (skips for company vehicles) ─────────
-  {id:47, text:"Please provide your personal auto insurance information.",                      type:'fins', key:'my',
-    skip:a=>a[17]!=='Personal Vehicle'
-  },
-  {id:30, text:"Please provide the tow company name and where your vehicle is being taken.",                   type:'ftow',skip:a=>a[29]!=='Yes'},
+  {id:251,text:"Was there any damage to property — such as a fence, guardrail, or building?", type:'yn', skip:a=>isCriminalType(a)},
+  {id:252,text:'Please describe the property that was damaged and the extent of the damage.', type:'fpropdmg', skip:a=>a[251]!=='Yes'},
+  {id:27, text:"Did any airbags deploy during the accident?",     type:'yn3', skip:a=>isNoImpactType(a)||isEnvironmentalType(a)},
+  {id:28, text:"Please select which vehicles had airbags deploy.", type:'airbags',skip:a=>a[27]!=='Yes'},
+  {id:30, text:"Please provide the tow company name and where your vehicle is being taken.", type:'ftow',skip:a=>a[29]!=='Yes'},
   {id:291,text:()=>{ const n=parseInt(S.ans[2])||1; return n>=3?'Do any of the other vehicles need to be towed?':'Does the other vehicle need to be towed?'; }, type:'yn3', skip:a=>isSolo(a)},
-  {id:301,text:"Please provide the tow details for the other vehicle.",                        type:'ftoword',skip:a=>a[291]!=='Yes'||isSolo(a)},
-  {id:31, text:"Was a police report filed at the scene?",                                      type:'fpolcheck'},
-  {id:32, text:"Please provide the police report details.",                                  type:'fpol',skip:a=>a[31]==='No'},
-  {id:33, text:"Was a citation or ticket issued at the scene?",                             type:'yn3', skip:a=>isCriminalType(a)||isEnvironmentalType(a)},
-  {id:34, text:"Please provide the citation details.",                                       type:'fcit',skip:a=>a[33]!=='Yes'},
-  {id:35, text:"Were there any witnesses to the accident?",                                       type:'yn3'},
-  {id:36, text:"Please provide the witness name and their contact information.",                   type:'fwit',skip:a=>a[35]!=='Yes'},
-  {id:37, text:"In your own words, please describe how the accident happened. Take your time.",          type:'narr'},
-  {id:38, text:"Is there anything else you would like our claims team to know, or do you need any additional assistance?",          type:'yn'},
-  {id:39, text:"How would you prefer that we contact you for follow-up on this claim?",         type:'fcontact'},
-];
+  {id:301,text:"Please provide the tow details for the other vehicle.", type:'ftoword',skip:a=>a[291]!=='Yes'||isSolo(a)},
+  {id:31, text:"Was a police report filed at the scene?",         type:'fpolcheck'},
+  {id:32, text:"Please provide the police report details.",       type:'fpol',skip:a=>a[31]==='No'},
+  {id:33, text:"Was a citation or ticket issued at the scene?",   type:'yn3', skip:a=>isCriminalType(a)||isEnvironmentalType(a)},
+  {id:34, text:"Please provide the citation details.",            type:'fcit',skip:a=>a[33]!=='Yes'},
+  {id:35, text:"Were there any witnesses to the accident?",       type:'yn3'},
+  {id:36, text:"Please provide the witness name and their contact information.", type:'fwit',skip:a=>a[35]!=='Yes'},
+  {id:37, text:"In your own words, please describe how the accident happened. Take your time.", type:'narr'},
+  {id:38, text:"Is there anything else you would like our claims team to know, or do you need any additional assistance?", type:'yn'},
+  {id:39, text:"How would you prefer that we contact you for follow-up on this claim?", type:'fcontact'},
+]
 
 function isSolo(a){
   const v=String(a[2]||'');
