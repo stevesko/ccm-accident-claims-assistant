@@ -1,4 +1,4 @@
-// CCM Accident Assistant | Built: 2026-06-08 1:40 PM EST
+// CCM Accident Assistant | Built: 2026-06-10 8:25 PM EST
 /**
  * CCM Accident Assistant — Tow Alerts API
  * GET  /api/get-tow-alerts         — returns all unacknowledged tow alerts
