@@ -1,4 +1,4 @@
-<!-- CCM Accident Assistant | Built: 2026-06-08 09:22 AM EDT -->
+<!-- CCM Accident Assistant | Built: 2026-06-11 12:04 PM EST -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CCM Claims">
 <meta name="theme-color" content="#07090f">
-<title>CCM Accident Assistant — 2026-06-08 09:22 AM EDT</title>
+<title>CCM Accident Assistant — 2026-06-11 12:04 PM EST</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>emailjs.init('qs3shRg48o-6yNtXb');</script>
@@ -591,7 +591,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
   <section class="scr on" id="scrStart">
     <div class="start-body">
       <div class="live-badge"><span class="live-dot"></span>System Active</div>
-      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-06-08 09:22 AM EDT</div>
+      <div style="font-size:10px;color:var(--t2);margin-top:4px;text-align:center">v2026-06-11 12:04 PM EST</div>
       <h1 class="start-h">Document Your<br><em>Accident Claim</em></h1>
       <p class="start-sub">Answer guided questions by voice or touch. Your answers are saved as you go — even offline. A complete report is emailed to claims when you finish.</p>
       <div class="feats">
@@ -607,6 +607,11 @@ input[type="datetime-local"].fi{color-scheme:dark}
         Begin Accident Report
       </button>
       <p class="sm tc mt8">Microphone access requested — tap answers if unavailable</p>
+      <p style="margin-top:20px;text-align:center">
+        <button onclick="showPhase2Entry()" style="background:none;border:none;color:var(--t3);font-size:12px;font-family:inherit;cursor:pointer;text-decoration:underline;padding:4px">
+          Already submitted a report? Complete Phase 2 here.
+        </button>
+      </p>
     </div>
   </section>
 
@@ -617,16 +622,6 @@ input[type="datetime-local"].fi{color-scheme:dark}
       <div class="qtext">What is the name of your company working with Corporate Claims Management?</div>
     </div>
     <div style="padding:0 4px">
-
-      <!-- Phase 2 quick access — visible to everyone at top of screen -->
-      <div style="background:rgba(0,212,170,.08);border:1.5px solid rgba(0,212,170,.25);border-radius:var(--r12);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="showPhase2Entry()">
-        <span style="font-size:24px">📋</span>
-        <div style="flex:1">
-          <div style="font-size:14px;font-weight:800;color:var(--teal)">Complete Phase 2 of Your Report</div>
-          <div style="font-size:12px;color:var(--t1);margin-top:2px">Already submitted Phase 1? Tap here to continue.</div>
-        </div>
-        <span style="color:var(--teal);font-size:18px">→</span>
-      </div>
 
       <select class="fi" id="id1Company" style="margin-bottom:20px">
         <option value="">Select your company…</option>
@@ -750,39 +745,60 @@ input[type="datetime-local"].fi{color-scheme:dark}
     </div>
   </section>
 
-  <!-- PHASE 2 QUICK ENTRY SCREEN — for anyone returning to complete Phase 2 -->
+  <!-- PHASE 2 ENTRY SCREEN — Driver ID + Company lookup -->
   <section class="scr" id="scrPhase2Entry">
     <div class="qcard">
       <div class="qstep">Complete Phase 2</div>
-      <div class="qtext">Enter your details to continue your accident report.</div>
+      <div class="qtext">Enter your Driver ID and company to find your report.</div>
     </div>
     <div style="padding:0 4px">
-      <label class="fl">Claim Number</label>
-      <input class="fi" id="p2ClaimNum" placeholder="e.g. 161000" type="tel" style="margin-bottom:12px" oninput="tryAutoP2()">
-      <label class="fl">Reference Number</label>
-      <input class="fi" id="p2Ref" placeholder="e.g. CCM-2026-847291" type="text" style="margin-bottom:8px" oninput="tryAutoP2()">
-      <p class="field-err" id="p2Err" style="display:none;margin-bottom:10px"></p>
-      <button class="btn btn-primary" id="p2SubmitBtn" onclick="submitPhase2Entry()" style="margin-bottom:10px">Continue to Phase 2 →</button>
-      <div style="border-top:1px solid var(--bd0);padding-top:14px;margin-top:6px">
-        <p style="font-size:12px;color:var(--t1);margin-bottom:10px">Can't find your numbers?</p>
-        <div id="resendPhoneBlock" style="display:none;margin-bottom:10px">
-          <label class="fl">Your Mobile Phone Number</label>
-          <input class="fi" id="p2ResendPhone" placeholder="(215)-555-1234" type="tel"
-            oninput="formatPhone(this)" style="margin-bottom:8px">
-          <button class="btn btn-primary" onclick="showResendNumbers()" style="margin-bottom:6px">
-            📱 Send my claim numbers
-          </button>
-          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('resendPhoneBlock').style.display='none'">
-            Cancel
-          </button>
-        </div>
-        <button class="btn btn-ghost" id="resendToggleBtn"
-          onclick="document.getElementById('resendPhoneBlock').style.display='block';this.style.display='none'"
-          style="margin-bottom:10px">
-          📱 Text to my phone number
+      <label class="fl">Driver ID</label>
+      <input class="fi" id="p2DriverID" placeholder="e.g. D1234, EMP-567…" type="text" style="margin-bottom:12px">
+      <label class="fl">Company Name</label>
+      <select class="fi" id="p2Company" style="margin-bottom:16px">
+        <option value="">Select your company…</option>
+      </select>
+      <div id="p2OptionalToggle" style="margin-bottom:12px">
+        <button onclick="toggleP2Optional()" style="background:none;border:none;color:var(--t3);font-size:12px;font-family:inherit;cursor:pointer;text-decoration:underline;padding:0">
+          + I also have my Claim Number or Reference Number
         </button>
       </div>
-      <button class="btn btn-ghost btn-sm" onclick="show('scrID1')">← Back</button>
+      <div id="p2OptionalFields" style="display:none;margin-bottom:4px">
+        <label class="fl">Claim Number <span style="color:var(--t3);font-weight:400">(optional)</span></label>
+        <input class="fi" id="p2ClaimNum" placeholder="e.g. 161030" type="tel" style="margin-bottom:12px">
+        <label class="fl">Reference Number <span style="color:var(--t3);font-weight:400">(optional)</span></label>
+        <input class="fi" id="p2Ref" placeholder="e.g. CCM-2026-847291" type="text" style="margin-bottom:16px">
+      </div>
+      <p class="field-err" id="p2Err" style="display:none;margin-bottom:10px"></p>
+      <button class="btn btn-primary" id="p2SubmitBtn" onclick="submitPhase2Entry()" style="margin-bottom:10px">
+        Find My Report →
+      </button>
+      <button class="btn btn-ghost btn-sm" onclick="show('scrStart')" style="margin-top:4px">← Back</button>
+    </div>
+  </section>
+
+  <!-- PHASE 2 CLAIM SELECTION — when multiple claims found -->
+  <section class="scr" id="scrP2ClaimList">
+    <div class="qcard">
+      <div class="qstep">Select Your Report</div>
+      <div class="qtext">We found multiple reports for your Driver ID. Select the one you want to complete.</div>
+    </div>
+    <div style="padding:0 4px" id="p2ClaimListBody">
+    </div>
+  </section>
+
+  <!-- PHASE 2 CONFIRMATION CARD -->
+  <section class="scr" id="scrP2Confirm">
+    <div class="qcard">
+      <div class="qstep">Confirm Your Report</div>
+      <div class="qtext">Is this the accident report you want to complete?</div>
+    </div>
+    <div style="padding:0 4px">
+      <div id="p2ConfirmCard" style="background:var(--bg2);border:1px solid var(--bd1);border-radius:var(--r16);padding:18px;margin-bottom:20px"></div>
+      <button class="btn btn-primary" onclick="confirmAndStartPhase2()" style="margin-bottom:10px">
+        Yes, Continue to Phase 2 →
+      </button>
+      <button class="btn btn-ghost btn-sm" onclick="show('scrPhase2Entry')" style="margin-top:4px">← That's not my report</button>
     </div>
   </section>
 
@@ -1734,7 +1750,7 @@ function beginApp(){
   // Audio is pre-fetched on page load — delay is just for iOS AudioContext unlock
   setTimeout(()=>{
     if(!S._phase2Tapped){
-      speak('Welcome to the Corporate Claims Management Accident Assistant. If you have already completed Phase 1 of your accident report, tap Complete Phase 2 of Your Report at the top of the screen. Otherwise, please select your company and let us know whether you are an Employee or a Family Member.');
+      speak('Welcome to the Corporate Claims Management Accident Assistant. Please select your company and let us know whether you are an Employee or a Family Member to get started.');
     }
   }, 50);
 }
@@ -2033,10 +2049,9 @@ function ans(q,val){
   saveDraft();
 
   // ── Special case: Q41 (tow truck on scene) answered No ──────────────────
-  // If Q29 (needs tow) = Yes AND Q41 = No, the vehicle IS being towed but
-  // no truck is there yet. Fire the tow alert immediately with no destination,
-  // then show the CCM message before continuing.
-  if(q.id===41 && val==='No' && S.ans[29]==='Yes'){
+  // Fire tow alert when Q41=No AND Q29=Yes or Unsure
+  // (vehicle needs tow or possibly needs tow, but no truck on scene yet)
+  if(q.id===41 && val==='No' && (S.ans[29]==='Yes' || S.ans[29]==='Unsure')){
     S.idx = S.idx + 1;
     fireTowAlertNoDestination();
     return;
@@ -2076,6 +2091,49 @@ function togglePause(){
 }
 
 // ── CCM Tow Alert Acknowledgment ─────────────────────────────────────────
+// ── Write tow alert to Turso tow_alerts table ────────────────────────────
+// Called from both tow paths — destination known (subTowDest) and unknown (fireTowAlertNoDestination)
+async function writeTowAlert(destination){
+  const a             = S.ans;
+  const claimNum      = S.claimNum  || 'Pending';
+  const refNum        = S.refNum    || 'Pending';
+  const driverName    = S.identity.name    || 'Unknown';
+  const driverPhone   = S.identity.phone   || 'Not provided';
+  const company       = S.identity.company || 'Unknown';
+  const location      = a[8]  || 'Not provided';
+  const dateTime      = a[9]  || 'Not provided';
+  const policeOnScene = a[40] || 'Unknown';
+  const towNeeded     = a[29] || 'Unknown';
+  const truckOnScene  = a[41] || 'Unknown';
+  const towType       = a[42] || 'Unknown';
+
+  try{
+    await fetch('/api/get-tow-alerts',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        action:        'create',
+        claim_number:  claimNum,
+        ref_number:    refNum,
+        driver_name:   driverName,
+        driver_phone:  driverPhone,
+        company:       company,
+        location:      location,
+        date_time:     dateTime,
+        police_on_scene: policeOnScene,
+        tow_needed:    towNeeded,
+        truck_on_scene: truckOnScene,
+        tow_type:      towType,
+        destination:   destination || 'Not yet known',
+        created_at:    new Date().toISOString(),
+      })
+    });
+    console.log('[TowAlert] ✓ Written to tow_alerts table for claim', claimNum);
+  }catch(e){
+    console.error('[TowAlert] ✗ Failed to write tow alert:', e.message);
+  }
+}
+
 function showCCMTowMessage(){
   stopSpeak();
   // Read the message aloud before showing the screen
@@ -2185,6 +2243,9 @@ async function fireTowAlertNoDestination(){
   }catch(e){
     console.error('[TowAlert] ✗ Failed to send no-truck tow alert:',e.message);
   }
+
+  // ── Write to tow_alerts table in Turso ───────────────────────────────────
+  await writeTowAlert('Not yet known — no truck on scene');
 
   // Show CCM acknowledgment screen — same screen as the destination path
   showCCMTowMessage();
@@ -3139,6 +3200,9 @@ async function subTowDest(qid, dest){
   }catch(e){
     console.error('[TowAlert] ✗ Failed to send tow alert:',e.message);
   }
+
+  // ── Write to tow_alerts table in Turso ───────────────────────────────────
+  await writeTowAlert(dest);
 
   // ── Show CCM acknowledgment screen ──────────────────────────────────────
   showCCMTowMessage();
@@ -4461,123 +4525,208 @@ function tryAutoP2(){
 function showPhase2Entry(){
   S._phase2Tapped = true;
   stopSpeak();
-  const err=document.getElementById('p2Err');
-  if(err){ err.style.display='none'; err.style.color='var(--red)'; }
-  const cn=document.getElementById('p2ClaimNum');
-  if(cn) cn.value='';
-  const ref=document.getElementById('p2Ref');
-  if(ref) ref.value='';
-  // Reset resend phone block
-  const rb=document.getElementById('resendPhoneBlock');
-  if(rb) rb.style.display='none';
-  const rtb=document.getElementById('resendToggleBtn');
-  if(rtb) rtb.style.display='';
-  const rp=document.getElementById('p2ResendPhone');
-  if(rp) rp.value='';
+
+  // Reset fields
+  const driverID = document.getElementById('p2DriverID');
+  const company  = document.getElementById('p2Company');
+  const claimNum = document.getElementById('p2ClaimNum');
+  const ref      = document.getElementById('p2Ref');
+  const err      = document.getElementById('p2Err');
+  const optFields= document.getElementById('p2OptionalFields');
+
+  if(driverID)  driverID.value  = '';
+  if(claimNum)  claimNum.value  = '';
+  if(ref)       ref.value       = '';
+  if(err)       { err.style.display='none'; }
+  if(optFields) optFields.style.display = 'none';
+
+  // Populate company dropdown from the same list used in Phase 1
+  if(company){
+    const p1Company = document.getElementById('id1Company');
+    if(p1Company && p1Company.options.length > 1){
+      company.innerHTML = p1Company.innerHTML;
+    }
+    company.value = '';
+  }
+
   show('scrPhase2Entry');
-  // Speak welcome back after short delay
-  setTimeout(()=>{ speak('Welcome back. Please enter your Claim Number and Reference Number to continue your report.'); }, 350);
+}
+
+function toggleP2Optional(){
+  const fields  = document.getElementById('p2OptionalFields');
+  const toggle  = document.getElementById('p2OptionalToggle');
+  if(!fields) return;
+  const showing = fields.style.display !== 'none';
+  fields.style.display  = showing ? 'none' : 'block';
+  if(toggle) toggle.querySelector('button').textContent =
+    showing ? '+ I also have my Claim Number or Reference Number' : '− Hide optional fields';
 }
 
 async function submitPhase2Entry(){
   const err = document.getElementById('p2Err');
   const btn = document.getElementById('p2SubmitBtn');
-  err.style.display='none';
-  err.style.color='var(--red)';
-  const claimNum = document.getElementById('p2ClaimNum').value.trim();
-  const ref      = document.getElementById('p2Ref').value.trim().toUpperCase();
+  if(err){ err.style.display='none'; err.style.color='var(--red)'; }
 
-  if(!claimNum){ err.textContent='Please enter your Claim Number.'; err.style.display='block'; return; }
-  if(!ref){ err.textContent='Please enter your Reference Number.'; err.style.display='block'; return; }
+  const driverID  = (document.getElementById('p2DriverID')?.value || '').trim();
+  const company   = (document.getElementById('p2Company')?.value  || '').trim();
+  const claimNum  = (document.getElementById('p2ClaimNum')?.value || '').trim();
+  const ref       = (document.getElementById('p2Ref')?.value      || '').trim().toUpperCase();
 
-  if(btn){ btn.disabled=true; btn.textContent='Looking up claim…'; }
+  // Validate required fields
+  if(!driverID){ err.textContent='Please enter your Driver ID.'; err.style.display='block'; return; }
+  if(!company){  err.textContent='Please select your company.';  err.style.display='block'; return; }
+
+  if(btn){ btn.disabled=true; btn.textContent='Searching…'; }
 
   try{
-    // ── STEP 1: Look up from database (works from any device/browser) ──
-    let restored = false;
-    try{
-      const r = await fetch('/api/get-claims?claimNumber='+encodeURIComponent(claimNum)+'&ref='+encodeURIComponent(ref), {
-        signal: AbortSignal.timeout(6000)
-      });
-      if(r.ok){
-        const d = await r.json();
-        const claim = (d.claims||[])[0];
-        if(claim){
-          if((claim.ref_number||'').toUpperCase() !== ref){
-            err.textContent='Reference Number does not match. Please check and try again.';
-            err.style.display='block';
-            if(btn){btn.disabled=false;btn.textContent='Continue to Phase 2 →';}
-            return;
-          }
-          if((claim.phase||1) >= 2){
-            err.style.color='var(--amber)';
-            err.innerHTML='<strong>Phase 2 Already Submitted</strong><br>This claim has already been completed. Contact CCM if you believe this is an error.';
-            err.style.display='block';
-            if(btn){btn.disabled=false;btn.textContent='Continue to Phase 2 →';}
-            return;
-          }
-          const payload = JSON.parse(claim.payload||'{}');
-          S.identity = payload.identity || {
-            name:claim.driver_name||'', driverID:claim.driver_id||'',
-            email:claim.driver_email||'', phone:claim.driver_phone||'',
-            company:claim.company||'', driverType:claim.driver_type||''
-          };
-          S.ans    = payload.ans || {};
-          S.photos = [];
-          S.refNum   = claim.ref_number || ref;
-          S.claimNum = String(claim.claim_number || claimNum);
-          restored = true;
-        }
-      }
-    }catch(dbErr){
-      console.warn('DB lookup failed, falling back to localStorage:', dbErr.message);
+    // Build query URL — Driver ID + Company are required; claim number and ref are optional filters
+    let url = '/api/get-claims?driverID='+encodeURIComponent(driverID)+'&limit=10';
+    const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    if(!r.ok) throw new Error('API error '+r.status);
+    const d = await r.json();
+
+    // Filter by company (case-insensitive)
+    let claims = (d.claims||[]).filter(c =>
+      (c.company||'').toLowerCase() === company.toLowerCase()
+    );
+
+    // If optional fields provided, narrow further
+    if(claimNum){
+      const filtered = claims.filter(c => String(c.claim_number||'') === claimNum);
+      if(filtered.length) claims = filtered;
+    }
+    if(ref){
+      const filtered = claims.filter(c => (c.ref_number||'').toUpperCase() === ref);
+      if(filtered.length) claims = filtered;
     }
 
-    // ── STEP 2: Fall back to localStorage (same device as Phase 1) ──
-    if(!restored){
-      const saved = JSON.parse(localStorage.getItem('ccm_p1_ans')||'null');
-      if(!saved){
-        err.textContent='Claim not found. Please verify your Claim Number and Reference Number, or contact CCM for assistance.';
-        err.style.display='block';
-        if(btn){btn.disabled=false;btn.textContent='Continue to Phase 2 →';}
-        return;
-      }
-      if(ref !== (saved.ref||'').toUpperCase()){
-        err.textContent='Reference Number does not match. Please check and try again.';
-        err.style.display='block';
-        if(btn){btn.disabled=false;btn.textContent='Continue to Phase 2 →';}
-        return;
-      }
-      const savedClaim=String(saved.claimNum||'').trim();
-      if(savedClaim && savedClaim!=='Pending...' && claimNum!==savedClaim){
-        err.textContent='Claim Number does not match. Please check and try again.';
-        err.style.display='block';
-        if(btn){btn.disabled=false;btn.textContent='Continue to Phase 2 →';}
-        return;
-      }
-      S.identity = {...(saved.identity||{})};
-      S.ans      = saved.ans||{};
-      S.photos   = (saved.photos||[]).map(p=>({...p, url:''}));
-      S.refNum   = saved.ref||'';
-      S.claimNum = saved.claimNum||claimNum;
+    if(btn){ btn.disabled=false; btn.textContent='Find My Report →'; }
+
+    if(!claims.length){
+      err.textContent = 'No report found for that Driver ID and company. Please check your information or contact CCM.';
+      err.style.display = 'block';
+      return;
     }
 
-    // ── STEP 3: Start Phase 2 ──
-    S.phase=2; S.idx=0; S.paused=false; S.airbags=[]; S.injSel={}; S.contactMethod='';
-    document.getElementById('progBar').classList.add('show');
-    document.getElementById('cbar').classList.add('show');
-    document.getElementById('pauseBtn').classList.remove('hidden');
-    initVoice();
-    speak('Welcome back. We have your Phase 1 information on file. Let us continue with the remaining details of your accident report.', ()=>{ goToQ(0); });
+    // Phase 1 only claims — exclude already-completed Phase 2
+    const phase1Claims = claims.filter(c => (c.phase||1) < 2);
+    const allDone      = claims.every(c => (c.phase||1) >= 2);
+
+    if(allDone){
+      err.style.color = 'var(--amber)';
+      err.innerHTML = '<strong>Report Already Complete</strong><br>Your Phase 2 report has already been submitted. Contact CCM at sskoletsky@ccmservices.com if you need assistance.';
+      err.style.display = 'block';
+      return;
+    }
+
+    if(phase1Claims.length === 1){
+      // Single match — go straight to confirmation card
+      showP2ConfirmCard(phase1Claims[0]);
+    } else {
+      // Multiple Phase 1 claims — show selection list
+      showP2ClaimList(phase1Claims);
+    }
 
   }catch(e){
-    console.error('Phase 2 entry error:', e);
-    err.textContent='An error occurred. Please contact CCM for assistance.';
-    err.style.display='block';
-    if(btn){btn.disabled=false;btn.textContent='Continue to Phase 2 →';}
+    console.error('Phase 2 lookup error:', e);
+    if(btn){ btn.disabled=false; btn.textContent='Find My Report →'; }
+    err.textContent = 'Could not connect. Please check your connection and try again.';
+    err.style.display = 'block';
   }
 }
 
+// ── Show list of claims to pick from ─────────────────────────────────────────
+function showP2ClaimList(claims){
+  const body = document.getElementById('p2ClaimListBody');
+  if(!body) return;
+  body.innerHTML = claims.map(c => {
+    const dt  = c.submitted_at ? new Date(c.submitted_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'Unknown date';
+    const loc = (c.location||'Location not recorded').slice(0,40);
+    const type= c.accident_type || 'Accident type not recorded';
+    const claimJSON = JSON.stringify(c).replace(/"/g,'&quot;');
+    return `<div style="background:var(--bg2);border:1px solid var(--bd1);border-radius:var(--r12);padding:16px;margin-bottom:12px;cursor:pointer"
+      onclick="showP2ConfirmCard(JSON.parse(this.dataset.claim))" data-claim="${claimJSON}">
+      <div style="font-size:11px;font-weight:700;color:var(--blue);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">
+        Claim ${c.claim_number||'—'} — ${dt}
+      </div>
+      <div style="font-size:14px;font-weight:700;color:var(--t0);margin-bottom:2px">${type}</div>
+      <div style="font-size:12px;color:var(--t1)">${loc}</div>
+      <div style="font-size:12px;color:var(--blue);margin-top:8px;font-weight:600">Tap to select this report →</div>
+    </div>`;
+  }).join('');
+  body.innerHTML += `<button class="btn btn-ghost btn-sm" onclick="show('scrPhase2Entry')" style="margin-top:4px">← Back</button>`;
+  show('scrP2ClaimList');
+}
+
+// ── Show confirmation card ────────────────────────────────────────────────────
+function showP2ConfirmCard(claim){
+  if(typeof claim === 'string') claim = JSON.parse(claim);
+  S._p2SelectedClaim = claim; // store for confirmAndStartPhase2
+
+  const dt   = claim.submitted_at ? new Date(claim.submitted_at).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}) : 'Unknown';
+  const card = document.getElementById('p2ConfirmCard');
+  if(!card) return;
+
+  card.innerHTML = `
+    <div style="font-size:11px;font-weight:700;color:var(--blue);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">Phase 1 Report on File</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding-bottom:8px;border-bottom:1px solid var(--bd0)">
+        <span style="color:var(--t2);font-weight:600">Claim Number</span>
+        <span style="color:var(--t0);font-weight:700">${claim.claim_number||'—'}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding-bottom:8px;border-bottom:1px solid var(--bd0)">
+        <span style="color:var(--t2);font-weight:600">Driver</span>
+        <span style="color:var(--t0)">${claim.driver_name||'—'}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding-bottom:8px;border-bottom:1px solid var(--bd0)">
+        <span style="color:var(--t2);font-weight:600">Accident Type</span>
+        <span style="color:var(--t0)">${claim.accident_type||'—'}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;padding-bottom:8px;border-bottom:1px solid var(--bd0)">
+        <span style="color:var(--t2);font-weight:600">Location</span>
+        <span style="color:var(--t0);text-align:right;max-width:55%">${claim.location||'—'}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px">
+        <span style="color:var(--t2);font-weight:600">Submitted</span>
+        <span style="color:var(--t0)">${dt}</span>
+      </div>
+    </div>
+  `;
+  show('scrP2Confirm');
+}
+
+// ── Confirm and start Phase 2 immediately ────────────────────────────────────
+function confirmAndStartPhase2(){
+  const claim = S._p2SelectedClaim;
+  if(!claim) return;
+
+  const payload = JSON.parse(claim.payload||'{}');
+  S.identity = payload.identity || {
+    name:        claim.driver_name  || '',
+    driverID:    claim.driver_id    || '',
+    email:       claim.driver_email || '',
+    phone:       claim.driver_phone || '',
+    company:     claim.company      || '',
+    driverType:  claim.driver_type  || 'employee',
+  };
+  S.ans      = payload.ans || {};
+  S.photos   = [];
+  S.refNum   = claim.ref_number   || '';
+  S.claimNum = String(claim.claim_number || '');
+  S.phase    = 2;
+  S.idx      = 0;
+  S.paused   = false;
+  S.airbags  = [];
+  S.injSel   = {};
+  S.contactMethod = '';
+
+  document.getElementById('progBar').classList.add('show');
+  document.getElementById('cbar').classList.add('show');
+  document.getElementById('pauseBtn').classList.remove('hidden');
+  initVoice();
+  // No intro — go directly to first question
+  goToQ(0);
+}
 async function showResendNumbers(){
   const phoneEl=document.getElementById('p2ResendPhone');
   const phone=phoneEl?phoneEl.value.trim():'';
