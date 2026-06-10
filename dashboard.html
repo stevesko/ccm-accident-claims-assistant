@@ -1,256 +1,1031 @@
+<!-- CCM Accident Assistant | Dashboard | Built: 2026-06-08 1:50 PM EST -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CCM Claims Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;background:#07090f;color:#eef2fb;min-height:100vh}
-.hdr{background:#0c1018;border-bottom:1px solid rgba(99,155,230,.12);padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
-.hdr-title{font-size:18px;font-weight:800;color:#eef2fb}
-.hdr-sub{font-size:12px;color:#4a6285;margin-top:2px}
-.hdr-logo{font-size:11px;font-weight:700;letter-spacing:.12em;color:#2d8cf0;text-transform:uppercase}
-.main{max-width:1200px;margin:0 auto;padding:24px 16px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
-.stat{background:#0c1018;border:1px solid rgba(99,155,230,.10);border-radius:12px;padding:16px}
-.stat-val{font-size:28px;font-weight:800;color:#eef2fb}
-.stat-lbl{font-size:11px;color:#4a6285;margin-top:4px;text-transform:uppercase;letter-spacing:.08em}
-.toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
-.search{background:#111827;border:1px solid rgba(99,155,230,.15);border-radius:8px;padding:9px 14px;color:#eef2fb;font-size:13px;flex:1;min-width:200px;outline:none}
-.search:focus{border-color:rgba(45,140,240,.4)}
-.filter{background:#111827;border:1px solid rgba(99,155,230,.15);border-radius:8px;padding:9px 12px;color:#eef2fb;font-size:13px;outline:none;cursor:pointer}
-.refresh-btn{background:rgba(45,140,240,.15);border:1px solid rgba(45,140,240,.25);border-radius:8px;padding:9px 16px;color:#2d8cf0;font-size:13px;font-weight:600;cursor:pointer}
-.refresh-btn:hover{background:rgba(45,140,240,.25)}
-.table-wrap{background:#0c1018;border:1px solid rgba(99,155,230,.10);border-radius:12px;overflow:hidden}
-table{width:100%;border-collapse:collapse}
-thead{background:#111827}
-th{padding:12px 14px;text-align:left;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#4a6285;white-space:nowrap}
-td{padding:13px 14px;font-size:13px;border-top:1px solid rgba(99,155,230,.06);vertical-align:middle}
-tr:hover td{background:rgba(45,140,240,.04)}
-.ref{font-weight:700;color:#2d8cf0;font-size:12px}
-.phase{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700}
-.phase1{background:rgba(0,212,170,.12);color:#00d4aa}
-.phase2{background:rgba(45,140,240,.12);color:#60aaff}
-.status-sel{background:transparent;border:1px solid rgba(99,155,230,.15);border-radius:6px;padding:4px 8px;color:#eef2fb;font-size:11px;font-weight:600;cursor:pointer;outline:none}
-.status-New{color:#f5a623}
-.status-In.Progress{color:#2d8cf0}
-.status-Closed{color:#7edb6a}
-.injured-yes{color:#ff4f6d;font-weight:700}
-.injured-no{color:#4a6285}
-.empty{text-align:center;padding:60px 20px;color:#4a6285}
-.empty-ic{font-size:48px;margin-bottom:12px}
-.loading{text-align:center;padding:60px 20px;color:#4a6285}
-.detail-btn{background:rgba(99,155,230,.08);border:1px solid rgba(99,155,230,.12);border-radius:6px;padding:4px 10px;color:#8aa0bf;font-size:11px;cursor:pointer}
-.detail-btn:hover{background:rgba(99,155,230,.15);color:#eef2fb}
-/* Modal */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}
-.modal-bg.on{display:flex}
-.modal{background:#0c1018;border:1px solid rgba(99,155,230,.15);border-radius:16px;max-width:640px;width:100%;max-height:90vh;overflow-y:auto;padding:24px}
-.modal-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.modal-title{font-size:16px;font-weight:800}
-.modal-close{background:none;border:none;color:#4a6285;font-size:20px;cursor:pointer;padding:4px}
-.modal-close:hover{color:#eef2fb}
-.detail-row{display:grid;grid-template-columns:160px 1fr;gap:8px;padding:10px 0;border-bottom:1px solid rgba(99,155,230,.06);font-size:13px}
-.detail-row:last-child{border-bottom:none}
-.detail-lbl{color:#4a6285;font-weight:600}
-.detail-val{color:#eef2fb}
+  :root {
+    --navy:   #0f1923;
+    --navy2:  #1a2838;
+    --navy3:  #243447;
+    --blue:   #2d8cf0;
+    --blue2:  #1a6fd4;
+    --red:    #e63946;
+    --amber:  #f4a261;
+    --green:  #2ec4b6;
+    --gold:   #c9a84c;
+    --white:  #ffffff;
+    --t1:     #e8edf5;
+    --t2:     #8fa3bc;
+    --t3:     #4a6180;
+    --border: rgba(255,255,255,0.07);
+    --card:   rgba(255,255,255,0.04);
+    --card2:  rgba(255,255,255,0.08);
+    --r:      10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--navy);
+    color: var(--t1);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Background texture ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 0%, rgba(45,140,240,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(201,168,76,0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Header ── */
+  .hdr {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(15,25,35,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .hdr-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .hdr-logo {
+    width: 32px;
+    height: 32px;
+    background: var(--gold);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--navy);
+    letter-spacing: -0.03em;
+  }
+
+  .hdr-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--t1);
+    letter-spacing: -0.01em;
+  }
+
+  .hdr-sub {
+    font-size: 11px;
+    color: var(--t3);
+    margin-top: 1px;
+  }
+
+  .hdr-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .hdr-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--t3);
+  }
+
+  .tow-bell {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .tow-bell:hover { background: var(--card); }
+
+  .tow-bell-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 8px;
+    height: 8px;
+    background: var(--red);
+    border-radius: 50%;
+    display: none;
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { transform: scale(1); opacity: 1; }
+    50%      { transform: scale(1.3); opacity: 0.7; }
+  }
+
+  .refresh-btn {
+    height: 34px;
+    padding: 0 16px;
+    background: var(--blue);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .refresh-btn:hover { background: var(--blue2); }
+
+  /* ── Main layout ── */
+  .main {
+    position: relative;
+    z-index: 1;
+    padding: 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* ── KPI cards ── */
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .kpi {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 20px 22px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .kpi:hover { border-color: rgba(255,255,255,0.14); }
+
+  .kpi::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .kpi.k-total::before  { background: var(--blue); }
+  .kpi.k-new::before    { background: var(--gold); }
+  .kpi.k-prog::before   { background: var(--green); }
+  .kpi.k-tow::before    { background: var(--red); }
+
+  .kpi-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--t3);
+    margin-bottom: 10px;
+  }
+
+  .kpi-value {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--t1);
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  .kpi-sub {
+    font-size: 12px;
+    color: var(--t3);
+    margin-top: 6px;
+  }
+
+  /* ── Claims table ── */
+  .claims-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    overflow: hidden;
+  }
+
+  .claims-hdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .claims-hdr-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .claims-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--t1);
+  }
+
+  .claims-count {
+    font-size: 12px;
+    font-weight: 600;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2px 10px;
+    color: var(--t2);
+  }
+
+  .filter-tabs {
+    display: flex;
+    gap: 4px;
+  }
+
+  .ftab {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--t3);
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .ftab.active {
+    background: var(--blue);
+    color: #fff;
+  }
+
+  .ftab:hover:not(.active) {
+    background: var(--card2);
+    color: var(--t2);
+  }
+
+  /* ── Table ── */
+  .tbl-wrap { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th {
+    padding: 10px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--t3);
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--t2);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  tr:hover td { background: rgba(255,255,255,0.025); }
+
+  .td-claim {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--blue);
+    font-weight: 500;
+  }
+
+  .td-driver {
+    font-weight: 600;
+    color: var(--t1);
+  }
+
+  .td-company {
+    color: var(--t2);
+  }
+
+  /* ── Status badges ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .badge::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+  }
+
+  .badge-new    { background: rgba(244,162,97,0.15); color: var(--amber); }
+  .badge-new::before    { background: var(--amber); }
+  .badge-prog   { background: rgba(46,196,182,0.15); color: var(--green); }
+  .badge-prog::before   { background: var(--green); }
+  .badge-closed { background: rgba(143,163,188,0.12); color: var(--t3); }
+  .badge-closed::before { background: var(--t3); }
+
+  .phase-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .phase-1 { background: rgba(45,140,240,0.15); color: var(--blue); }
+  .phase-2 { background: rgba(46,196,182,0.15); color: var(--green); }
+
+  /* ── Status select ── */
+  .status-sel {
+    background: var(--navy3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--t1);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    padding: 4px 8px;
+    cursor: pointer;
+    outline: none;
+  }
+
+  /* ── Empty / loading states ── */
+  .state-msg {
+    text-align: center;
+    padding: 64px 24px;
+    color: var(--t3);
+    font-size: 14px;
+  }
+
+  .spinner {
+    width: 28px;
+    height: 28px;
+    border: 2px solid var(--border);
+    border-top-color: var(--blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 12px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ══════════════════════════════════════════════
+     TOW ALERT OVERLAY
+  ══════════════════════════════════════════════ */
+  #towOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+  }
+
+  #towOverlay.visible {
+    display: flex;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .tow-popup {
+    background: var(--navy2);
+    border: 1px solid rgba(230,57,70,0.4);
+    border-radius: 16px;
+    width: 480px;
+    max-width: 95vw;
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(230,57,70,0.2);
+    animation: slideUp 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(24px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .tow-popup-hdr {
+    background: linear-gradient(135deg, #b71c1c, #e63946);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .tow-icon {
+    width: 44px;
+    height: 44px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .tow-popup-hdr h2 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 2px;
+  }
+
+  .tow-popup-hdr p {
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .tow-urgent {
+    background: rgba(244,162,97,0.12);
+    border-left: 3px solid var(--amber);
+    margin: 16px;
+    padding: 10px 14px;
+    border-radius: 0 6px 6px 0;
+    font-size: 12px;
+    color: var(--amber);
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .tow-body {
+    padding: 4px 16px 16px;
+  }
+
+  .tow-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 16px;
+  }
+
+  .tow-row:last-child { border-bottom: none; }
+
+  .tow-lbl {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--t3);
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding-top: 1px;
+  }
+
+  .tow-val {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--t1);
+    text-align: right;
+    line-height: 1.4;
+  }
+
+  .tow-val.urgent { color: var(--red); font-weight: 700; }
+
+  .tow-actions {
+    padding: 0 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .btn-call {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px;
+    background: #2ec4b6;
+    border: none;
+    border-radius: 10px;
+    color: var(--navy);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+
+  .btn-call:hover { background: #25b0a3; }
+
+  .btn-ack {
+    padding: 12px;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--t2);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-ack:hover {
+    background: rgba(255,255,255,0.1);
+    color: var(--t1);
+  }
+
+  .tow-meta {
+    font-size: 11px;
+    color: var(--t3);
+    text-align: center;
+    padding-top: 4px;
+  }
+
+  /* ── Tow alert history section ── */
+  .tow-section {
+    margin-top: 24px;
+    background: var(--card);
+    border: 1px solid rgba(230,57,70,0.2);
+    border-radius: var(--r);
+    overflow: hidden;
+  }
+
+  .tow-section-hdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(230,57,70,0.06);
+  }
+
+  .tow-section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--t1);
+  }
+
+  .tow-live-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--red);
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+
+  .tow-empty {
+    padding: 28px 24px;
+    text-align: center;
+    color: var(--t3);
+    font-size: 13px;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .main { padding: 16px; }
+    .hdr  { padding: 0 16px; }
+  }
 </style>
 </head>
 <body>
 
-<div class="hdr">
-  <div>
-    <div class="hdr-title">Claims Dashboard</div>
-    <div class="hdr-sub">Corporate Claims Management — FNOL Submissions</div>
-  </div>
-  <div class="hdr-logo">CCM</div>
-</div>
-
-<div class="main">
-  <div class="stats">
-    <div class="stat"><div class="stat-val" id="statTotal">—</div><div class="stat-lbl">Total Claims</div></div>
-    <div class="stat"><div class="stat-val" id="statNew" style="color:#f5a623">—</div><div class="stat-lbl">New</div></div>
-    <div class="stat"><div class="stat-val" id="statProgress" style="color:#2d8cf0">—</div><div class="stat-lbl">In Progress</div></div>
-    <div class="stat"><div class="stat-val" id="statClosed" style="color:#7edb6a">—</div><div class="stat-lbl">Closed</div></div>
-    <div class="stat"><div class="stat-val" id="statInjured" style="color:#ff4f6d">—</div><div class="stat-lbl">With Injuries</div></div>
-  </div>
-
-  <div class="toolbar">
-    <input class="search" id="search" placeholder="Search by name, company, reference…" oninput="filterTable()">
-    <select class="filter" id="filterStatus" onchange="filterTable()">
-      <option value="">All Statuses</option>
-      <option>New</option>
-      <option>In Progress</option>
-      <option>Closed</option>
-    </select>
-    <select class="filter" id="filterPhase" onchange="filterTable()">
-      <option value="">All Phases</option>
-      <option value="1">Phase 1</option>
-      <option value="2">Phase 2</option>
-    </select>
-    <button class="refresh-btn" onclick="loadClaims()">↻ Refresh</button>
-  </div>
-
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Claim #</th>
-          <th>Reference</th>
-          <th>Submitted</th>
-          <th>Phase</th>
-          <th>Company</th>
-          <th>Driver</th>
-          <th>Accident Type</th>
-          <th>Injured</th>
-          <th>Status</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="tbody">
-        <tr><td colspan="10" class="loading">Loading claims…</td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<!-- Detail Modal -->
-<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <div class="modal-hdr">
-      <div class="modal-title" id="modalTitle">Claim Detail</div>
-      <button class="modal-close" onclick="closeModal()">×</button>
+<!-- ── Header ── -->
+<header class="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-logo">CCM</div>
+    <div>
+      <div class="hdr-title">Claims Dashboard</div>
+      <div class="hdr-sub">Accident Assistant — Operations View</div>
     </div>
-    <div id="modalBody"></div>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-time" id="clock">—</div>
+    <div class="tow-bell" onclick="showLatestTowAlert()" title="Tow Alerts">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--t2)">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+      </svg>
+      <div class="tow-bell-badge" id="bellBadge"></div>
+    </div>
+    <button class="refresh-btn" onclick="loadAll()">↻ Refresh</button>
+  </div>
+</header>
+
+<!-- ── Main ── -->
+<main class="main">
+
+  <!-- KPI Cards -->
+  <div class="kpis">
+    <div class="kpi k-total">
+      <div class="kpi-label">Total Claims</div>
+      <div class="kpi-value" id="kTotal">—</div>
+      <div class="kpi-sub">All time</div>
+    </div>
+    <div class="kpi k-new">
+      <div class="kpi-label">New</div>
+      <div class="kpi-value" id="kNew">—</div>
+      <div class="kpi-sub">Awaiting assignment</div>
+    </div>
+    <div class="kpi k-prog">
+      <div class="kpi-label">In Progress</div>
+      <div class="kpi-value" id="kProg">—</div>
+      <div class="kpi-sub">Phase 1 or 2 active</div>
+    </div>
+    <div class="kpi k-tow">
+      <div class="kpi-label">Active Tow Alerts</div>
+      <div class="kpi-value" id="kTow">—</div>
+      <div class="kpi-sub">Unacknowledged</div>
+    </div>
+  </div>
+
+  <!-- Tow Alerts Section -->
+  <div class="tow-section" id="towSection">
+    <div class="tow-section-hdr">
+      <div class="tow-section-title">
+        <div class="tow-live-dot"></div>
+        Live Tow Alerts
+      </div>
+      <div style="font-size:11px;color:var(--t3)">Auto-refreshes every 30 seconds</div>
+    </div>
+    <div id="towList"><div class="tow-empty">No active tow alerts</div></div>
+  </div>
+
+  <!-- Claims Table -->
+  <div class="claims-card" style="margin-top:24px">
+    <div class="claims-hdr">
+      <div class="claims-hdr-left">
+        <div class="claims-title">All Claims</div>
+        <div class="claims-count" id="claimsCount">—</div>
+      </div>
+      <div class="filter-tabs">
+        <button class="ftab active" onclick="filterClaims('all',this)">All</button>
+        <button class="ftab" onclick="filterClaims('New',this)">New</button>
+        <button class="ftab" onclick="filterClaims('In Progress',this)">In Progress</button>
+        <button class="ftab" onclick="filterClaims('Closed',this)">Closed</button>
+      </div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Claim #</th>
+            <th>Driver</th>
+            <th>Company</th>
+            <th>Type</th>
+            <th>Location</th>
+            <th>Submitted</th>
+            <th>Phase</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="claimsTbody">
+          <tr><td colspan="8"><div class="state-msg"><div class="spinner"></div>Loading claims…</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- ── Tow Alert Pop-up ── -->
+<div id="towOverlay">
+  <div class="tow-popup">
+    <div class="tow-popup-hdr">
+      <div class="tow-icon">🚨</div>
+      <div>
+        <h2>Vehicle Tow Alert</h2>
+        <p id="towPopupMeta">Immediate action required</p>
+      </div>
+    </div>
+    <div class="tow-urgent" id="towUrgent"></div>
+    <div class="tow-body">
+      <div class="tow-row"><span class="tow-lbl">Driver</span><span class="tow-val" id="tp-driver"></span></div>
+      <div class="tow-row"><span class="tow-lbl">Company</span><span class="tow-val" id="tp-company"></span></div>
+      <div class="tow-row"><span class="tow-lbl">Location</span><span class="tow-val" id="tp-location"></span></div>
+      <div class="tow-row"><span class="tow-lbl">Police on Scene</span><span class="tow-val" id="tp-police"></span></div>
+      <div class="tow-row"><span class="tow-lbl">Tow Status</span><span class="tow-val urgent" id="tp-tow"></span></div>
+      <div class="tow-row"><span class="tow-lbl">Destination</span><span class="tow-val" id="tp-dest"></span></div>
+    </div>
+    <div class="tow-actions">
+      <a class="btn-call" id="tp-call" href="#">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13 19.79 19.79 0 0 1 1.61 4.38 2 2 0 0 1 3.58 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.1 6.1l1.08-1.08a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        Call Driver
+      </a>
+      <button class="btn-ack" id="tp-ack" onclick="acknowledgeAlert()">
+        ✓ Acknowledge — I am handling this
+      </button>
+      <div class="tow-meta">Acknowledging removes this alert for all users</div>
+    </div>
   </div>
 </div>
 
 <script>
-let allClaims = [];
+// ── Config ──────────────────────────────────────────────────────────────────
+const API = window.location.origin;
+const POLL_MS = 30000;
 
+let allClaims    = [];
+let activeFilter = 'all';
+let towAlerts    = [];
+let activeAlertId = null;
+let pollTimer    = null;
+
+// ── Clock ────────────────────────────────────────────────────────────────────
+function updateClock(){
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',second:'2-digit'});
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── Load everything ──────────────────────────────────────────────────────────
+async function loadAll(){
+  await Promise.all([loadClaims(), loadTowAlerts()]);
+}
+
+// ── Claims ───────────────────────────────────────────────────────────────────
 async function loadClaims(){
-  document.getElementById('tbody').innerHTML='<tr><td colspan="10" class="loading">Loading…</td></tr>';
   try{
-    const r = await fetch('/api/get-claims');
+    const r = await fetch(API+'/api/get-claims');
     const d = await r.json();
     allClaims = d.claims || [];
-    updateStats();
-    filterTable();
+    renderClaims();
+    updateKPIs();
   }catch(e){
-    console.error('loadClaims error:', e);
-    document.getElementById('tbody').innerHTML=`<tr><td colspan="10" class="empty"><div class="empty-ic">⚠️</div><div>Failed to load claims.<br><span style="font-size:11px;color:#4a6285">${e.message}</span></div></td></tr>`;
+    document.getElementById('claimsTbody').innerHTML =
+      '<tr><td colspan="8"><div class="state-msg">Failed to load claims. Check connection.</div></td></tr>';
   }
 }
 
-function updateStats(){
-  document.getElementById('statTotal').textContent    = allClaims.length;
-  document.getElementById('statNew').textContent      = allClaims.filter(c=>c.status==='New').length;
-  document.getElementById('statProgress').textContent = allClaims.filter(c=>c.status==='In Progress').length;
-  document.getElementById('statClosed').textContent   = allClaims.filter(c=>c.status==='Closed').length;
-  document.getElementById('statInjured').textContent  = allClaims.filter(c=>(c.injured||'').toLowerCase()==='yes').length;
-}
+function renderClaims(){
+  const filtered = activeFilter==='all'
+    ? allClaims
+    : allClaims.filter(c=>(c.status||'New')===activeFilter);
 
-function filterTable(){
-  const q      = document.getElementById('search').value.toLowerCase();
-  const status = document.getElementById('filterStatus').value;
-  const phase  = document.getElementById('filterPhase').value;
+  document.getElementById('claimsCount').textContent = filtered.length+' claim'+(filtered.length!==1?'s':'');
 
-  const filtered = allClaims.filter(c=>{
-    const txt = [c.claim_number,c.ref_number,c.company,c.driver_name,c.driver_id,c.accident_type,c.location].join(' ').toLowerCase();
-    if(q && !txt.includes(q)) return false;
-    if(status && c.status!==status) return false;
-    if(phase  && String(c.phase)!==phase) return false;
-    return true;
-  });
-
-  renderTable(filtered);
-}
-
-function renderTable(claims){
-  if(claims.length===0){
-    document.getElementById('tbody').innerHTML='<tr><td colspan="10" class="empty"><div class="empty-ic">📋</div><div>No claims found</div></td></tr>';
+  if(!filtered.length){
+    document.getElementById('claimsTbody').innerHTML =
+      '<tr><td colspan="8"><div class="state-msg">No claims found</div></td></tr>';
     return;
   }
 
-  document.getElementById('tbody').innerHTML = claims.map(c=>{
-    const dt  = c.submitted_at ? new Date(c.submitted_at).toLocaleString('en-US',{dateStyle:'short',timeStyle:'short'}) : '—';
-    const inj = (c.injured||'').toLowerCase()==='yes';
-    const statusClass = 'status-'+(c.status||'New').replace(' ','.');
+  document.getElementById('claimsTbody').innerHTML = filtered.map(c=>{
+    const status  = c.status || 'New';
+    const badgeClass = status==='New'?'badge-new':status==='In Progress'?'badge-prog':'badge-closed';
+    const phase   = c.phase||1;
+    const dt      = c.submitted_at ? new Date(c.submitted_at).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : '—';
+    const loc     = (c.location||'—').slice(0,32)+(c.location&&c.location.length>32?'…':'');
+    const type    = (c.accident_type||'—').slice(0,22)+(c.accident_type&&c.accident_type.length>22?'…':'');
     return `<tr>
-      <td><div style="font-weight:800;color:#eef2fb;font-size:14px">${c.claim_number||'—'}</div></td>
-      <td><div class="ref">${c.ref_number||'—'}</div></td>
-      <td style="color:#8aa0bf;font-size:12px">${dt}</td>
-      <td><span class="phase phase${c.phase||1}">Phase ${c.phase||1}</span></td>
-      <td>${c.company||'—'}</td>
+      <td class="td-claim">${c.claim_number||'—'}</td>
+      <td class="td-driver">${esc(c.driver_name||'Unknown')}</td>
+      <td class="td-company">${esc(c.company||'—')}</td>
+      <td>${esc(type)}</td>
+      <td>${esc(loc)}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px">${dt}</td>
+      <td><span class="phase-badge phase-${phase}">P${phase}</span></td>
       <td>
-        <div style="font-weight:600">${c.driver_name||'—'}</div>
-        <div style="font-size:11px;color:#4a6285">${c.driver_id||''}</div>
-      </td>
-      <td style="font-size:12px;color:#8aa0bf">${c.accident_type||'—'}</td>
-      <td class="${inj?'injured-yes':'injured-no'}">${inj?'Yes':'No'}</td>
-      <td>
-        <select class="status-sel ${statusClass}" onchange="updateStatus(${c.id},this.value,this)">
-          <option ${c.status==='New'?'selected':''}>New</option>
-          <option ${c.status==='In Progress'?'selected':''}>In Progress</option>
-          <option ${c.status==='Closed'?'selected':''}>Closed</option>
+        <select class="status-sel" onchange="updateStatus(${c.id},this.value)">
+          <option value="New"        ${status==='New'?'selected':''}>New</option>
+          <option value="In Progress"${status==='In Progress'?'selected':''}>In Progress</option>
+          <option value="Closed"     ${status==='Closed'?'selected':''}>Closed</option>
         </select>
       </td>
-      <td><button class="detail-btn" onclick="showDetail(${c.id})">View</button></td>
     </tr>`;
   }).join('');
 }
 
-async function updateStatus(id, status, el){
-  el.className='status-sel status-'+status.replace(' ','.');
+function filterClaims(f, btn){
+  activeFilter = f;
+  document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderClaims();
+}
+
+async function updateStatus(id, status){
   try{
-    await fetch('/api/get-claims',{
+    await fetch(API+'/api/get-claims',{
       method:'PATCH',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({id,status})
+      body: JSON.stringify({id, status})
     });
-    const c=allClaims.find(x=>x.id===id);
-    if(c){ c.status=status; updateStats(); }
-  }catch(e){ console.warn('Status update failed',e); }
+    const c = allClaims.find(x=>x.id===id);
+    if(c) c.status = status;
+    updateKPIs();
+  }catch(e){
+    console.error('Status update failed:', e);
+  }
 }
 
-function showDetail(id){
-  const c=allClaims.find(x=>x.id===id);
-  if(!c) return;
-  const dt=c.submitted_at?new Date(c.submitted_at).toLocaleString('en-US',{dateStyle:'full',timeStyle:'short'}):'—';
-  document.getElementById('modalTitle').textContent='Claim #'+(c.claim_number||c.ref_number);
-  const rows=[
-    ['Claim Number',  c.claim_number||'—'],
-    ['Reference',    c.ref_number||'—'],
-    ['Submitted',    dt],
-    ['Phase',        'Phase '+(c.phase||1)],
-    ['Status',       c.status||'New'],
-    ['Company',      c.company||'—'],
-    ['Driver Name',  c.driver_name||'—'],
-    ['Driver ID',    c.driver_id||'—'],
-    ['Driver Type',  c.driver_type||'—'],
-    ['Email',        c.driver_email||'—'],
-    ['Phone',        c.driver_phone||'—'],
-    ['Accident Type',c.accident_type||'—'],
-    ['Location',     c.location||'—'],
-    ['Date/Time',    c.date_time||'—'],
-    ['Injured',      c.injured||'—'],
-    ['Vehicles',     c.vehicles||'—'],
-  ];
-  document.getElementById('modalBody').innerHTML=rows.map(([l,v])=>
-    `<div class="detail-row"><div class="detail-lbl">${l}</div><div class="detail-val">${v}</div></div>`
-  ).join('');
-  document.getElementById('modalBg').classList.add('on');
+// ── KPIs ─────────────────────────────────────────────────────────────────────
+function updateKPIs(){
+  document.getElementById('kTotal').textContent = allClaims.length;
+  document.getElementById('kNew').textContent   = allClaims.filter(c=>(c.status||'New')==='New').length;
+  document.getElementById('kProg').textContent  = allClaims.filter(c=>c.status==='In Progress').length;
+  document.getElementById('kTow').textContent   = towAlerts.filter(a=>a.status==='new').length;
 }
 
-function closeModal(){
-  document.getElementById('modalBg').classList.remove('on');
+// ── Tow Alerts ───────────────────────────────────────────────────────────────
+async function loadTowAlerts(){
+  try{
+    const r = await fetch(API+'/api/get-tow-alerts');
+    if(!r.ok) return;
+    const d = await r.json();
+    towAlerts = d.alerts || [];
+    renderTowAlerts();
+    updateBellBadge();
+    // Auto-show pop-up if there's a new alert we haven't shown yet
+    const newest = towAlerts.find(a=>a.status==='new');
+    if(newest && newest.id !== activeAlertId){
+      showTowPopup(newest);
+    }
+  }catch(e){
+    // Silent — tow alerts are optional
+  }
 }
 
-// Auto-refresh every 60 seconds
-loadClaims();
-setInterval(loadClaims, 60000);
+function renderTowAlerts(){
+  const active = towAlerts.filter(a=>a.status==='new');
+  const kTow = document.getElementById('kTow');
+  if(kTow) kTow.textContent = active.length;
+
+  if(!active.length){
+    document.getElementById('towList').innerHTML =
+      '<div class="tow-empty">✓ No active tow alerts</div>';
+    return;
+  }
+
+  document.getElementById('towList').innerHTML = active.map(a=>{
+    const rawPhone = (a.driver_phone||'').replace(/\D/g,'');
+    const dest = a.destination||'Not yet known';
+    const noTruck = a.truck_on_scene==='No';
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--border);gap:16px">
+      <div style="display:flex;align-items:center;gap:14px;flex:1;min-width:0">
+        <div style="width:8px;height:8px;background:var(--red);border-radius:50%;flex-shrink:0;animation:pulse 1.5s infinite"></div>
+        <div style="min-width:0">
+          <div style="font-size:13px;font-weight:600;color:var(--t1)">${esc(a.driver_name||'Unknown')} — ${esc(a.company||'Unknown')}</div>
+          <div style="font-size:12px;color:var(--t3);margin-top:2px">${esc(a.location||'Location not provided')}</div>
+          <div style="font-size:11px;color:${noTruck?'var(--amber)':'var(--t3)'};margin-top:2px">
+            ${noTruck?'⚠ No truck on scene yet':'Truck on scene — '+esc(a.tow_type||'Unknown')} | Destination: ${esc(dest.slice(0,40))}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0">
+        <a href="tel:${rawPhone}" style="padding:6px 12px;background:var(--green);border-radius:6px;color:var(--navy);font-size:12px;font-weight:700;text-decoration:none">Call</a>
+        <button onclick="showTowPopup(${JSON.stringify(a).replace(/"/g,'&quot;')})" style="padding:6px 12px;background:var(--card2);border:1px solid var(--border);border-radius:6px;color:var(--t2);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Details</button>
+        <button onclick="ackAlert(${a.id})" style="padding:6px 12px;background:rgba(230,57,70,0.15);border:1px solid rgba(230,57,70,0.3);border-radius:6px;color:var(--red);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif">Acknowledge</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateBellBadge(){
+  const active = towAlerts.filter(a=>a.status==='new').length;
+  const badge  = document.getElementById('bellBadge');
+  badge.style.display = active > 0 ? 'block' : 'none';
+}
+
+function showLatestTowAlert(){
+  const newest = towAlerts.find(a=>a.status==='new');
+  if(newest) showTowPopup(newest);
+}
+
+// ── Tow Pop-up ───────────────────────────────────────────────────────────────
+function showTowPopup(alert){
+  if(typeof alert === 'string') alert = JSON.parse(alert);
+  activeAlertId = alert.id;
+
+  const noTruck = alert.truck_on_scene === 'No';
+  const rawPhone = (alert.driver_phone||'').replace(/\D/g,'');
+
+  document.getElementById('towPopupMeta').textContent =
+    'Claim '+( alert.claim_number||'Pending')+' — '+
+    new Date(alert.created_at||Date.now()).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+
+  document.getElementById('towUrgent').textContent = noTruck
+    ? '⚠ No tow truck on scene yet. Contact driver immediately to arrange recovery before police order storage.'
+    : '🚨 Tow truck on scene. Confirm destination and authorize CCM repair shop.';
+
+  document.getElementById('tp-driver').textContent  = alert.driver_name  || 'Unknown';
+  document.getElementById('tp-company').textContent = alert.company       || 'Unknown';
+  document.getElementById('tp-location').textContent= alert.location      || 'Not provided';
+  document.getElementById('tp-police').textContent  = alert.police_on_scene || 'Unknown';
+  document.getElementById('tp-dest').textContent    = alert.destination   || 'Not yet known';
+
+  const towStatus = (alert.tow_needed||'Unknown') +
+    (alert.truck_on_scene==='Yes' ? ' — Truck on scene — '+(alert.tow_type||'Unknown') : ' — No truck yet');
+  document.getElementById('tp-tow').textContent = towStatus;
+
+  const callBtn = document.getElementById('tp-call');
+  callBtn.href = rawPhone ? 'tel:'+rawPhone : '#';
+  callBtn.textContent = '';
+  callBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13 19.79 19.79 0 0 1 1.61 4.38 2 2 0 0 1 3.58 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.1 6.1l1.08-1.08a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    Call Driver — ${esc(alert.driver_phone||'No number')}`;
+
+  document.getElementById('tp-ack').dataset.alertId = alert.id;
+  document.getElementById('towOverlay').classList.add('visible');
+
+  // Play alert tone
+  try{
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    [0,0.15,0.3].forEach(t=>{
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value=880;
+      g.gain.setValueAtTime(0.2,ctx.currentTime+t);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+t+0.12);
+      o.start(ctx.currentTime+t); o.stop(ctx.currentTime+t+0.12);
+    });
+  }catch(e){}
+}
+
+function closeTowPopup(){
+  document.getElementById('towOverlay').classList.remove('visible');
+  activeAlertId = null;
+}
+
+async function acknowledgeAlert(){
+  const id = document.getElementById('tp-ack').dataset.alertId;
+  if(id) await ackAlert(id);
+  closeTowPopup();
+}
+
+async function ackAlert(id){
+  try{
+    await fetch(API+'/api/get-tow-alerts',{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ id: parseInt(id), acknowledgedBy: 'sskoletsky' })
+    });
+    // Remove from local list
+    towAlerts = towAlerts.map(a=>a.id==id ? {...a,status:'acknowledged'} : a);
+    renderTowAlerts();
+    updateBellBadge();
+    updateKPIs();
+  }catch(e){
+    console.error('Acknowledge failed:', e);
+  }
+}
+
+// Close overlay on background click
+document.getElementById('towOverlay').addEventListener('click', function(e){
+  if(e.target === this) closeTowPopup();
+});
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function esc(s){
+  return String(s||'')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+// ── Start ────────────────────────────────────────────────────────────────────
+loadAll();
+pollTimer = setInterval(loadTowAlerts, POLL_MS);
 </script>
 </body>
 </html>
