@@ -759,7 +759,7 @@ input[type="datetime-local"].fi{color-scheme:dark}
         <option value="">Select your company…</option>
       </select>
       <div id="p2OptionalToggle" style="margin-bottom:12px">
-        <button onclick="toggleP2Optional()" style="background:none;border:none;color:var(--t3);font-size:12px;font-family:inherit;cursor:pointer;text-decoration:underline;padding:0">
+        <button onclick="toggleP2Optional()" style="background:rgba(45,140,240,.1);border:1px solid rgba(45,140,240,.3);border-radius:8px;color:var(--blue);font-size:13px;font-family:inherit;cursor:pointer;padding:10px 14px;width:100%;text-align:left;font-weight:600">
           + I also have my Claim Number or Reference Number
         </button>
       </div>
@@ -4558,7 +4558,7 @@ function toggleP2Optional(){
   const toggle  = document.getElementById('p2OptionalToggle');
   if(!fields) return;
   const showing = fields.style.display !== 'none';
-  fields.style.display  = showing ? 'none' : 'block';
+  fields.style.display = showing ? 'none' : 'block';
   if(toggle) toggle.querySelector('button').textContent =
     showing ? '+ I also have my Claim Number or Reference Number' : '− Hide optional fields';
 }
